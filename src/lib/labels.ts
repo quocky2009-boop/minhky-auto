@@ -50,3 +50,7 @@ export const VEHICLE_SALE_STATUS: Record<string, string> = {
 export const BUSINESS_TYPE_LABEL: Record<string, string> = { owned: "Showroom sở hữu", consignment: "Ký gửi" };
 export const PREP_LABEL: Record<string, string> = { pending: "Chưa chuẩn bị", in_progress: "Đang chuẩn bị", ready: "Sẵn sàng" };
 export const triLabel = (v: boolean | null | undefined, yes = "Có", no = "Không") => (v === true ? yes : v === false ? no : "Chưa rõ");
+export const SOURCE_TYPE_LABEL: Record<string, string> = {
+  manufacturer: "Hãng", distributor: "Nhà phân phối", individual: "Cá nhân", other_dealer: "Đại lý khác", trade_in: "Thu cũ đổi mới",
+};
+export const PAPERWORK_LABEL: Record<string, string> = { incomplete: "Chưa đủ hồ sơ", complete: "Đủ hồ sơ" };

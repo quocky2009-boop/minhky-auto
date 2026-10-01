@@ -1,0 +1,105 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { requireModule } from "@/lib/auth";
+import { canSeeFinance, isManager } from "@/lib/modules";
+import { createClient } from "@/lib/supabase/server";
+import { formatDate } from "@/lib/dates";
+import { formatVnd } from "@/lib/money";
+import { BUSINESS_TYPE_LABEL, CONDITION_LABEL, FUEL_LABEL, PAPERWORK_LABEL, PREP_LABEL, SOURCE_TYPE_LABEL, VEHICLE_SALE_STATUS } from "@/lib/labels";
+import { PageHeader } from "@/components/ui";
+import { loadVehicle } from "./load";
+
+export const metadata = { title: "Chi tiết xe" };
+
+const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div className="grid grid-cols-[9rem_1fr] gap-2 border-b border-line/70 py-1.5 text-sm last:border-0"><dt className="text-ink-soft">{label}</dt><dd>{children}</dd></div>
+);
+const unknown = <span className="text-ink-soft">Chưa rõ</span>;
+const orUnknown = (v: React.ReactNode) => (v === null || v === undefined || v === "" ? unknown : v);
+
+export default async function VehiclePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string | undefined>> }) {
+  const user = await requireModule("inventory");
+  const { id } = await params;
+  const sp = await searchParams;
+  const supabase = await createClient();
+  const v = await loadVehicle(supabase, id);
+  if (!v) notFound();
+  const [{ data: history }, demand] = await Promise.all([
+    supabase.rpc("vehicle_history", { p_id: id }),
+    v.source_demand_id ? supabase.from("demands").select("id, code").eq("id", v.source_demand_id).maybeSingle() : Promise.resolve({ data: null }),
+  ]);
+  const finance = canSeeFinance(user.roles);
+  const manager = isManager(user.roles);
+  const title = [v.make, v.model, v.variant, v.year_made].filter(Boolean).join(" ");
+  const cycles = ((history ?? []) as { id: string; code: string; sale_status: string; business_type: string; intake_date: string | null; depth: number }[]).filter((h) => h.depth > 0);
+  const age = v.intake_date ? Math.floor((Date.now() - new Date(`${v.intake_date}T00:00:00+07:00`).getTime()) / 86400000) : null;
+  const ended = ["sold", "delivered", "returned_to_owner"].includes(v.sale_status);
+
+  return (
+    <div className="space-y-4">
+      {sp["da-tao"] && <p role="status" className="panel border-[#b7d9c3] bg-[#eef7f1] px-4 py-2 text-sm text-sig-green">Đã nhập xe {v.code} vào kho.</p>}
+      {sp["da-nhap-kho"] && <p role="status" className="panel border-[#b7d9c3] bg-[#eef7f1] px-4 py-2 text-sm text-sig-green">Đã nhập kho {v.code} từ nhu cầu bán. Thông tin khách khai vẫn được giữ ở nhu cầu nguồn.</p>}
+      {sp["da-luu"] && <p role="status" className="panel border-[#b7d9c3] bg-[#eef7f1] px-4 py-2 text-sm text-sig-green">Đã lưu thay đổi.</p>}
+      <PageHeader title={title || v.code} sub={`${v.code} · ${CONDITION_LABEL[v.condition]} · ${BUSINESS_TYPE_LABEL[v.business_type]}`}>
+        {manager && !ended && <Link href={`/kho-xe/${v.id}/sua`} className="btn btn-primary">Sửa</Link>}
+        <Link href="/kho-xe" className="btn btn-ghost">Về kho xe</Link>
+      </PageHeader>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <section className="panel p-4">
+          <h2 className="mb-2 font-semibold">Thông tin xe</h2>
+          <dl>
+            <Row label="Hãng / model">{orUnknown([v.make, v.model, v.variant].filter(Boolean).join(" "))}</Row>
+            <Row label="Năm SX / đăng ký">{orUnknown([v.year_made, v.year_registered].filter(Boolean).join(" / "))}</Row>
+            <Row label="Màu">{orUnknown(v.color)}</Row>
+            <Row label="ODO">{v.odo !== null ? `${v.odo.toLocaleString("vi-VN")} km` : unknown}</Row>
+            <Row label="Nhiên liệu / chỗ">{v.fuel_type ? FUEL_LABEL[v.fuel_type] : "Chưa rõ"} · {v.seats ?? "chưa rõ"} chỗ</Row>
+            <Row label="VIN">{orUnknown(v.vin)}</Row>
+            <Row label="Biển số">{orUnknown(v.plate)}</Row>
+            <Row label="Ghi chú">{orUnknown(v.notes)}</Row>
+          </dl>
+        </section>
+
+        <section className="panel p-4">
+          <h2 className="mb-2 font-semibold">Trạng thái (các chiều tách riêng)</h2>
+          <dl>
+            <Row label="Bán hàng"><b>{VEHICLE_SALE_STATUS[v.sale_status]}</b></Row>
+            <Row label="Chuẩn bị bán">{PREP_LABEL[v.prep_status]}</Row>
+            <Row label="Hồ sơ giấy tờ">{PAPERWORK_LABEL[v.paperwork_status]}</Row>
+            <Row label="Nguồn xe">{v.source_type ? SOURCE_TYPE_LABEL[v.source_type] : "Chưa rõ"}</Row>
+            <Row label="Vị trí">{orUnknown(v.location_name)}</Row>
+            <Row label="Ngày nhập kho">{v.intake_date ? `${formatDate(v.intake_date)} (${age} ngày)` : unknown}</Row>
+          </dl>
+          {demand.data && <p className="mt-3 text-sm">Nguồn gốc: nhu cầu bán <Link href={`/nhu-cau/${demand.data.id}`} className="text-petrol hover:underline">{demand.data.code}</Link> (thông tin khách khai nằm ở đó).</p>}
+        </section>
+
+        <section className="panel p-4">
+          <h2 className="mb-2 font-semibold">Giá</h2>
+          <dl>
+            <Row label="Giá chào bán">{v.asking_price !== null ? <span className="num font-semibold">{formatVnd(v.asking_price)}</span> : unknown}</Row>
+            {finance && (
+              <>
+                <Row label="Giá mua (nội bộ)">{v.business_type === "consignment" ? <span className="text-ink-soft">Không áp dụng — xe ký gửi</span> : v.purchase_price !== null ? <span className="num">{formatVnd(v.purchase_price)}</span> : unknown}</Row>
+                <Row label="Giá sàn (nội bộ)">{v.floor_price !== null ? <span className="num">{formatVnd(v.floor_price)}</span> : unknown}</Row>
+              </>
+            )}
+          </dl>
+          {!finance && <p className="mt-2 text-xs text-ink-soft">Giá mua và giá sàn chỉ hiển thị với quản lý/kế toán.</p>}
+        </section>
+
+        <section className="panel p-4">
+          <h2 className="mb-2 font-semibold">Lịch sử vòng sở hữu</h2>
+          {cycles.length === 0 ? <p className="text-sm text-ink-soft">Đây là lần đầu xe vào showroom (hoặc chưa có VIN để đối chiếu).</p> : (
+            <ul className="space-y-1 text-sm">
+              {cycles.map((c) => (
+                <li key={c.id}><Link href={`/kho-xe/${c.id}`} className="text-petrol hover:underline">{c.code}</Link> · {BUSINESS_TYPE_LABEL[c.business_type]} · {VEHICLE_SALE_STATUS[c.sale_status]} · nhập {formatDate(c.intake_date)}</li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-3 text-xs text-ink-soft">Mỗi lần xe quay lại showroom là một hồ sơ mới; hồ sơ và giao dịch cũ được giữ nguyên.</p>
+        </section>
+      </div>
+      <p className="text-xs text-ink-soft">Thu mua/thẩm định, chi phí chuẩn bị, hợp đồng ký gửi: các phần tiếp theo của chặng 3, chưa triển khai.</p>
+    </div>
+  );
+}

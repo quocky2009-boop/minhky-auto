@@ -56,6 +56,7 @@ erDiagram
   locations ||--o{ vehicles : "vị trí"
   legal_entities ||--o{ vehicles : "pháp nhân"
   sell_offers |o--o| vehicles : "converted_vehicle_id"
+  vehicles |o--o| vehicles : "previous_vehicle_id (vòng sở hữu trước)"
 
   vehicles ||--o{ purchase_appraisals : "(chặng 3)"
   vehicles ||--o{ vehicle_costs : "(chặng 3)"
@@ -90,5 +91,5 @@ Bảng hệ thống: `app_settings` (cấu hình vận hành, ví dụ số ngà
 
 - Khách chỉ có một số điện thoại; chưa có màn hình gộp khách trùng (chỉ cảnh báo khi nhập).
 - Chưa có giao diện quản lý danh mục (hãng/model/màu/nguồn khách) và cấu hình `app_settings` — sửa qua SQL.
-- Xe chỉ xem được; nhập xe/thu mua/ký gửi ở chặng 3.
+- Kho xe đã có nhập/sửa/lọc và nhập kho từ nhu cầu bán; thẩm định có checklist, chi phí, ký gửi, ảnh/tệp xe là các lát tiếp theo của chặng 3.
 - Thông báo nhắc việc chỉ hiển thị trong app (Việc hôm nay, đèn báo); chưa gửi Zalo/email/push.

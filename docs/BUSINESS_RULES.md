@@ -84,6 +84,20 @@ tổng tỷ lệ ≠ 100%; trùng bên; **P ≤ 0 (hòa vốn/lỗ cần phươn
 
 Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c = 20%, vốn 60/40 → công ty 8 triệu; hai bên 19,2 và 12,8 triệu.
 
+## 7b. Kho xe và nhập kho (chặng 3 — lát 1)
+
+- **Một chiếc xe thật có thể có nhiều vòng sở hữu.** Mỗi lần xe vào showroom là một hồ sơ (mã XE…); VIN chỉ duy nhất giữa các hồ sơ **đang hoạt động**
+  (chưa bán/bàn giao/trả chủ). Xe quay lại → hồ sơ mới tự liên kết hồ sơ cũ cùng VIN; hồ sơ cũ giữ nguyên giá mua, trạng thái, lịch sử.
+- Các chiều tách riêng: mới/cũ · sở hữu/ký gửi · nguồn xe · chuẩn bị bán · hồ sơ giấy tờ · bán hàng. Không gộp một trạng thái.
+- Trạng thái bán hàng: Chưa chào bán → Đang bán → (giữ / cọc / đã bán — chặng 5) → Đã bàn giao; ký gửi có thể "Trả chủ xe". Đã bàn giao/trả chủ là hết vòng, không mở lại.
+  Đặt tay qua form chỉ có "Chưa chào bán" và "Đang bán".
+- Không đổi được hình thức sở hữu ↔ ký gửi sau khi nhập (tạo hồ sơ mới).
+- **Giá:** giá chào (sales được xem) · giá mua và giá sàn (chỉ quản lý/kế toán) nằm ở bảng riêng. Giá sàn không được cao hơn giá chào khi cùng nhập.
+  Xe mua đứt bắt buộc có giá mua khi nhập kho; xe ký gửi **không có** giá mua (giá chủ xe muốn nhận thuộc hợp đồng ký gửi — chưa làm).
+- **Tuổi tồn** = số ngày từ ngày nhập kho (giờ Việt Nam). Chưa có ngày nhập → hiện "Chưa rõ", không coi là 0.
+- **Nhập kho từ nhu cầu bán:** quản lý, khi nhu cầu ở "Đã thẩm định"/"Thương lượng". Giá trị showroom đã kiểm tra ghi đè thông tin khách khai; thông tin khách khai giữ nguyên.
+  Một nhu cầu chỉ sinh được một xe. Nguồn xe ghi "Thu cũ đổi mới" nếu khách chọn hình thức đổi xe, ngược lại "Cá nhân".
+
 ## 8. Chưa định nghĩa — sẽ bổ sung ở chặng tương ứng
 
-Ký gửi (phí, quyết toán chủ xe), chi phí được trừ trước khi chia, giữ/cọc xe đồng thời, thu cũ đổi mới đối trừ, hoa hồng, chỉ tiêu báo cáo.
+Thẩm định có checklist và duyệt mua, ký gửi (phí, quyết toán chủ xe), chi phí được trừ trước khi chia, giữ/cọc xe đồng thời, thu cũ đổi mới đối trừ, hoa hồng, chỉ tiêu báo cáo.

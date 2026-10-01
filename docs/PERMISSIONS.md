@@ -41,7 +41,7 @@ Ký hiệu: ✔ toàn bộ · ◐ một phần (ghi chú) · — không có quy�
 | Xe — xem | ✔ | ✔ | ✔ | ◐ đang bán/giữ/cọc | ◐ chưa bán |
 | Xe — giá chào | ✔ | ✔ | ✔ | ✔ | — |
 | Xe — giá vốn, giá sàn | ✔ | ✔ | ✔ | — | — |
-| Xe — thêm / sửa | ✔ | ✔ | — | — | — |
+| Xe — thêm / sửa / nhập kho từ nhu cầu bán | ✔ | ✔ | — | — | — |
 | Danh mục hãng/model — thêm | ✔ | ✔ | ✔ | ✔ | ✔ |
 | Danh mục — sửa | ✔ | ✔ | — | — | — |
 | Cấu hình `app_settings`, nguồn khách — sửa | ✔ | — | — | — | — |

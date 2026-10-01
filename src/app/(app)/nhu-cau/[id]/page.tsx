@@ -17,6 +17,8 @@ import {
 } from "@/lib/labels";
 import { KindTag, Signal, StatusText } from "@/components/ui";
 import { loadDemand } from "./load";
+import { AcquireForm } from "./acquire-form";
+import { getLocations } from "@/lib/vehicles/data";
 import { ActivityForm } from "./activity-form";
 import { ReassignForm, ShareForm, UploadForm } from "./side-forms";
 import { unshareDemand } from "../actions";
@@ -82,6 +84,11 @@ export default async function DemandDetailPage({ params, searchParams }: {
     active && d.kind === "sell" && d.offer && !d.offer.converted_vehicle_id ? supabase.rpc("match_pool_buy_demands") : Promise.resolve({ data: [] }),
   ]);
   const canEdit = !!canEditRes.data;
+  const canAcquire = manager && d.kind === "sell" && !!d.offer && !d.offer.converted_vehicle_id && ["appraised", "negotiating"].includes(d.status);
+  const [convertedVehicle, locations] = await Promise.all([
+    d.offer?.converted_vehicle_id ? supabase.from("vehicles").select("id, code").eq("id", d.offer.converted_vehicle_id).maybeSingle() : Promise.resolve({ data: null }),
+    canAcquire ? getLocations() : Promise.resolve([]),
+  ]);
   const now = new Date();
   const st = followupState(d, staleDays, now);
   const phone = normalizePhone(d.customer.phone);
@@ -301,6 +308,25 @@ export default async function DemandDetailPage({ params, searchParams }: {
             <UploadForm demandId={d.id} />
             <p className="mt-2 text-xs text-ink-soft">Tệp riêng tư; đường dẫn xem chỉ có hiệu lực 10 phút.</p>
           </section>
+
+          {d.kind === "sell" && convertedVehicle.data && (
+            <section className="panel border-[#b7d9c3] p-4">
+              <h2 className="mb-1 text-sm font-semibold">Đã nhập kho</h2>
+              <p className="text-sm">Xe này đã thành <Link href={`/kho-xe/${convertedVehicle.data.id}`} className="font-medium text-petrol hover:underline">{convertedVehicle.data.code}</Link> trong kho.</p>
+            </section>
+          )}
+          {canAcquire && d.offer && (
+            <section className="panel p-4">
+              <h2 className="mb-2 text-sm font-semibold">Nhập kho (quản lý)</h2>
+              <AcquireForm demandId={d.id} requestId={randomUUID()} saleMode={d.offer.sale_mode} locations={locations}
+                offer={{ make: d.offer.make_name ?? "", model: d.offer.model_name ?? "", variant: d.offer.variant_name ?? "", year: String(d.offer.year_made ?? ""),
+                  color: d.offer.color ?? "", odo: d.offer.odo !== null ? String(d.offer.odo) : "", vin: d.offer.vin ?? "", plate: d.offer.plate ?? "",
+                  fuel: d.offer.fuel_type ? FUEL_LABEL[d.offer.fuel_type] : "", price: "" }} />
+            </section>
+          )}
+          {manager && d.kind === "sell" && !d.offer?.converted_vehicle_id && !canAcquire && active && (
+            <p className="rounded-md bg-floor p-3 text-xs text-ink-soft">Để nhập xe này vào kho, chuyển nhu cầu sang “Đã thẩm định” hoặc “Thương lượng” bằng nhật ký liên hệ.</p>
+          )}
 
           <section className="panel p-4">
             <h2 className="mb-2 text-sm font-semibold">Chia sẻ để hỗ trợ</h2>

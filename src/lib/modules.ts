@@ -48,3 +48,6 @@ export function canUse(roles: AppRole[], key: string): boolean {
   return !!m && m.roles.some((r) => roles.includes(r));
 }
 export const isManager = (roles: AppRole[]) => roles.includes("admin") || roles.includes("manager");
+
+/** Vai trò được xem giá mua / giá sàn / lợi nhuận. Chỉ để ẩn/hiện giao diện; database vẫn là nơi chặn thật. */
+export const canSeeFinance = (roles: AppRole[]) => roles.some((r) => r === "admin" || r === "manager" || r === "accountant");

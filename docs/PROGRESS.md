@@ -1,6 +1,6 @@
 # Tiến độ
 
-Cập nhật: 01/10/2026 · Chặng hiện tại: **kết thúc chặng 2; database đã chạy trên Supabase thật, còn nghiệm thu giao diện** · Chặng tiếp theo: 3 (kho → thu mua/thẩm định → chi phí → ký gửi)
+Cập nhật: 01/10/2026 · Chặng hiện tại: **chặng 3 — lát 1 (kho xe + nhập kho từ nhu cầu bán) đã xong và đã áp lên Supabase** · Tiếp theo: lát 2 (thẩm định, duyệt mua), lát 3 (chi phí), lát 4 (ký gửi)
 
 ## Tổng quan theo chặng (CLAUDE.md §14)
 
@@ -8,7 +8,7 @@ Cập nhật: 01/10/2026 · Chặng hiện tại: **kết thúc chặng 2; datab
 |---|---|---|
 | 1 | Nền tảng, Auth, schema, quyền, Storage | **Có mã + test database.** Chưa chạy trên Supabase thật |
 | 2 | Khách → nhu cầu → lọc → chăm sóc → ghép xe | **Có mã + test database + build.** Chưa kiểm tra trên trình duyệt với tài khoản thật |
-| 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | Chưa làm (đã có bảng `vehicles` nền + màn hình Kho xe chỉ xem) |
+| 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Đang làm — lát 1 xong:** kho xe (nhập/sửa/lọc/chi tiết), vòng sở hữu theo VIN, nhập kho từ nhu cầu bán. **Còn:** thẩm định có checklist + duyệt mua, chi phí (dự kiến/xác nhận/đã trả), hợp đồng ký gửi, ảnh/tệp xe, quản lý địa điểm |
 | 4 | Vốn góp/vay, công thức, quyết toán | Chưa làm (đã có thư viện công thức + unit test) |
 | 5 | Bán, thu chi, thu cũ đổi mới, bàn giao | Chưa làm |
 | 6 | Dashboard, báo cáo, hậu mãi, hoa hồng, nghiệm thu | Chưa làm |
@@ -45,9 +45,9 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 |---|---|
 | `npm run typecheck` | Không lỗi |
 | `npm run lint` | Không lỗi, không cảnh báo |
-| `npm test` | **37/37** unit test đạt (4 file) |
-| `npm run test:db` | **28/28** test đạt trên PostgreSQL 16 thật + lớp giả lập auth/storage (3 file) |
-| `npm run build` | Đạt; 16 route biên dịch |
+| `npm test` | **45/45** unit test đạt (5 file) |
+| `npm run test:db` | **40/40** test đạt trên PostgreSQL 16 thật + lớp giả lập auth/storage (4 file) |
+| `npm run build` | Đạt; 17 trang biên dịch (có 4 route kho xe) |
 | `next start` + curl | `/dang-nhap` trả 200 và có form; `/nhu-cau`, `/nhu-cau/moi`, `/tong-quan`, `/cai-dat/nguoi-dung` chuyển hướng về đăng nhập khi chưa đăng nhập |
 | `supabase/bootstrap/first_admin.sql`, `supabase/seed/demo_staging.sql` | Chạy đúng trên database test; seed tự chặn khi thiếu cờ an toàn và khi chạy lần hai |
 
@@ -59,7 +59,7 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 | 12.2 | Lọc kết hợp; 600–700tr khớp 650tr; thiếu dữ liệu không giả phù hợp | ✔ | `search`, `matching`, `ui-flow` |
 | 12.3 | Nguồn chưa nhập không phải xe sẵn giao; lịch nhắc; trạng thái đóng | ✔ | `matching`, `ui-flow`, `demands-rls`, `search` |
 | 12.4 | Hai người giữ/cọc cùng xe | Chưa — chặng 5 | |
-| 12.5 | Ký gửi tách tồn, quyết toán khớp | Chưa — chặng 3 | |
+| 12.5 | Ký gửi tách tồn, quyết toán khớp | ◐ đã tách hình thức sở hữu/ký gửi, ký gửi không có giá mua, lọc tồn riêng; hợp đồng + quyết toán chưa làm | `inventory` |
 | 12.6 | P=40tr, c=20%, 60/40 → 8 / 19,2 / 12,8tr | ✔ ở thư viện | `profit-split` |
 | 12.7 | Công ty vừa góp vốn vừa vận hành không đếm trùng | ✔ ở thư viện | `profit-split` |
 | 12.8 | Thiếu điều khoản/lỗ không quyết toán; làm tròn khớp tổng | ◐ thư viện xong; "tỷ lệ xe không đổi theo cấu hình chung" cần bảng điều khoản (chặng 4) | `profit-split` |
@@ -69,6 +69,22 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 | 12.12 | Đổi/thu hồi vai trò có hiệu lực, không dựa vào UI | ✔ | `demands-rls` |
 | 12.13 | Báo cáo khớp giao dịch | Chưa — chặng 6 | |
 | 12.14 | Dùng được trên máy tính và điện thoại | ◐ giao diện đã thiết kế responsive; **chưa kiểm tra trên trình duyệt thật** | |
+
+## Chặng 3 — lát 1: kho xe và nhập kho (01/10/2026)
+
+- **Vòng sở hữu:** mỗi dòng `vehicles` là một vòng của một chiếc xe thật. VIN chỉ duy nhất giữa các hồ sơ đang hoạt động; xe bán xong rồi quay lại tạo hồ sơ mới
+  liên kết `previous_vehicle_id`, hồ sơ cũ (giá mua cũ, trạng thái đã giao) giữ nguyên. Hồ sơ đã kết thúc không "sống lại".
+- **Luật trạng thái bán hàng** ở database (trigger); không đặt tay giữ/cọc/bán/giao qua form (thuộc chặng 5); không đổi hình thức sở hữu/ký gửi sau khi nhập.
+- **Kho xe:** danh sách lọc kết hợp (mới/cũ, hình thức, trạng thái, hãng/model, đời, màu, giá chào, vị trí, tuổi tồn), phân trang, sắp xếp tồn lâu trước;
+  chi tiết xe; nhập xe; sửa xe có kiểm tra phiên bản. Sales chỉ thấy xe đang bán + giá chào; kỹ thuật không thấy giá; giá mua/giá sàn chỉ quản lý/kế toán.
+- **Nhập kho từ nhu cầu bán** (chỉ quản lý): chỉ khi nhu cầu ở "Đã thẩm định"/"Thương lượng"; mua đứt bắt buộc giá mua, ký gửi cấm giá mua;
+  giá trị đã kiểm tra ghi đè thông tin khách khai (thông tin khách khai giữ nguyên ở nhu cầu); liên kết nguồn gốc hai chiều; bấm lặp/thử lại không tạo trùng xe;
+  nhu cầu chuyển "đã mua vào/nhận ký gửi" + nhật ký hệ thống; VIN trùng xe đang hoạt động thì chặn.
+- Test: 12 test database + 8 test unit mới (xem bảng kiểm thử). Migration `0800_inventory.sql` đã áp lên `minhky-auto` và thử trong giao dịch tự hủy.
+
+**Giới hạn hiện biết của lát 1:** chưa có giao diện thêm địa điểm (bảng `locations` trống → mục Vị trí chỉ có "Chưa rõ"); chưa có ảnh/video/tệp cho xe;
+chưa có thẩm định có checklist và luồng duyệt mua (hiện quản lý nhập kho trực tiếp khi nhu cầu ở "Đã thẩm định"); chưa có thông tin pin xe điện có bằng chứng;
+chưa có chi phí và hợp đồng ký gửi.
 
 ## Kiểm tra trên Supabase thật — project `minhky-auto` (01/10/2026)
 
