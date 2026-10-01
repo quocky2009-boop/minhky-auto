@@ -28,3 +28,4 @@ Trạng thái: **Chốt** (đã có căn cứ trong đặc tả hoặc anh Kỳ 
 | D22 | 01/10/2026 | Danh mục 17 mục thẩm định (14 chung, 2 xe điện, 1 phụ kiện) do đội phát triển soạn theo thông lệ kiểm tra xe cũ; admin sửa được trong bảng `appraisal_templates` | Đặc tả yêu cầu có checklist nhưng không liệt kê mục | **Tạm** — anh/thợ kỹ thuật nên rà và cho biết mục thừa/thiếu |
 | D23 | 01/10/2026 | Địa điểm đầu tiên: Showroom Minh Kỳ Auto, 212 Trường Chinh, P. Minh Xuân, tỉnh Tuyên Quang | Anh Kỳ cung cấp | Chốt |
 | D24 | 01/10/2026 | Thẩm định do quản lý ghi; kỹ thuật viên chưa có quyền ghi thẩm định (chưa có luồng giao việc) | Giữ lát 2 nhỏ; kỹ thuật chưa được đọc nhu cầu nên cần thiết kế quyền riêng | **Tạm** — nếu thợ cần tự nhập kết quả kiểm tra, làm ở lát sau |
+| D25 | 01/10/2026 | Repo GitHub để công khai; admin đầu tiên là tài khoản chủ (quocky2009@gmail.com) | Anh Kỳ quyết định; đã rà không lộ bí mật | Chốt |

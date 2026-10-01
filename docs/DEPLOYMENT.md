@@ -1,6 +1,6 @@
 # Triển khai, cấu hình và sao lưu
 
-> Trạng thái 01/10/2026: project Supabase `minhky-auto` (tổ chức "Minh Kỳ Auto", ap-southeast-1) **đã áp migrations 0100–0700 và kiểm tra**; chưa tạo admin, chưa deploy Vercel, chưa push GitHub.
+> Trạng thái 01/10/2026: project Supabase `minhky-auto` (tổ chức "Minh Kỳ Auto", ap-southeast-1) **đã áp migrations 0100–0900 và kiểm tra**; đã gán admin cho tài khoản chủ; repo GitHub `quocky2009-boop/minhky-auto` (công khai); đã tạo dự án Vercel tại `minhky-auto.vercel.app` (chưa kiểm tra đăng nhập thực tế).
 > Bản thử nghiệm và bản chạy thật hiện dùng chung một project — **không nạp dữ liệu demo vào project này nếu sắp nhập khách thật**; muốn có staging riêng cần tạo project thứ hai.
 
 ## 1. Môi trường
@@ -56,3 +56,10 @@ Biến môi trường (mẫu trong `.env.example`):
 - Tạo nhu cầu từ điện thoại; bấm Lưu hai lần không sinh trùng.
 - Tải tệp lên một nhu cầu; đường dẫn tệp hết hạn sau 10 phút; người ngoài quyền không mở được.
 - Supabase Dashboard → Advisors (Security, Performance) không có cảnh báo mức ERROR.
+
+## 6. Repository công khai — lưu ý
+
+- Mã nguồn công khai KHÔNG làm lộ dữ liệu: mọi dữ liệu nằm trong Supabase sau đăng nhập + RLS. Khóa `sb_publishable_…` được thiết kế để công khai.
+- Đã rà mã và toàn bộ lịch sử commit (01/10/2026): không có khóa bí mật, mật khẩu hay chuỗi kết nối. Chỉ có `.env.example` (giá trị mẫu).
+- Công khai làm lộ cấu trúc dữ liệu và quy tắc nghiệp vụ. Nếu muốn kín, chuyển repo về Private (Vercel vẫn deploy được repo private).
+- **Tuyệt đối không commit** `.env*`, `SUPABASE_SECRET_KEY`, bản dump database hay tệp dữ liệu khách. `.gitignore` đã chặn `.env*` (trừ `.env.example`).

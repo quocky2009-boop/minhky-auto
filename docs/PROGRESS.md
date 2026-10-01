@@ -126,8 +126,8 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 
 ## Trở ngại hiện tại (cần anh Kỳ)
 
-1. Push mã lên `quocky2009-boop/minhky-auto` — môi trường làm việc không có quyền GitHub (xem `DEPLOYMENT.md`).
-2. Tạo tài khoản admin đầu tiên (Authentication → Add user, rồi chạy `supabase/bootstrap/first_admin.sql`) và đưa `.env.local`/Vercel biến môi trường.
+1. Push các commit mới lên `quocky2009-boop/minhky-auto` — môi trường làm việc không có quyền ghi GitHub (GitHub đang ở commit `cd3088a`, thiếu chặng 3 lát 1–2).
+2. Admin đầu tiên đã được gán (01/10/2026). Cần xác nhận đăng nhập thực tế trên `minhky-auto.vercel.app` và cấu hình Site URL/Redirect URL trong Supabase Auth.
 3. Xác nhận các tham số tạm D7, D8, D9, D11, D12 (xem `DECISIONS.md`).
 4. Dự án đang để gói Free; nâng gói Pro của tổ chức "Minh Kỳ Auto" trước khi nhập khách thật (để có sao lưu).
 
