@@ -1,6 +1,6 @@
 # Tiến độ
 
-Cập nhật: 01/10/2026 · Chặng hiện tại: **kết thúc chặng 2, chờ hạ tầng để nghiệm thu thật** · Chặng tiếp theo: 3 (kho → thu mua/thẩm định → chi phí → ký gửi)
+Cập nhật: 01/10/2026 · Chặng hiện tại: **kết thúc chặng 2; database đã chạy trên Supabase thật, còn nghiệm thu giao diện** · Chặng tiếp theo: 3 (kho → thu mua/thẩm định → chi phí → ký gửi)
 
 ## Tổng quan theo chặng (CLAUDE.md §14)
 
@@ -70,21 +70,40 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 | 12.13 | Báo cáo khớp giao dịch | Chưa — chặng 6 | |
 | 12.14 | Dùng được trên máy tính và điện thoại | ◐ giao diện đã thiết kế responsive; **chưa kiểm tra trên trình duyệt thật** | |
 
+## Kiểm tra trên Supabase thật — project `minhky-auto` (01/10/2026)
+
+Đã xác minh đúng project (tổ chức "Minh Kỳ Auto", ap-southeast-1, ban đầu hoàn toàn trống) trước khi áp.
+
+| Việc | Kết quả |
+|---|---|
+| Áp 7 migrations (0100–0700) | Thành công |
+| Số bảng / bảng chưa bật RLS / policy | 23 / **0** / 50 |
+| Quyền bảng của `anon` | **0** |
+| Bucket `demand-files` | Riêng tư, 3 policy |
+| Dữ liệu tham chiếu | 7 nguồn khách, 11 màu, `demand_stale_after_days = 14` |
+| Security Advisor | 0 ERROR; 5 WARN có chủ ý (xem D17) |
+| Luồng thử trong giao dịch tự hủy (3 nhân viên giả) | Lọc giá 650tr khớp ngân sách 600–700tr (1), không khớp ngưỡng 800tr (0); lọc màu+hãng (1); nhận ra trùng SĐT dạng +84 (1); sales B thấy 0 nhu cầu/0 khách/0 giá vốn của sales A và bị chặn đổi người phụ trách; quản lý thấy nhu cầu và audit log; gửi lại cùng mã yêu cầu 2 lần chỉ tạo 1 nhu cầu; `anon` bị chặn |
+| Sau thử nghiệm | 0 người dùng, 0 khách, 0 nhu cầu (không để sót dữ liệu) |
+
+Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 0100 vẫn mang quyền EXECUTE mặc định của PUBLIC → đã siết ở migration 0700
+(trước đó `anon` vẫn chưa gọi được vì schema `private` đã thu hồi quyền truy cập).
+
 ## Chưa xác minh (do thiếu môi trường)
 
-- Chưa chạy trên Supabase thật: hành vi Auth (mời, đặt mật khẩu, getClaims), Storage thật (tải lên, signed URL), Data API/PostgREST
-  (cú pháp `select` lồng bảng, tên khóa ngoại), Security Advisors.
+- Database đã chạy trên Supabase thật (bảng trên). **Chưa kiểm tra:** hành vi Auth (mời, đặt mật khẩu, getClaims), Storage thật (tải lên, signed URL),
+  Data API/PostgREST từ ứng dụng (cú pháp `select` lồng bảng, tên khóa ngoại), Security Advisors mức Performance.
 - Chưa kiểm tra trên trình duyệt có đăng nhập (desktop + điện thoại). Test database dùng SQL trực tiếp, không qua PostgREST.
 - Chưa đo hiệu năng với dữ liệu lớn (bộ lọc dùng view + LIKE trên chuỗi chuẩn hóa; có chỉ mục trigram nhưng chưa đo).
 
 ## Trở ngại hiện tại (cần anh Kỳ)
 
-1. Duyệt tạo project Supabase riêng (đề xuất `minhky-auto`, vùng Singapore; nên có thêm project staging) — D1.
-2. Tên repository GitHub đích — D2. Repository hiện có lịch sử git cục bộ, sẵn sàng push.
+1. Push mã lên `quocky2009-boop/minhky-auto` — môi trường làm việc không có quyền GitHub (xem `DEPLOYMENT.md`).
+2. Tạo tài khoản admin đầu tiên (Authentication → Add user, rồi chạy `supabase/bootstrap/first_admin.sql`) và đưa `.env.local`/Vercel biến môi trường.
 3. Xác nhận các tham số tạm D7, D8, D9, D11, D12 (xem `DECISIONS.md`).
+4. Dự án đang để gói Free; nâng gói Pro của tổ chức "Minh Kỳ Auto" trước khi nhập khách thật (để có sao lưu).
 
 ## Bước tiếp theo
 
-1. Khi có project staging: áp migrations → bootstrap admin → seed demo → kiểm tra theo `DEPLOYMENT.md` §5 trên máy tính và điện thoại; sửa lỗi tích hợp nếu có.
+1. Bootstrap admin → đăng nhập app → kiểm tra theo `DEPLOYMENT.md` §5 trên máy tính và điện thoại; sửa lỗi tích hợp nếu có. (Project hiện là bản duy nhất: không nạp dữ liệu demo vào đây nếu sắp dùng thật.)
 2. Chặng 3: nhập xe (mới/cũ/ký gửi), hồ sơ thu mua + thẩm định (tách thông tin khách khai với kết quả kiểm tra), chuyển nhu cầu bán → xe trong kho
    (`converted_vehicle_id`), chi phí chuẩn bị xe, hợp đồng ký gửi, giao diện quản lý danh mục.

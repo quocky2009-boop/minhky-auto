@@ -4,7 +4,7 @@
 --   vehicles            : thông tin xe — nhân viên được phép đều đọc
 --   vehicle_listings    : giá chào — sales/quản lý/kế toán
 --   vehicle_financials  : giá mua, giá sàn — quản lý/kế toán/admin
--- Chặng 4 sẽ bổ sung thu mua, thẩm định, chi phí, ký gửi.
+-- Chặng 3 sẽ bổ sung thu mua, thẩm định, chi phí, ký gửi.
 -- =====================================================================
 
 create sequence public.vehicle_code_seq;

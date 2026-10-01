@@ -237,7 +237,7 @@ create table public.demand_vehicle_options (
 create index dvo_spec_idx on public.demand_vehicle_options (make_id, model_id, variant_id);
 
 -- Xe khách đang chào bán: nguồn xe tiềm năng, CHƯA phải xe trong kho.
--- Toàn bộ là thông tin KHÁCH CUNG CẤP; kết quả showroom kiểm tra nằm ở bảng thẩm định (chặng 4).
+-- Toàn bộ là thông tin KHÁCH CUNG CẤP; kết quả showroom kiểm tra nằm ở bảng thẩm định (chặng 3).
 create table public.sell_offers (
   demand_id uuid primary key references public.demands (id) on delete cascade,
   make_id uuid references public.vehicle_makes (id),
@@ -344,10 +344,6 @@ create or replace function private.demands_before_write()
 returns trigger language plpgsql set search_path = '' as $$
 begin
   if tg_op = 'INSERT' then
-    if new.status not in ('new') and not private.is_system() then
-      -- cho phép tạo thẳng ở trạng thái đang xử lý nếu đã có việc tiếp theo (constraint kiểm tra)
-      null;
-    end if;
     if new.status in ('verified', 'info_collected') then new.verified_at := coalesce(new.verified_at, now()); end if;
     return new;
   end if;

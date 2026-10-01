@@ -1,7 +1,7 @@
 # Triển khai, cấu hình và sao lưu
 
-> Trạng thái 01/10/2026: **chưa triển khai lên Supabase/Vercel thật.** Chưa có project Supabase riêng cho showroom
-> (hai project hiện có `minhky-ev`, `minhky-parts-ai` thuộc hệ thống khác — không dùng). Chờ anh Kỳ duyệt tạo project.
+> Trạng thái 01/10/2026: project Supabase `minhky-auto` (tổ chức "Minh Kỳ Auto", ap-southeast-1) **đã áp migrations 0100–0700 và kiểm tra**; chưa tạo admin, chưa deploy Vercel, chưa push GitHub.
+> Bản thử nghiệm và bản chạy thật hiện dùng chung một project — **không nạp dữ liệu demo vào project này nếu sắp nhập khách thật**; muốn có staging riêng cần tạo project thứ hai.
 
 ## 1. Môi trường
 

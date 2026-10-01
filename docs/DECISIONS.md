@@ -4,8 +4,8 @@ Trạng thái: **Chốt** (đã có căn cứ trong đặc tả hoặc anh Kỳ 
 
 | # | Ngày | Quyết định | Lý do | Trạng thái |
 |---|---|---|---|---|
-| D1 | 01/10/2026 | Không dùng 2 project Supabase hiện có (`minhky-ev`, `minhky-parts-ai`); cần project riêng cho showroom | CLAUDE.md §13 cấm tự chọn project khác; tách dữ liệu kinh doanh | **Chờ** anh Kỳ duyệt tạo project (có phí) |
-| D2 | 01/10/2026 | Repository tạo mới cục bộ; chưa có GitHub đích | Không có repo sẵn, chưa kết nối GitHub | **Chờ** tên repo |
+| D1 | 01/10/2026 | Không dùng 2 project Supabase hiện có (`minhky-ev`, `minhky-parts-ai`); cần project riêng cho showroom | CLAUDE.md §13 cấm tự chọn project khác; tách dữ liệu kinh doanh | **Đã giải quyết 01/10/2026:** anh Kỳ tạo tổ chức riêng "Minh Kỳ Auto" + project `minhky-auto` (ap-southeast-1). Migrations đã áp và kiểm tra |
+| D2 | 01/10/2026 | Repository tạo mới cục bộ; chưa có GitHub đích | Không có repo sẵn, chưa kết nối GitHub | **Đã giải quyết:** `quocky2009-boop/minhky-auto`. Chờ anh Kỳ push (xem PROGRESS) |
 | D3 | 01/10/2026 | Tiền `numeric(18,0)` / `bigint`; null = Chưa rõ | §10 toàn vẹn số liệu; tránh 0 giả | Chốt |
 | D4 | 01/10/2026 | Vai trò từ bảng `user_roles`, kiểm tra mỗi truy vấn; không dùng `user_metadata` | §11; thu hồi quyền có hiệu lực ngay | Chốt |
 | D5 | 01/10/2026 | Tách giá chào / giá vốn-giá sàn thành bảng riêng | RLS lọc hàng, không lọc cột | Chốt |
@@ -20,3 +20,5 @@ Trạng thái: **Chốt** (đã có căn cứ trong đặc tả hoặc anh Kỳ 
 | D14 | 01/10/2026 | Không làm REST API riêng; dùng Server Actions + RPC có RLS | Giảm bề mặt tấn công; một nơi thực thi quyền | Chốt |
 | D15 | 01/10/2026 | Đánh số chặng theo CLAUDE.md §14 (6 chặng). Báo cáo trong chat trước đó gọi nhầm là "chặng 3/4" | Thống nhất với đặc tả | Chốt — đã sửa trong mã và tài liệu |
 | D16 | 01/10/2026 | Nhắc việc chỉ trong app (đèn báo, Việc hôm nay); chưa gửi Zalo/email | §14 không tích hợp Zalo khi chưa yêu cầu | Chốt cho chặng 2 |
+| D17 | 01/10/2026 | Giữ 5 cảnh báo WARN của Supabase Advisor về hàm `SECURITY DEFINER` mà người đã đăng nhập gọi được: `my_roles`, `list_sellers`, `find_customers_by_phone`, `match_pool_buy_demands`, `match_pool_sell_offers` | Chủ ý thiết kế: cần vượt RLS để sales thấy "khách của đồng nghiệp cần xe này" mà không lộ liên hệ; mỗi hàm tự kiểm tra vai trò, trả tối thiểu cột. Có test | Chốt |
+| D18 | 01/10/2026 | Migration đã áp lên `minhky-auto` bằng công cụ Supabase nên mã phiên bản trong lịch sử migration của Supabase khác tên file trong repo | Không ảnh hưởng nội dung. Nếu sau này dùng `supabase db push`, phải chạy `supabase migration repair` hoặc chỉ áp các migration mới | Ghi nhận |
