@@ -1,6 +1,6 @@
 # Tiến độ
 
-Cập nhật: 01/10/2026 · Chặng hiện tại: **chặng 3 — lát 1 (kho xe + nhập kho từ nhu cầu bán) đã xong và đã áp lên Supabase** · Tiếp theo: lát 2 (thẩm định, duyệt mua), lát 3 (chi phí), lát 4 (ký gửi)
+Cập nhật: 01/10/2026 · Chặng hiện tại: **chặng 3 — lát 1 (kho xe + nhập kho) và lát 2 (thẩm định + duyệt mua) đã xong, đã áp lên Supabase** · Tiếp theo: lát 3 (chi phí), lát 4 (ký gửi)
 
 ## Tổng quan theo chặng (CLAUDE.md §14)
 
@@ -8,7 +8,7 @@ Cập nhật: 01/10/2026 · Chặng hiện tại: **chặng 3 — lát 1 (kho xe
 |---|---|---|
 | 1 | Nền tảng, Auth, schema, quyền, Storage | **Có mã + test database.** Chưa chạy trên Supabase thật |
 | 2 | Khách → nhu cầu → lọc → chăm sóc → ghép xe | **Có mã + test database + build.** Chưa kiểm tra trên trình duyệt với tài khoản thật |
-| 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Đang làm — lát 1 xong:** kho xe (nhập/sửa/lọc/chi tiết), vòng sở hữu theo VIN, nhập kho từ nhu cầu bán. **Còn:** thẩm định có checklist + duyệt mua, chi phí (dự kiến/xác nhận/đã trả), hợp đồng ký gửi, ảnh/tệp xe, quản lý địa điểm |
+| 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Đang làm — lát 1, 2 xong:** kho xe, vòng sở hữu theo VIN, nhập kho; thẩm định có checklist + duyệt mua. **Còn:** chi phí (dự kiến/xác nhận/đã trả), hợp đồng ký gửi, ảnh/tệp gắn với xe, giao diện quản lý địa điểm/mẫu checklist, kỹ thuật viên tự nhập kết quả kiểm tra |
 | 4 | Vốn góp/vay, công thức, quyết toán | Chưa làm (đã có thư viện công thức + unit test) |
 | 5 | Bán, thu chi, thu cũ đổi mới, bàn giao | Chưa làm |
 | 6 | Dashboard, báo cáo, hậu mãi, hoa hồng, nghiệm thu | Chưa làm |
@@ -45,8 +45,8 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 |---|---|
 | `npm run typecheck` | Không lỗi |
 | `npm run lint` | Không lỗi, không cảnh báo |
-| `npm test` | **45/45** unit test đạt (5 file) |
-| `npm run test:db` | **40/40** test đạt trên PostgreSQL 16 thật + lớp giả lập auth/storage (4 file) |
+| `npm test` | **49/49** unit test đạt (6 file) |
+| `npm run test:db` | **49/49** test đạt trên PostgreSQL 16 thật + lớp giả lập auth/storage (5 file) |
 | `npm run build` | Đạt; 17 trang biên dịch (có 4 route kho xe) |
 | `next start` + curl | `/dang-nhap` trả 200 và có form; `/nhu-cau`, `/nhu-cau/moi`, `/tong-quan`, `/cai-dat/nguoi-dung` chuyển hướng về đăng nhập khi chưa đăng nhập |
 | `supabase/bootstrap/first_admin.sql`, `supabase/seed/demo_staging.sql` | Chạy đúng trên database test; seed tự chặn khi thiếu cờ an toàn và khi chạy lần hai |
@@ -82,9 +82,22 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
   nhu cầu chuyển "đã mua vào/nhận ký gửi" + nhật ký hệ thống; VIN trùng xe đang hoạt động thì chặn.
 - Test: 12 test database + 8 test unit mới (xem bảng kiểm thử). Migration `0800_inventory.sql` đã áp lên `minhky-auto` và thử trong giao dịch tự hủy.
 
-**Giới hạn hiện biết của lát 1:** chưa có giao diện thêm địa điểm (bảng `locations` trống → mục Vị trí chỉ có "Chưa rõ"); chưa có ảnh/video/tệp cho xe;
-chưa có thẩm định có checklist và luồng duyệt mua (hiện quản lý nhập kho trực tiếp khi nhu cầu ở "Đã thẩm định"); chưa có thông tin pin xe điện có bằng chứng;
-chưa có chi phí và hợp đồng ký gửi.
+**Giới hạn hiện biết của lát 1:** chưa có giao diện thêm địa điểm (hiện có 1 địa điểm, thêm qua SQL); chưa có ảnh/video/tệp gắn với xe; chưa có chi phí và hợp đồng ký gửi.
+
+## Chặng 3 — lát 2: thẩm định và duyệt mua (01/10/2026)
+
+- **Thẩm định có checklist** trong trang nhu cầu bán (quản lý): 17 mục theo nhóm (giấy tờ & nhận dạng, tình trạng xe, xe điện, khác); mỗi mục Đạt / Không đạt / Không áp dụng / Chưa kiểm tra.
+  Lưu nháp; có chống ghi đè đồng thời.
+- **Mục chưa kiểm tra không được coi là đạt:** không duyệt được khi còn mục bắt buộc chưa kiểm tra. Mục không đạt phải ghi tình trạng. ODO và pin xe điện phải ghi số đo/bằng chứng.
+  Đánh dấu xe điện thì thêm mục pin (SoH) và sạc bắt buộc.
+- **Duyệt mua:** quản lý/admin, không ngưỡng giá. Phải nhập **giá mua tối đa được duyệt** (trừ xe ký gửi). Từ chối bắt buộc lý do. Đã chốt thì khóa; mở lại có nhật ký và xóa giá đã duyệt (phải duyệt lại).
+- **Nhập kho bắt buộc thẩm định đã duyệt;** giá mua thực tế không vượt giá tối đa đã duyệt; sau khi nhập kho không đổi quyết định.
+- **Tách quyền:** sales phụ trách thấy tình trạng thẩm định + checklist nhưng KHÔNG thấy giá đề xuất/giá duyệt; nhật ký hệ thống không ghi số tiền; kế toán xem được giá.
+- **Địa điểm** Showroom Minh Kỳ Auto (212 Trường Chinh, P. Minh Xuân, tỉnh Tuyên Quang) đã có trong hệ thống.
+- Test: 9 test database + 4 test unit mới. Migration `0900_appraisal_approval.sql` đã áp lên `minhky-auto` và thử trong giao dịch tự hủy.
+
+**Giới hạn của lát 2:** ảnh/video bằng chứng chưa gắn trực tiếp vào từng mục (hiện dùng "Tệp đính kèm" của nhu cầu và ghi tên tệp vào ghi chú); kỹ thuật viên chưa tự nhập được kết quả kiểm tra;
+chưa có giao diện sửa mẫu checklist (sửa qua SQL bảng `appraisal_templates`); chưa có hợp đồng mua.
 
 ## Kiểm tra trên Supabase thật — project `minhky-auto` (01/10/2026)
 

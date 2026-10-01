@@ -98,6 +98,17 @@ Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c 
 - **Nhập kho từ nhu cầu bán:** quản lý, khi nhu cầu ở "Đã thẩm định"/"Thương lượng". Giá trị showroom đã kiểm tra ghi đè thông tin khách khai; thông tin khách khai giữ nguyên.
   Một nhu cầu chỉ sinh được một xe. Nguồn xe ghi "Thu cũ đổi mới" nếu khách chọn hình thức đổi xe, ngược lại "Cá nhân".
 
+## 7c. Thẩm định và duyệt mua (chặng 3 — lát 2)
+
+- Mỗi nhu cầu bán có tối đa một bản thẩm định. **Thông tin khách khai** (ở nhu cầu) và **kết quả showroom kiểm tra** (ở thẩm định) lưu riêng.
+- Mỗi mục kiểm tra: Chưa kiểm tra (mặc định) · Đạt · Không đạt · Không áp dụng. **Chưa kiểm tra không bao giờ được coi là đạt.**
+- Duyệt mua chỉ được khi: mọi mục bắt buộc đã kiểm tra; mục Không đạt có ghi tình trạng; mục ODO và pin xe điện có ghi số đo/bằng chứng;
+  đã nhập giá mua tối đa được duyệt (không bắt buộc với xe ký gửi).
+- Người duyệt: quản lý/admin. **Không có ngưỡng giá** (anh Kỳ chốt 01/10/2026).
+- Khi nhập kho (mua đứt): giá mua thực tế ≤ giá mua tối đa đã duyệt. Cần mua cao hơn → mở lại thẩm định và duyệt giá mới (có nhật ký).
+- Thẩm định đã duyệt/từ chối bị khóa; mở lại được (trừ khi xe đã nhập kho), mở lại xóa giá tối đa đã duyệt.
+- Giá đề xuất và giá tối đa là dữ liệu tài chính: chỉ quản lý/kế toán xem. Nhật ký nhu cầu (sales đọc được) không ghi số tiền.
+
 ## 8. Chưa định nghĩa — sẽ bổ sung ở chặng tương ứng
 
-Thẩm định có checklist và duyệt mua, ký gửi (phí, quyết toán chủ xe), chi phí được trừ trước khi chia, giữ/cọc xe đồng thời, thu cũ đổi mới đối trừ, hoa hồng, chỉ tiêu báo cáo.
+Hợp đồng mua, ký gửi (phí, quyết toán chủ xe), chi phí được trừ trước khi chia, giữ/cọc xe đồng thời, thu cũ đổi mới đối trừ, hoa hồng, chỉ tiêu báo cáo.

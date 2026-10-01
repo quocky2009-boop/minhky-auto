@@ -42,6 +42,10 @@ Ký hiệu: ✔ toàn bộ · ◐ một phần (ghi chú) · — không có quy�
 | Xe — giá chào | ✔ | ✔ | ✔ | ✔ | — |
 | Xe — giá vốn, giá sàn | ✔ | ✔ | ✔ | — | — |
 | Xe — thêm / sửa / nhập kho từ nhu cầu bán | ✔ | ✔ | — | — | — |
+| Thẩm định — xem tình trạng + checklist | ✔ | ✔ | — | ◐ nhu cầu của mình | — |
+| Thẩm định — ghi, duyệt mua, mở lại | ✔ | ✔ | — | — | — |
+| Giá đề xuất / giá mua tối đa được duyệt | ✔ | ✔ | ✔ (xem) | — | — |
+| Mẫu checklist thẩm định — sửa | ✔ | — | — | — | — |
 | Danh mục hãng/model — thêm | ✔ | ✔ | ✔ | ✔ | ✔ |
 | Danh mục — sửa | ✔ | ✔ | — | — | — |
 | Cấu hình `app_settings`, nguồn khách — sửa | ✔ | — | — | — | — |

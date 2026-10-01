@@ -18,6 +18,10 @@ import {
 import { KindTag, Signal, StatusText } from "@/components/ui";
 import { loadDemand } from "./load";
 import { AcquireForm } from "./acquire-form";
+import { AppraisalPanel } from "./appraisal-panel";
+import { loadAppraisal } from "./appraisal-load";
+import { canSeeFinance } from "@/lib/modules";
+import { toVnd } from "@/lib/money";
 import { getLocations } from "@/lib/vehicles/data";
 import { ActivityForm } from "./activity-form";
 import { ReassignForm, ShareForm, UploadForm } from "./side-forms";
@@ -84,7 +88,10 @@ export default async function DemandDetailPage({ params, searchParams }: {
     active && d.kind === "sell" && d.offer && !d.offer.converted_vehicle_id ? supabase.rpc("match_pool_buy_demands") : Promise.resolve({ data: [] }),
   ]);
   const canEdit = !!canEditRes.data;
-  const canAcquire = manager && d.kind === "sell" && !!d.offer && !d.offer.converted_vehicle_id && ["appraised", "negotiating"].includes(d.status);
+  const { templates, appraisal } = d.kind === "sell" && d.offer
+    ? await loadAppraisal(supabase, d.id, canSeeFinance(user.roles))
+    : { templates: [], appraisal: null };
+  const canAcquire = manager && d.kind === "sell" && !!d.offer && !d.offer.converted_vehicle_id && appraisal?.status === "approved" && ["appraised", "negotiating"].includes(d.status);
   const [convertedVehicle, locations] = await Promise.all([
     d.offer?.converted_vehicle_id ? supabase.from("vehicles").select("id, code").eq("id", d.offer.converted_vehicle_id).maybeSingle() : Promise.resolve({ data: null }),
     canAcquire ? getLocations() : Promise.resolve([]),
@@ -198,6 +205,19 @@ export default async function DemandDetailPage({ params, searchParams }: {
                   <Row label="Hẹn thẩm định">{d.offer.inspection_at ? formatDateTime(d.offer.inspection_at) : unknown}</Row>
                 </dl>
               ) : <p className="text-sm text-ink-soft">Chưa có thông tin xe.</p>}
+            </section>
+          )}
+
+          {d.kind === "sell" && d.offer && !d.offer.converted_vehicle_id && (
+            <section className="panel p-4">
+              <h2 className="mb-2 font-semibold">Thẩm định và duyệt mua</h2>
+              {manager ? (
+                <AppraisalPanel key={`${appraisal?.version ?? 0}-${appraisal?.status ?? "none"}`} demandId={d.id} templates={templates} appraisal={appraisal} saleMode={d.offer.sale_mode}
+                  moneyDefaults={{ proposed: toVnd(appraisal?.proposed_price)?.toString() ?? "", approvedMax: toVnd(appraisal?.approved_max_price)?.toString() ?? "" }} />
+              ) : (
+                <p className="text-sm">Trạng thái: <b>{!appraisal ? "Chưa thẩm định" : appraisal.status === "draft" ? "Đang thẩm định" : appraisal.status === "approved" ? "Đã duyệt mua" : "Không duyệt mua"}</b>
+                  <span className="text-ink-soft"> — việc thẩm định và duyệt mua do quản lý thực hiện.</span></p>
+              )}
             </section>
           )}
 
@@ -325,7 +345,7 @@ export default async function DemandDetailPage({ params, searchParams }: {
             </section>
           )}
           {manager && d.kind === "sell" && !d.offer?.converted_vehicle_id && !canAcquire && active && (
-            <p className="rounded-md bg-floor p-3 text-xs text-ink-soft">Để nhập xe này vào kho, chuyển nhu cầu sang “Đã thẩm định” hoặc “Thương lượng” bằng nhật ký liên hệ.</p>
+            <p className="rounded-md bg-floor p-3 text-xs text-ink-soft">Để nhập xe này vào kho: (1) thẩm định và duyệt mua ở khung bên trái, (2) chuyển nhu cầu sang “Đã thẩm định” hoặc “Thương lượng” bằng nhật ký liên hệ.</p>
           )}
 
           <section className="panel p-4">

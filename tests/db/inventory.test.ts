@@ -130,15 +130,25 @@ d("Kho xe — chặng 3 lát 1 (database thật)", () => {
         request_id: uuid(), kind: "sell", customer: { full_name: "Khách bán " + uuid().slice(0, 4) }, sell_offer: offer })])).rows[0].id as string);
     const moveTo = (id: string, status: string) =>
       as(c, salesA, (db) => db.query("select public.log_demand_activity($1, $2, 'call', 'cập nhật', null, 'Việc tiếp theo', now() + interval '1 day', $3, null, null)", [id, uuid(), status]));
+    /** Thẩm định đạt toàn bộ mục + duyệt mua (quản lý). max = giá mua tối đa được duyệt. */
+    const approve = async (demand: string, max = "900000000") => {
+      const tpl = (await sys.query("select key, requires_note_on_pass from public.appraisal_templates where is_active and not ev_only")).rows;
+      const items = Object.fromEntries(tpl.map((t) => [t.key, { result: "pass", note: t.requires_note_on_pass ? "đã đo" : "" }]));
+      await as(c, manager, (db) => db.query("select public.save_appraisal($1, $2::jsonb)", [demand, JSON.stringify({ items, proposed_price: max })]));
+      await as(c, manager, (db) => db.query("select public.decide_appraisal($1, 'approve', $2::jsonb)", [demand, JSON.stringify({ approved_max_price: max })]));
+    };
     const acquire = (user: string, demand: string, p: Record<string, unknown> = {}, request = uuid()) =>
       as(c, user, async (db) => (await db.query("select public.acquire_from_demand($1, $2, $3::jsonb) id", [demand, request, JSON.stringify(p)])).rows[0].id as string);
 
     it("Chỉ nhập khi đã thẩm định/thương lượng, chỉ quản lý, phải có giá mua; liên kết nguồn gốc; không tạo trùng xe", async () => {
       const dem = await newSellDemand({ make: "Mazda", model: "CX-5", year_made: "2020", color: "Xanh dương", odo: "45000", vin: "JM3KE0000000ACQ01", asking_price: "700000000", sale_mode: "outright" });
-      await expect(acquire(manager, dem)).rejects.toThrow(/Đã thẩm định/);       // còn ở trạng thái Mới
+      await expect(acquire(manager, dem, { purchase_price: "650000000" })).rejects.toThrow(/Cần thẩm định và duyệt mua/);
+      await approve(dem, "700000000");
+      await expect(acquire(manager, dem, { purchase_price: "650000000" })).rejects.toThrow(/Đã thẩm định/);   // đã duyệt nhưng nhu cầu còn ở trạng thái Mới
       await moveTo(dem, "appraised");
       await expect(acquire(salesA, dem, { purchase_price: "650000000" })).rejects.toThrow(/Chỉ quản lý/);
       await expect(acquire(manager, dem)).rejects.toThrow(/Nhập giá mua thực tế/);
+      await expect(acquire(manager, dem, { purchase_price: "720000000" })).rejects.toThrow(/vượt giá tối đa đã duyệt/);
       const req = uuid();
       const v1 = await acquire(manager, dem, { purchase_price: "650000000", odo: "45500", location_id: "" }, req);
       const v2 = await acquire(manager, dem, { purchase_price: "650000000" }, uuid());     // bấm lại / thử lại
@@ -163,6 +173,7 @@ d("Kho xe — chặng 3 lát 1 (database thật)", () => {
     it("Ký gửi: không có giá mua, hình thức tách khỏi sở hữu; thu cũ đổi mới ghi nguồn trade_in; chưa chọn hình thức thì chặn", async () => {
       const cons = await newSellDemand({ make: "Hyundai", model: "Accent", year_made: "2019", sale_mode: "consignment" });
       await moveTo(cons, "negotiating");
+      await approve(cons);
       await expect(acquire(manager, cons, { purchase_price: "300000000" })).rejects.toThrow(/Xe ký gửi không có giá mua/);
       const vc = await acquire(manager, cons);
       const row = (await sys.query("select business_type from public.vehicles where id = $1", [vc])).rows[0];
@@ -171,11 +182,13 @@ d("Kho xe — chặng 3 lát 1 (database thật)", () => {
 
       const ti = await newSellDemand({ make: "Toyota", model: "Camry", year_made: "2018", sale_mode: "trade_in" });
       await moveTo(ti, "appraised");
+      await approve(ti);
       const vt = await acquire(manager, ti, { purchase_price: "500000000" });
       expect((await sys.query("select source_type, business_type from public.vehicles where id = $1", [vt])).rows[0]).toEqual({ source_type: "trade_in", business_type: "owned" });
 
       const und = await newSellDemand({ make: "Ford", model: "Ranger", sale_mode: "undecided" });
       await moveTo(und, "appraised");
+      await approve(und);
       await expect(acquire(manager, und, { purchase_price: "600000000" })).rejects.toThrow(/Chọn hình thức/);
       const vu = await acquire(manager, und, { purchase_price: "600000000", business_type: "owned" });
       expect(vu).toBeTruthy();
@@ -185,6 +198,7 @@ d("Kho xe — chặng 3 lát 1 (database thật)", () => {
       await createVehicle(manager, { make: "Suzuki", model: "XL7", condition: "used", vin: "MHYDUPLICATE0001" });
       const dem = await newSellDemand({ make: "Suzuki", model: "XL7", vin: "MHYDUPLICATE0001", sale_mode: "outright" });
       await moveTo(dem, "appraised");
+      await approve(dem);
       await expect(acquire(manager, dem, { purchase_price: "400000000" })).rejects.toThrow(/đang có trong kho/);
       expect((await sys.query("select status from public.demands where id = $1", [dem])).rows[0].status).toBe("appraised");
       expect((await sys.query("select count(*)::int n from public.vehicles where source_demand_id = $1", [dem])).rows[0].n).toBe(0);
