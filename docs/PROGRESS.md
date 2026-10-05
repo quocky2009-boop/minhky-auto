@@ -9,7 +9,7 @@ Cập nhật: 05/10/2026 · Chặng hiện tại: **chặng 3 gần xong (còn g
 | 1 | Nền tảng, Auth, schema, quyền, Storage | **Có mã + test database.** Chưa chạy trên Supabase thật |
 | 2 | Khách → nhu cầu → lọc → chăm sóc → ghép xe | **Có mã + test database + build.** Chưa kiểm tra trên trình duyệt với tài khoản thật |
 | 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Đang làm — lát 1, 2, 3 xong:** kho xe, vòng sở hữu theo VIN, nhập kho; thẩm định + duyệt mua; chi phí chuẩn bị xe (dự kiến / đã xác nhận / đã thanh toán). **Lát 4 (có mã + test, đã áp lên Supabase):** hợp đồng ký gửi. **Còn:** giao diện quản lý địa điểm/mẫu checklist, kỹ thuật viên tự nhập kết quả kiểm tra |
-| 4 | Vốn góp/vay, công thức, quyết toán | **Đang làm — lát 1 xong (có mã + test, chưa áp lên Supabase):** bên góp vốn, điều khoản chia lợi nhuận theo xe có phiên bản, sổ vốn góp, cho vay tách riêng, ước tính chia. **Còn:** quyết toán (tạm tính → kiểm tra → phê duyệt → thanh toán), hoàn vốn/chia thực chi, chi phí muộn có điều chỉnh, xử lý hòa vốn/lỗ được duyệt — cần giao dịch bán (chặng 5) |
+| 4 | Vốn góp/vay, công thức, quyết toán | **Đang làm — lát 1 xong (có mã + test, đã áp lên Supabase):** bên góp vốn, điều khoản chia lợi nhuận theo xe có phiên bản, sổ vốn góp, cho vay tách riêng, ước tính chia. **Còn:** quyết toán (tạm tính → kiểm tra → phê duyệt → thanh toán), hoàn vốn/chia thực chi, chi phí muộn có điều chỉnh, xử lý hòa vốn/lỗ được duyệt — cần giao dịch bán (chặng 5) |
 | 5 | Bán, thu chi, thu cũ đổi mới, bàn giao | Chưa làm |
 | 6 | Dashboard, báo cáo, hậu mãi, hoa hồng, nghiệm thu | Chưa làm |
 
@@ -159,7 +159,11 @@ Nay tệp nhu cầu cũng tải thẳng lên Storage bằng URL ký (không đ�
 - **Cho vay** tách khỏi góp vốn: gốc, ngày, lãi thỏa thuận ghi nguyên văn, trả gốc/lãi (trả gốc không vượt gốc) — D41. Chỉ xe showroom sở hữu (D43).
 - **Điều kiện quyết toán** hiển thị trên xe: chưa có điều khoản duyệt / chưa chốt căn cứ chi phí / vốn đổi chưa xác nhận lại (D39). **Ước tính chia** theo giá bán giả định bằng đúng công thức `profit-split.ts` (từ chối khi thiếu dữ liệu) — D44.
 - Khối "Vốn góp và chia lợi nhuận" ở trang chi tiết xe sở hữu (quản lý/kế toán). Quyền: D42.
-- Migration `20261001001300_capital_terms.sql`: **mới áp lên database test cục bộ, CHƯA áp lên Supabase** (chờ anh Kỳ đồng ý).
+- Migration `20261001001300_capital_terms.sql` **đã áp lên Supabase `minhky-auto` ngày 05/10/2026** (anh Kỳ đồng ý). Đã xác minh đúng project và chưa có đối tượng trùng trước khi áp.
+  Sau khi áp: 0 bảng chưa bật RLS; 6 bảng mới đều bật RLS với 19 policy; `anon` 0 quyền bảng và 0 RPC; không ai có quyền xóa/truncate; 3 view `security_invoker`; 13 RPC đều `security invoker`; Security Advisor không có cảnh báo mới do migration này.
+  Luồng thử trong giao dịch tự hủy (quản lý, kế toán, sales, kỹ thuật giả): chặn xe ký gửi; tỷ lệ công ty bắt buộc; chặn duyệt khi tổng 99,9999; duyệt 60/40 được và bản đã duyệt không sửa được; kế toán ghi tiền thực nhận nhưng không ghi vốn cam kết, không lập điều khoản, không rút vượt vốn;
+  sales thấy 0 dòng và không ghi được; kỹ thuật thấy 0 dòng; không ai xóa được. Sau thử nghiệm: 1 tài khoản admin có sẵn, 0 xe, 0 bên góp vốn, 0 điều khoản, 0 dòng sổ, 0 nhật ký thử.
+  (Cờ "cần xác nhận lại" không đo được trong một giao dịch duy nhất vì `now()` không đổi trong giao dịch; đã kiểm bằng test database với các giao dịch riêng.)
 - Test: 10 test database (`tests/db/capital.test.ts`: phân quyền gồm sales/kỹ thuật/anon và không xóa, chỉ xe sở hữu, tỷ lệ không mặc định, duyệt đúng 100%, bản duyệt bất biến và thay thế, hủy nháp, gửi lặp song song + đánh số phiên bản khi hai người cùng lập, sổ vốn và rút vốn, cờ xác nhận lại, cho vay tách riêng + hạn mức trả gốc song song, nhật ký không lộ SĐT) + 17 test unit (`tests/unit/capital.test.ts`, gồm dữ liệu test của đặc tả P=40tr/c=20%/60-40 qua ước tính).
 - **Chưa kiểm tra bằng trình duyệt thật.** Chưa có: sửa bản nháp trên giao diện (hủy nháp rồi lập lại; RPC `update_capital_terms` đã có), danh sách "chi phí được chọn" cho căn cứ `selected_costs`, màn hình riêng quản lý bên góp vốn (hiện thêm trong trang xe).
 
@@ -194,7 +198,8 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
-1f. **Áp migration `1300_capital_terms.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (thêm 6 bảng vốn góp/cho vay). Và các mục **Tạm** D38–D42 (đặc biệt D39: định nghĩa chi phí được trừ trước khi chia; D41: cách tính lãi vay).
+1f. ~~Áp migration 1300~~ — đã xong 05/10/2026. **Cần anh Kỳ xác nhận D39:** "chi phí chung" trừ trước khi chia trái quy tắc §7 đã chốt (C dành cho công ty bù vận hành, không trừ thêm điện nước/thuê nhà/cơ sở vật chất) — giữ quy tắc đó hay đổi?
+1g. **Bảo mật — 4 hàm `valuation_agent_*` (không do phiên này tạo, thuộc 3 migration `appraisal_ai_*`/`valuation_agent_*` ngoài repo) đang cho `anon` (chưa đăng nhập) gọi được** dù là SECURITY DEFINER và có ghi dữ liệu (`save_comparables`, `save_decision`, `save_new_car_evidence`, `fail_run`); có tham số `p_token` nên có thể đã tự kiểm tra token, nhưng chưa được rà. Cần chủ dự án xác nhận ai tạo, đưa mã vào repo và rà quyền (CLAUDE.md §11).
 1e. ~~Áp migration 1200~~ — đã xong 05/10/2026. Cần thử tải ảnh thật trên giao diện (Preview/production) rồi mới coi là nghiệm thu.
 1d. **Supabase có 3 migration không có trong repo:** `appraisal_ai_valuation_tables_v1`, `_security_v1`, `_views_v1` (áp 05/10/2026 07:58, tạo các bảng `appraisal_ai_*`). Không do phiên làm việc này tạo. Cần đưa mã nguồn vào repo (CLAUDE.md §13: không để mã lệch database) và xác nhận phạm vi — CLAUDE.md §14 ghi chưa mở rộng sang "AI định giá" khi chưa được yêu cầu.
 1c. Xác nhận định nghĩa "giá bán" để tính phí % (D30) và các mục **Tạm** D32, D33, D35.
