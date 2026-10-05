@@ -169,6 +169,19 @@ Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c 
 - **Ước tính chia lợi nhuận** trên trang xe: "nếu bán giá X" → P = giá bán − giá mua − chi phí đã xác nhận (theo căn cứ) rồi dùng công thức mục 7. Từ chối (không đoán) khi thiếu căn cứ chi phí, thiếu giá mua, chưa có chi phí đã xác nhận, hòa vốn/lỗ, hoặc tổng tỷ lệ sai. **Đây là ước tính, không phải quyết toán.**
 - **Chưa làm:** quyết toán (tạm tính → kiểm tra → phê duyệt → thanh toán), hoàn vốn/chia lợi nhuận thực chi, chi phí muộn qua điều chỉnh, xử lý hòa vốn/lỗ được duyệt, Cần giao dịch bán (chặng 5).
 
+## 7h. Giữ xe và đặt cọc (chặng 5 — lát 1)
+
+- **Độc quyền theo xe:** một xe chỉ có **một giữ/cọc hiệu lực**, chặn ở database (unique index) — hai người bấm cùng lúc thì chỉ một người thắng, người đến sau nhận lỗi rõ ràng "xe vừa được người khác giữ/đặt cọc", không ghi đè.
+  Yêu cầu: xe đang ở trạng thái "đang bán"; xe ký gửi phải có hợp đồng ký gửi hiệu lực (luật của xe, mục 7e).
+- **Gắn với nhu cầu MUA còn mở của khách** (khách lấy từ nhu cầu). Sales chỉ giữ/cọc cho nhu cầu mình phụ trách; quản lý giữ/cọc thay được. Kế toán/kỹ thuật không giữ xe.
+- **Giữ xe** (có hạn): người giữ **nhập hạn, không có hạn mặc định**; hạn phải ở tương lai. Gia hạn: người phụ trách/quản lý, hạn mới phải sau hạn cũ; không gia hạn bản đã hết hạn. Nhả giữ: người phụ trách/quản lý, **bắt buộc lý do**.
+- **Hết hạn:** giữ xe quá hạn được **nhả lười** (không cần job nền): khi có người giữ/cọc xe đó, hoặc quản lý bấm "nhả mọi giữ xe hết hạn"; ghi lý do "Hết hạn giữ xe", không có người thực hiện (hệ thống).
+- **Đặt cọc:** có **số tiền cọc thỏa thuận** > 0 (chưa phải đã thu — tiền thực nhận/hoàn là chứng từ thu chi ở lát sau; cọc không phải lợi nhuận). Đặt cọc không "nhả": chỉ **quản lý hủy cọc, bắt buộc lý do** (vì liên quan tiền cọc đã nhận). Số tiền cọc, xe, khách, người phụ trách **không sửa** — hủy rồi lập lại.
+- **Chuyển giữ → cọc** trong một giao dịch (xe không bao giờ "trống" ở giữa); bản giữ thành "đã chuyển", giá chốt kế thừa.
+- **Trạng thái xe** (đang giữ / đã cọc / đang bán) do trigger đồng bộ theo giữ/cọc — không đặt tay. Mọi giữ/cọc ghi nhật ký hệ thống vào nhu cầu (không ghi số tiền); không xóa giữ/cọc.
+- **Quyền xem:** sales chỉ thấy giữ/cọc của mình; quản lý/kế toán thấy tất cả. Sales khác chỉ biết "xe đang được giữ/đã cọc" + người phụ trách + hạn giữ (không lộ khách, số tiền, giá chốt).
+- **Chưa làm:** báo giá có phiên bản, duyệt giảm giá, đơn bán nhiều xe, hợp đồng bán, thu chi (tiền cọc thực nhận/hoàn), thu cũ đổi mới, bàn giao, quyết toán; chưa tự đổi trạng thái nhu cầu sang "Đã cọc".
+
 ## 8. Chưa định nghĩa — sẽ bổ sung ở chặng tương ứng
 
 Hợp đồng mua, quyết toán chủ xe xe ký gửi (thu hộ, phần showroom, khấu trừ, còn phải trả; định nghĩa chính xác "giá bán" để tính phần trăm — giá ghi trên hợp đồng bán, đã/chưa trừ giảm giá, thuế, lệ phí), việc chi phí nào được trừ trước khi chia lợi nhuận, giữ/cọc xe đồng thời, thu cũ đổi mới đối trừ, hoa hồng, chỉ tiêu báo cáo.

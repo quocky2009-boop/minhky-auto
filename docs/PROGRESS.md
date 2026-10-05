@@ -10,7 +10,7 @@ Cập nhật: 05/10/2026 · Chặng hiện tại: **chặng 3 gần xong (còn g
 | 2 | Khách → nhu cầu → lọc → chăm sóc → ghép xe | **Có mã + test database + build.** Chưa kiểm tra trên trình duyệt với tài khoản thật |
 | 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Đang làm — lát 1, 2, 3 xong:** kho xe, vòng sở hữu theo VIN, nhập kho; thẩm định + duyệt mua; chi phí chuẩn bị xe (dự kiến / đã xác nhận / đã thanh toán). **Lát 4 (có mã + test, đã áp lên Supabase):** hợp đồng ký gửi. **Còn:** giao diện quản lý địa điểm/mẫu checklist, kỹ thuật viên tự nhập kết quả kiểm tra |
 | 4 | Vốn góp/vay, công thức, quyết toán | **Đang làm — lát 1 xong (có mã + test, đã áp lên Supabase):** bên góp vốn, điều khoản chia lợi nhuận theo xe có phiên bản, sổ vốn góp, cho vay tách riêng, ước tính chia. **Còn:** quyết toán (tạm tính → kiểm tra → phê duyệt → thanh toán), hoàn vốn/chia thực chi, chi phí muộn có điều chỉnh, xử lý hòa vốn/lỗ được duyệt — cần giao dịch bán (chặng 5) |
-| 5 | Bán, thu chi, thu cũ đổi mới, bàn giao | Chưa làm |
+| 5 | Bán, thu chi, thu cũ đổi mới, bàn giao | **Đang làm — lát 1 xong (có mã + test, chưa áp lên Supabase):** giữ xe/đặt cọc độc quyền. **Còn:** báo giá có phiên bản + duyệt giảm giá, đơn bán (nhiều xe, dòng chi tiết), hợp đồng bán, thu chi (tài khoản tiền, phiếu, phân bổ, công nợ), thu cũ đổi mới đối trừ, bàn giao/hồ sơ, quyết toán chia lợi nhuận và ký gửi |
 | 6 | Dashboard, báo cáo, hậu mãi, hoa hồng, nghiệm thu | Chưa làm |
 
 Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth → database. Vì chưa có project Supabase, chặng 1–2 hiện ở mức
@@ -45,8 +45,8 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 |---|---|
 | `npm run typecheck` | Không lỗi |
 | `npm run lint` | Không lỗi, không cảnh báo |
-| `npm test` | **104/104** unit test đạt (11 file) — chạy lại 05/10/2026 sau chặng 4 lát 1 |
-| `npm run test:db` | 01/10: 61/61. **05/10/2026: 88/90 đạt, 2 test cũ không chạy được do môi trường** (xem "Chưa xác minh") — test hợp đồng ký gửi, tệp xe và vốn góp đều đạt |
+| `npm test` | **110/110** unit test đạt (12 file) — chạy lại 05/10/2026 sau chặng 5 lát 1 |
+| `npm run test:db` | 01/10: 61/61. **05/10/2026: 100/102 đạt, 2 test cũ không chạy được do môi trường** (xem "Chưa xác minh") — test hợp đồng ký gửi, tệp xe, vốn góp và giữ/cọc đều đạt |
 | `npm run build` | Đạt (chạy lại 05/10/2026); 17 trang biên dịch |
 | `npm run typecheck`, `npm run lint` | Không lỗi (chạy lại 05/10/2026 sau lát 4) |
 | `next start` + curl | `/dang-nhap` trả 200 và có form; `/nhu-cau`, `/nhu-cau/moi`, `/tong-quan`, `/cai-dat/nguoi-dung` chuyển hướng về đăng nhập khi chưa đăng nhập |
@@ -59,7 +59,7 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 | 12.1 | Khách vừa mua vừa bán, không trùng khách | ✔ | `demands-rls` |
 | 12.2 | Lọc kết hợp; 600–700tr khớp 650tr; thiếu dữ liệu không giả phù hợp | ✔ | `search`, `matching`, `ui-flow` |
 | 12.3 | Nguồn chưa nhập không phải xe sẵn giao; lịch nhắc; trạng thái đóng | ✔ | `matching`, `ui-flow`, `demands-rls`, `search` |
-| 12.4 | Hai người giữ/cọc cùng xe | Chưa — chặng 5 | |
+| 12.4 | Hai người giữ/cọc cùng xe: chỉ một giao dịch thắng | ✔ test đồng thời thật ở database (giữ-giữ, giữ-cọc, cọc-cọc, 4 yêu cầu song song, chạy lặp 25 lần không lỗi); **mới chạy trên database test cục bộ, chưa áp lên Supabase** | `reservations` |
 | 12.5 | Ký gửi tách tồn, quyết toán khớp | ◐ đã tách hình thức sở hữu/ký gửi, ký gửi không có giá mua, chi phí ký gửi tách bên chịu và không tăng vốn tồn, lọc tồn riêng; hợp đồng ký gửi đã làm (lát 4; đã áp lên Supabase); quyết toán chưa làm (chặng 5) | `inventory`, `costs`, `consignment` |
 | 12.6 | P=40tr, c=20%, 60/40 → 8 / 19,2 / 12,8tr | ✔ ở thư viện | `profit-split` |
 | 12.7 | Công ty vừa góp vốn vừa vận hành không đếm trùng | ✔ ở thư viện và ở ước tính trên trang xe | `profit-split`, `capital` |
@@ -152,6 +152,16 @@ sales chưa xem được quyền giảm giá (D33); chưa có mục "Ký gửi" 
 **Đã sửa rủi ro:** tệp đính kèm *nhu cầu* (`demand-files`) trước đây tải qua Server Action; Vercel giới hạn thân yêu cầu ~4,5 MB nên ảnh/video lớn hơn có thể bị từ chối trên bản đang chạy dù cấu hình ghi 20 MB (chưa từng kiểm chứng trên Vercel).
 Nay tệp nhu cầu cũng tải thẳng lên Storage bằng URL ký (không đổi database/policy; bỏ cấu hình `bodySizeLimit`), 3 test unit mới (`tests/unit/attachments.test.ts`). **Chưa thử tải thật qua trình duyệt** (cần thử trên bản xem trước).
 
+## Chặng 5 — lát 1: giữ xe và đặt cọc độc quyền (05/10/2026)
+
+- **Độc quyền:** một xe một giữ/cọc hiệu lực (unique index); hai người cùng lúc → một người thắng, người kia nhận lỗi rõ ràng. Trạng thái xe (đang giữ/đã cọc/đang bán) do trigger đồng bộ — D45.
+- **Giữ xe** nhập hạn (không mặc định), gia hạn, nhả (lý do); hết hạn **nhả lười** (khi có người giữ/cọc hoặc quản lý bấm) — D46. **Đặt cọc** ghi số tiền thỏa thuận (chưa phải đã thu), chỉ quản lý hủy có lý do — D47. **Chuyển giữ → cọc** trong một giao dịch.
+- Gắn nhu cầu MUA của khách; sales chỉ giữ cho nhu cầu mình phụ trách và chỉ thấy bản của mình; sales khác chỉ thấy "xe đang bị giữ/cọc + người phụ trách + hạn" — D48. Nhật ký hệ thống ghi vào nhu cầu (không ghi số tiền). Xe ký gửi cần hợp đồng hiệu lực.
+- Khối "Giữ xe và đặt cọc" ở trang chi tiết xe (sales, quản lý; kế toán xem). Không xóa giữ/cọc.
+- Migration `20261001001400_vehicle_reservations.sql`: **mới áp lên database test cục bộ, CHƯA áp lên Supabase** (chờ anh Kỳ đồng ý).
+- Test: 12 test database (`tests/db/reservations.test.ts`: quyền và RLS, **độc quyền đồng thời thật**, gửi lặp song song, điều kiện giữ/cọc, nhả/gia hạn/hết hạn/chuyển/hủy cọc, tin tức tối thiểu cho sales khác, xe ký gửi) + 6 test unit (`tests/unit/reservations.test.ts`).
+- Giới hạn: chưa ghi nhận tiền cọc thực nhận/hoàn (thu chi), chưa đổi trạng thái nhu cầu (D49), chưa nhắc sales trước hạn giữ, chưa kiểm tra bằng trình duyệt thật.
+
 ## Chặng 4 — lát 1: vốn góp, điều khoản chia lợi nhuận, cho vay (05/10/2026)
 
 - **Bên góp vốn/cho vay** (mã GV…); **điều khoản chia lợi nhuận theo xe có phiên bản** (nháp → duyệt → thay thế; tỷ lệ công ty bắt buộc nhập, không mặc định; duyệt chỉ khi tổng chia đúng 100%; bản duyệt bất biến) — D38.
@@ -191,13 +201,14 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
   Data API/PostgREST từ ứng dụng (cú pháp `select` lồng bảng, tên khóa ngoại), Security Advisors mức Performance.
 - Chưa kiểm tra trên trình duyệt có đăng nhập (desktop + điện thoại). Test database dùng SQL trực tiếp, không qua PostgREST.
 - **Test database ngày 05/10/2026 chạy bằng vai trò `root`, không phải `postgres`:** 2 test cũ của `demands-rls` (§12.3 người phụ trách bắt buộc, §12.12 khóa tài khoản) phụ thuộc hàm `private.is_system()` chỉ nhận vai trò `postgres/service_role/supabase_admin`,
-  nên báo lỗi do môi trường (cùng 2 test này lỗi trên bản trước lát 4, trước khi có migration mới). Cần chạy lại `npm run test:db` bằng vai trò `postgres` (máy anh Kỳ hoặc CI) để xác nhận 90/90.
+  nên báo lỗi do môi trường (cùng 2 test này lỗi trên bản trước lát 4, trước khi có migration mới). Cần chạy lại `npm run test:db` bằng vai trò `postgres` (máy anh Kỳ hoặc CI) để xác nhận 102/102.
 - Chưa đo hiệu năng với dữ liệu lớn (bộ lọc dùng view + LIKE trên chuỗi chuẩn hóa; có chỉ mục trigram nhưng chưa đo).
 
 ## Trở ngại hiện tại (cần anh Kỳ)
 
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
+1h. **Áp migration `1400_vehicle_reservations.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (thêm bảng giữ/cọc, trigger đồng bộ trạng thái xe, hàm `public_reservation_info`). Các mục **Tạm** D46–D49.
 1f. ~~Áp migration 1300~~ — đã xong 05/10/2026. **Đã chốt D39/D41 (05/10/2026):** chi phí chung KHÔNG trừ trước khi chia (giữ quy tắc §7); lãi vay không tính, không trừ. Còn lại: hoa hồng bán xe có trừ trước khi chia không — để chặng 6.
 1g. **Bảo mật — 4 hàm `valuation_agent_*` (không do phiên này tạo, thuộc 3 migration `appraisal_ai_*`/`valuation_agent_*` ngoài repo) đang cho `anon` (chưa đăng nhập) gọi được** dù là SECURITY DEFINER và có ghi dữ liệu (`save_comparables`, `save_decision`, `save_new_car_evidence`, `fail_run`); có tham số `p_token` nên có thể đã tự kiểm tra token, nhưng chưa được rà. Cần chủ dự án xác nhận ai tạo, đưa mã vào repo và rà quyền (CLAUDE.md §11).
 1e. ~~Áp migration 1200~~ — đã xong 05/10/2026. Cần thử tải ảnh thật trên giao diện (Preview/production) rồi mới coi là nghiệm thu.

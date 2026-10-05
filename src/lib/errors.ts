@@ -17,6 +17,9 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
   vehicle_capital_shares_ratio_percent_check: "Tỷ lệ của mỗi bên góp vốn phải lớn hơn 0% và tối đa 100%.",
   vehicle_capital_shares_pkey: "Một bên góp vốn bị chọn trùng trong điều khoản.",
   vehicle_loan_payments_amount_check: "Số tiền thanh toán phải lớn hơn 0.",
+  vehicle_reservations_one_active: "Xe vừa được người khác giữ hoặc đặt cọc. Không thể giữ/cọc thêm.",
+  reservations_hold_shape: "Giữ xe phải có hạn giữ; đặt cọc phải có số tiền cọc (và không có cả hai kiểu cùng lúc).",
+  vehicle_reservations_deposit_amount_check: "Số tiền cọc phải lớn hơn 0.",
   consignment_one_open_per_vehicle: "Xe này đã có hợp đồng ký gửi đang soạn hoặc đang hiệu lực.",
 };
 
