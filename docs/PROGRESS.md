@@ -1,6 +1,6 @@
 # Tiến độ
 
-Cập nhật: 01/10/2026 · Chặng hiện tại: **chặng 3 — lát 1 (kho xe + nhập kho), lát 2 (thẩm định + duyệt mua), lát 3 (chi phí chuẩn bị xe) đã xong, đã áp lên Supabase** · Tiếp theo: lát 4 (hợp đồng ký gửi)
+Cập nhật: 05/10/2026 · Chặng hiện tại: **chặng 3 — lát 1–3 đã xong và đã áp lên Supabase; lát 4 (hợp đồng ký gửi) có mã + test, CHƯA áp lên Supabase** · Tiếp theo: áp migration 1100 sau khi anh Kỳ duyệt, rồi ảnh/tệp gắn với xe; quyết toán ký gửi ở chặng 5
 
 ## Tổng quan theo chặng (CLAUDE.md §14)
 
@@ -8,7 +8,7 @@ Cập nhật: 01/10/2026 · Chặng hiện tại: **chặng 3 — lát 1 (kho xe
 |---|---|---|
 | 1 | Nền tảng, Auth, schema, quyền, Storage | **Có mã + test database.** Chưa chạy trên Supabase thật |
 | 2 | Khách → nhu cầu → lọc → chăm sóc → ghép xe | **Có mã + test database + build.** Chưa kiểm tra trên trình duyệt với tài khoản thật |
-| 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Đang làm — lát 1, 2, 3 xong:** kho xe, vòng sở hữu theo VIN, nhập kho; thẩm định + duyệt mua; chi phí chuẩn bị xe (dự kiến / đã xác nhận / đã thanh toán). **Còn:** hợp đồng ký gửi, ảnh/tệp gắn với xe, giao diện quản lý địa điểm/mẫu checklist, kỹ thuật viên tự nhập kết quả kiểm tra |
+| 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Đang làm — lát 1, 2, 3 xong:** kho xe, vòng sở hữu theo VIN, nhập kho; thẩm định + duyệt mua; chi phí chuẩn bị xe (dự kiến / đã xác nhận / đã thanh toán). **Lát 4 (có mã + test, chưa áp lên Supabase):** hợp đồng ký gửi. **Còn:** ảnh/tệp gắn với xe, giao diện quản lý địa điểm/mẫu checklist, kỹ thuật viên tự nhập kết quả kiểm tra |
 | 4 | Vốn góp/vay, công thức, quyết toán | Chưa làm (đã có thư viện công thức + unit test) |
 | 5 | Bán, thu chi, thu cũ đổi mới, bàn giao | Chưa làm |
 | 6 | Dashboard, báo cáo, hậu mãi, hoa hồng, nghiệm thu | Chưa làm |
@@ -45,9 +45,10 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 |---|---|
 | `npm run typecheck` | Không lỗi |
 | `npm run lint` | Không lỗi, không cảnh báo |
-| `npm test` | **56/56** unit test đạt (7 file) |
-| `npm run test:db` | **61/61** test đạt trên PostgreSQL 16 thật + lớp giả lập auth/storage (6 file) |
-| `npm run build` | Đạt; 17 trang biên dịch (có 4 route kho xe) |
+| `npm test` | **77/77** unit test đạt (8 file) — chạy lại 05/10/2026 |
+| `npm run test:db` | 01/10: 61/61. **05/10/2026: 73/75 đạt, 2 test cũ không chạy được do môi trường** (xem "Chưa xác minh") — 14 test mới của hợp đồng ký gửi đều đạt |
+| `npm run build` | Đạt (chạy lại 05/10/2026); 17 trang biên dịch |
+| `npm run typecheck`, `npm run lint` | Không lỗi (chạy lại 05/10/2026 sau lát 4) |
 | `next start` + curl | `/dang-nhap` trả 200 và có form; `/nhu-cau`, `/nhu-cau/moi`, `/tong-quan`, `/cai-dat/nguoi-dung` chuyển hướng về đăng nhập khi chưa đăng nhập |
 | `supabase/bootstrap/first_admin.sql`, `supabase/seed/demo_staging.sql` | Chạy đúng trên database test; seed tự chặn khi thiếu cờ an toàn và khi chạy lần hai |
 
@@ -59,7 +60,7 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 | 12.2 | Lọc kết hợp; 600–700tr khớp 650tr; thiếu dữ liệu không giả phù hợp | ✔ | `search`, `matching`, `ui-flow` |
 | 12.3 | Nguồn chưa nhập không phải xe sẵn giao; lịch nhắc; trạng thái đóng | ✔ | `matching`, `ui-flow`, `demands-rls`, `search` |
 | 12.4 | Hai người giữ/cọc cùng xe | Chưa — chặng 5 | |
-| 12.5 | Ký gửi tách tồn, quyết toán khớp | ◐ đã tách hình thức sở hữu/ký gửi, ký gửi không có giá mua, chi phí ký gửi tách bên chịu và không tăng vốn tồn, lọc tồn riêng; hợp đồng + quyết toán chưa làm | `inventory`, `costs` |
+| 12.5 | Ký gửi tách tồn, quyết toán khớp | ◐ đã tách hình thức sở hữu/ký gửi, ký gửi không có giá mua, chi phí ký gửi tách bên chịu và không tăng vốn tồn, lọc tồn riêng; hợp đồng ký gửi đã làm (lát 4; chưa áp lên Supabase); quyết toán chưa làm (chặng 5) | `inventory`, `costs`, `consignment` |
 | 12.6 | P=40tr, c=20%, 60/40 → 8 / 19,2 / 12,8tr | ✔ ở thư viện | `profit-split` |
 | 12.7 | Công ty vừa góp vốn vừa vận hành không đếm trùng | ✔ ở thư viện | `profit-split` |
 | 12.8 | Thiếu điều khoản/lỗ không quyết toán; làm tròn khớp tổng | ◐ thư viện xong; "tỷ lệ xe không đổi theo cấu hình chung" cần bảng điều khoản (chặng 4) | `profit-split` |
@@ -113,6 +114,25 @@ chưa có giao diện sửa mẫu checklist (sửa qua SQL bảng `appraisal_tem
 **Giới hạn của lát 3:** chưa có tạm ứng trước khi nghiệm thu (D26); chưa có bước chủ xe duyệt từng khoản của xe ký gửi (làm cùng hợp đồng ký gửi);
 chưa có tệp/hóa đơn đính kèm cho từng khoản (hiện ghi số chứng từ vào ô "chứng từ / số tham chiếu"); chưa đưa chi phí vào báo cáo lợi nhuận (chặng 4–6).
 
+## Chặng 3 — lát 4: hợp đồng ký gửi (05/10/2026)
+
+Anh Kỳ chốt: phí = **số tiền cố định hoặc phần trăm trên giá bán** (D30); chi phí phát sinh xe ký gửi **không cần chủ xe duyệt** (D31).
+
+- **Hợp đồng theo xe** (mã KG…): chủ xe/ủy quyền, thời hạn, biên bản nhận xe, trạng thái Đang soạn → Đang hiệu lực → Đã trả xe / Đã hủy. Mỗi xe một hợp đồng đang soạn/hiệu lực.
+- **Thỏa thuận có phiên bản, bất biến:** giá chủ muốn nhận, giá chào, quyền giảm giá (không/tiền/%), phí (cố định hoặc % giá bán, không mặc định), bên ký hợp đồng bán và bên thu tiền.
+  Chỉ phiên bản đã có ngày chủ xe ký mới có hiệu lực. Hiển thị ước tính "nếu bán đúng giá chào: phí / chủ xe nhận" kèm cảnh báo nếu thấp hơn số chủ xe muốn nhận.
+- **Kích hoạt** cần thỏa thuận đã ký + điện thoại chủ xe + thời hạn + biên bản nhận xe đủ (0 chìa khóa là số thật); giao diện liệt kê rõ phần còn thiếu. Kích hoạt chốt biên bản nhận.
+- **Xe ký gửi chỉ chào bán khi có hợp đồng hiệu lực** — database chặn kể cả sửa trực tiếp. **Trả xe chỉ qua biên bản trả xe** (ngày, lý do, tình trạng, chìa khóa, giấy tờ): chặn khi xe đang giữ/cọc/bán, còn chi phí dự kiến chưa xử lý,
+  hoặc còn chi phí chủ xe chịu chưa thanh toán mà chưa ghi cách xử lý; ảnh chụp chi phí chủ xe chịu do database tính.
+- **Quyền:** quản lý/admin ghi; kế toán đọc; sales/kỹ thuật không thấy hợp đồng. Nhật ký kiểm toán không lưu điện thoại/số giấy tờ/ủy quyền của chủ xe.
+- **Test:** 14 test database (`tests/db/consignment.test.ts`: phân quyền gồm sửa/trả bằng ID trực tiếp và anon, bấm lặp song song, phiên bản thỏa thuận và đánh số khi hai người cùng thêm, không sửa/xóa thỏa thuận,
+  điều kiện kích hoạt, chặn chào bán khi chưa có hợp đồng, luồng trả xe, hàm tính phí, nhật ký không lộ PII) + 21 test unit (`tests/unit/consignment.test.ts`).
+  Test cũ `inventory` "xe ký gửi trả chủ" được cập nhật theo luật mới (không đặt trạng thái trả chủ trực tiếp).
+- Migration `20261001001100_consignment_contracts.sql`: **mới áp lên database test cục bộ, CHƯA áp lên Supabase `minhky-auto`** (chờ anh Kỳ đồng ý áp lên project đang chạy thật).
+
+**Giới hạn của lát 4:** chưa có quyết toán ký gửi (thu hộ, phần showroom, khấu trừ, còn phải trả chủ xe) — cần giao dịch bán (chặng 5); chưa có tệp scan hợp đồng/biên bản (chưa có Storage cho xe, ghi số hợp đồng giấy vào ô tham chiếu);
+sales chưa xem được quyền giảm giá (D33); chưa có mục "Ký gửi" riêng trên menu (làm trong trang chi tiết xe); chưa kiểm tra bằng trình duyệt thật.
+
 ## Kiểm tra trên Supabase thật — project `minhky-auto` (01/10/2026)
 
 Đã xác minh đúng project (tổ chức "Minh Kỳ Auto", ap-southeast-1, ban đầu hoàn toàn trống) trước khi áp.
@@ -136,11 +156,15 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 - Database đã chạy trên Supabase thật (bảng trên). **Chưa kiểm tra:** hành vi Auth (mời, đặt mật khẩu, getClaims), Storage thật (tải lên, signed URL),
   Data API/PostgREST từ ứng dụng (cú pháp `select` lồng bảng, tên khóa ngoại), Security Advisors mức Performance.
 - Chưa kiểm tra trên trình duyệt có đăng nhập (desktop + điện thoại). Test database dùng SQL trực tiếp, không qua PostgREST.
+- **Test database ngày 05/10/2026 chạy bằng vai trò `root`, không phải `postgres`:** 2 test cũ của `demands-rls` (§12.3 người phụ trách bắt buộc, §12.12 khóa tài khoản) phụ thuộc hàm `private.is_system()` chỉ nhận vai trò `postgres/service_role/supabase_admin`,
+  nên báo lỗi do môi trường (cùng 2 test này lỗi trên bản trước lát 4, trước khi có migration mới). Cần chạy lại `npm run test:db` bằng vai trò `postgres` (máy anh Kỳ hoặc CI) để xác nhận 75/75.
 - Chưa đo hiệu năng với dữ liệu lớn (bộ lọc dùng view + LIKE trên chuỗi chuẩn hóa; có chỉ mục trigram nhưng chưa đo).
 
 ## Trở ngại hiện tại (cần anh Kỳ)
 
-1. Push các commit mới lên `quocky2009-boop/minhky-auto` — môi trường làm việc không có quyền ghi GitHub (GitHub đang ở commit `cd3088a`, thiếu chặng 3 lát 1–2).
+1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
+1b. **Áp migration `1100_consignment_contracts.sql` lên Supabase `minhky-auto`?** (project đang chạy thật, chưa có dữ liệu thật) — cần anh Kỳ đồng ý; sau khi áp sẽ kiểm tra RLS/advisor như các lát trước.
+1c. Xác nhận định nghĩa "giá bán" để tính phí % (D30) và các mục **Tạm** D32, D33, D35.
 2. Admin đầu tiên đã được gán (01/10/2026). Cần xác nhận đăng nhập thực tế trên `minhky-auto.vercel.app` và cấu hình Site URL/Redirect URL trong Supabase Auth.
 3. Xác nhận các tham số tạm D7, D8, D9, D11, D12 (xem `DECISIONS.md`).
 4. Dự án đang để gói Free; nâng gói Pro của tổ chức "Minh Kỳ Auto" trước khi nhập khách thật (để có sao lưu).
@@ -150,5 +174,5 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 0. Chuyển sang làm việc bằng Claude Code trên máy anh Kỳ để tự commit/push (hướng dẫn: `docs/CLAUDE_CODE.md`).
 
 1. Bootstrap admin → đăng nhập app → kiểm tra theo `DEPLOYMENT.md` §5 trên máy tính và điện thoại; sửa lỗi tích hợp nếu có. (Project hiện là bản duy nhất: không nạp dữ liệu demo vào đây nếu sắp dùng thật.)
-2. Chặng 3: nhập xe (mới/cũ/ký gửi), hồ sơ thu mua + thẩm định (tách thông tin khách khai với kết quả kiểm tra), chuyển nhu cầu bán → xe trong kho
-   (`converted_vehicle_id`), chi phí chuẩn bị xe, hợp đồng ký gửi, giao diện quản lý danh mục.
+2. Chặng 3 còn lại: ảnh/video/tệp gắn với xe (kể cả scan hợp đồng ký gửi), giao diện quản lý danh mục/địa điểm/mẫu checklist, kỹ thuật viên nhập kết quả kiểm tra.
+3. Chặng 4 (vốn góp/vay, quyết toán) rồi chặng 5 (bán, thu chi, quyết toán ký gửi).

@@ -4,8 +4,8 @@ Quản lý khách, nhu cầu mua/bán xe, kho xe, ký gửi, góp vốn theo xe,
 Đặc tả gốc: [`CLAUDE.md`](CLAUDE.md). Tiến độ hiện tại: [`docs/PROGRESS.md`](docs/PROGRESS.md).
 **Làm việc với Claude Code** (cài đặt, bàn giao bối cảnh, quy tắc an toàn khi tự chủ push/migrate): [`docs/CLAUDE_CODE.md`](docs/CLAUDE_CODE.md).
 
-**Trạng thái (01/10/2026):** chặng 1–2 và chặng 3 (lát 1–3: kho xe, thẩm định + duyệt mua, chi phí chuẩn bị xe) đã có mã, test và đã áp lên Supabase `minhky-auto`; app chạy trên Vercel.
-Còn lại: hợp đồng ký gửi (chặng 3), chặng 4–6. Menu của phân hệ chưa làm hiện mờ, không có nút giả. Chi tiết: `docs/PROGRESS.md`.
+**Trạng thái (05/10/2026):** chặng 1–2 và chặng 3 (lát 1–3: kho xe, thẩm định + duyệt mua, chi phí chuẩn bị xe) đã có mã, test và đã áp lên Supabase `minhky-auto`; app chạy trên Vercel.
+Lát 4 (hợp đồng ký gửi) có mã và test nhưng migration chưa áp lên Supabase. Còn lại: ảnh/tệp gắn với xe (chặng 3), chặng 4–6. Menu của phân hệ chưa làm hiện mờ, không có nút giả. Chi tiết: `docs/PROGRESS.md`.
 
 ## Công nghệ
 

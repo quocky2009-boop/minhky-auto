@@ -75,14 +75,12 @@ Xem `.env.example`. Giá trị công khai (an toàn để biết): `NEXT_PUBLIC_
 
 ## 9. Trạng thái bàn giao (01/10/2026)
 
-- **Đã xong:** chặng 1–2 (nền tảng, khách, nhu cầu mua/bán, lọc, nhắc việc, ghép xe); chặng 3 lát 1 (kho xe, vòng sở hữu theo VIN, nhập kho từ nhu cầu bán), lát 2 (thẩm định có checklist + duyệt mua, không ngưỡng giá), lát 3 (chi phí chuẩn bị xe: dự kiến / đã xác nhận / đã thanh toán).
+- **Đã xong:** chặng 1–2 (nền tảng, khách, nhu cầu mua/bán, lọc, nhắc việc, ghép xe); chặng 3 lát 1 (kho xe, vòng sở hữu theo VIN, nhập kho từ nhu cầu bán), lát 2 (thẩm định có checklist + duyệt mua, không ngưỡng giá), lát 3 (chi phí chuẩn bị xe: dự kiến / đã xác nhận / đã thanh toán); lát 4 (hợp đồng ký gửi — có mã + test ngày 05/10/2026, **chưa áp migration 1100 lên Supabase**).
 - **Đã triển khai:** Supabase `minhky-auto` (đã áp migrations 0100–1000), Vercel `minhky-auto.vercel.app`, admin: tài khoản chủ.
-- **Kiểm tra gần nhất:** `npm test` 56/56, `npm run test:db` 61/61, typecheck/lint/build sạch.
-- **Việc tiếp theo:** chặng 3 lát 4 — **hợp đồng ký gửi** (xem `docs/BUSINESS_RULES.md`, CLAUDE.md §6). **Đang chờ anh Kỳ trả lời trước khi làm:**
-  1. Showroom hưởng phí ký gửi theo cách nào (cố định / phần trăm / chênh lệch)?
-  2. Khoản chi phí nào của xe ký gửi bắt buộc chủ xe đồng ý (có ngưỡng số tiền không)?
-  Sau đó: chặng 4 (vốn góp/vay, công thức chia lợi nhuận — thư viện `src/lib/profit-split.ts` đã có, chưa có bảng điều khoản).
-- **Quyết định tạm chờ xác nhận:** xem `docs/DECISIONS.md` các mục ghi "Tạm" (D7, D8, D9, D11, D12, D20 phần người duyệt, D22, D24, D26, D27).
+- **Kiểm tra gần nhất (05/10/2026):** `npm test` 77/77, typecheck/lint/build sạch; `npm run test:db` 73/75 (2 test cũ cần chạy bằng vai trò `postgres` — xem PROGRESS "Chưa xác minh"); lần 01/10 là 61/61.
+- **Việc tiếp theo:** (1) anh Kỳ xem lát 4 rồi quyết định áp migration `1100` lên Supabase; (2) chặng 3 còn: ảnh/tệp gắn với xe, giao diện quản lý danh mục; (3) chặng 4 (vốn góp/vay, công thức chia lợi nhuận — thư viện `src/lib/profit-split.ts` đã có, chưa có bảng điều khoản).
+  Đã chốt 05/10/2026: phí ký gửi = số tiền cố định hoặc % trên giá bán (D30); chi phí phát sinh xe ký gửi không cần chủ xe duyệt (D31). **Chờ anh Kỳ:** định nghĩa "giá bán" để tính % phí (đã/chưa trừ giảm giá, thuế, lệ phí).
+- **Quyết định tạm chờ xác nhận:** xem `docs/DECISIONS.md` các mục ghi "Tạm" (D7, D8, D9, D11, D12, D20 phần người duyệt, D22, D24, D26, D27, D32 phần điều kiện kích hoạt, D33, D35).
 - **Ghi chú vận hành:** Vercel Hobby (miễn phí) không dùng cho mục đích thương mại; khi nhập khách thật cần Vercel Pro và Supabase Pro (sao lưu). Repo đang công khai (đã rà không lộ bí mật).
 
 ## 10. Câu mở đầu mẫu cho phiên Claude Code đầu tiên

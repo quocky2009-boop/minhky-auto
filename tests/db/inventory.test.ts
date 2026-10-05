@@ -116,12 +116,13 @@ d("Kho xe — chặng 3 lát 1 (database thật)", () => {
     expect(hist.map((h) => h.depth)).toEqual([0, 1]);
   });
 
-  it("Xe ký gửi chỉ được trả chủ khi là xe ký gửi", async () => {
+  it("Chỉ xe ký gửi mới trả chủ xe, và phải qua biên bản trả xe", async () => {
     const own = await createVehicle(manager, { make: "Honda", model: "City", condition: "used", business_type: "owned" });
     await expect(updateVehicle(manager, own, await version(own), { sale_status: "returned_to_owner" })).rejects.toThrow(/Chỉ xe ký gửi mới trả lại chủ xe/);
     const cons = await createVehicle(manager, { make: "Honda", model: "Civic", condition: "used", business_type: "consignment", source_type: "individual" });
-    await updateVehicle(manager, cons, await version(cons), { sale_status: "returned_to_owner" });
-    expect((await sys.query("select sale_status from public.vehicles where id = $1", [cons])).rows[0].sale_status).toBe("returned_to_owner");
+    // Từ lát 4: xe ký gửi chỉ trả chủ qua biên bản trả xe trong hợp đồng ký gửi (xem consignment.test.ts), không đặt trạng thái trực tiếp.
+    await expect(updateVehicle(manager, cons, await version(cons), { sale_status: "returned_to_owner" })).rejects.toThrow(/phải lập biên bản trả xe/);
+    expect((await sys.query("select sale_status from public.vehicles where id = $1", [cons])).rows[0].sale_status).toBe("not_listed");
   });
 
   describe("Nhập kho từ nhu cầu bán", () => {

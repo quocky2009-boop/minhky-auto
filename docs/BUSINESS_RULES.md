@@ -93,7 +93,7 @@ Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c 
   Đặt tay qua form chỉ có "Chưa chào bán" và "Đang bán".
 - Không đổi được hình thức sở hữu ↔ ký gửi sau khi nhập (tạo hồ sơ mới).
 - **Giá:** giá chào (sales được xem) · giá mua và giá sàn (chỉ quản lý/kế toán) nằm ở bảng riêng. Giá sàn không được cao hơn giá chào khi cùng nhập.
-  Xe mua đứt bắt buộc có giá mua khi nhập kho; xe ký gửi **không có** giá mua (giá chủ xe muốn nhận thuộc hợp đồng ký gửi — chưa làm).
+  Xe mua đứt bắt buộc có giá mua khi nhập kho; xe ký gửi **không có** giá mua (giá chủ xe muốn nhận thuộc hợp đồng ký gửi — xem 7e).
 - **Tuổi tồn** = số ngày từ ngày nhập kho (giờ Việt Nam). Chưa có ngày nhập → hiện "Chưa rõ", không coi là 0.
 - **Nhập kho từ nhu cầu bán:** quản lý, khi nhu cầu ở "Đã thẩm định"/"Thương lượng". Giá trị showroom đã kiểm tra ghi đè thông tin khách khai; thông tin khách khai giữ nguyên.
   Một nhu cầu chỉ sinh được một xe. Nguồn xe ghi "Thu cũ đổi mới" nếu khách chọn hình thức đổi xe, ngược lại "Cá nhân".
@@ -119,9 +119,31 @@ Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c 
 - Người xác nhận / người chi / người hủy do **database tự điền** bằng người đang đăng nhập, không giả mạo được.
 - **Đơn vị thực hiện** ghi tự do (ví dụ gara nội bộ, spa, bên ngoài). **Dự toán để trống = "chưa rõ"**; tổng hợp đếm riêng số khoản chưa có dự toán.
 - **Xe showroom sở hữu:** showroom chịu; chi phí đã xác nhận tính vào giá vốn xe.
-  **Xe ký gửi:** bắt buộc chọn bên chịu (showroom hoặc chủ xe); không làm tăng giá trị vốn tồn kho sở hữu; phần chủ xe chịu tách riêng. Bước chủ xe duyệt từng khoản làm cùng hợp đồng ký gửi.
+  **Xe ký gửi:** bắt buộc chọn bên chịu (showroom hoặc chủ xe); không làm tăng giá trị vốn tồn kho sở hữu; phần chủ xe chịu tách riêng. **Chi phí phát sinh của xe ký gửi không cần chủ xe duyệt** (anh Kỳ chốt 05/10/2026).
 - Chỉ quản lý/kế toán xem chi phí; sales và kỹ thuật không thấy.
+
+## 7e. Hợp đồng ký gửi (chặng 3 — lát 4)
+
+- **Một hợp đồng cho một xe (một vòng ký gửi).** Một xe chỉ có một hợp đồng đang soạn/hiệu lực; hợp đồng đã trả/hủy không chặn lập lại khi xe chưa kết thúc vòng.
+  Xe đã bán/bàn giao/trả chủ thì không lập hợp đồng mới; xe quay lại showroom nhập thành hồ sơ xe mới (mục 7b).
+- **Vòng đời:** Đang soạn → Đang hiệu lực → Đã trả xe; hoặc Đang soạn → Đã hủy (cần lý do). Hợp đồng đã hiệu lực không hủy: kết thúc bằng biên bản trả xe. Không xóa hồ sơ.
+- **Chủ xe / ủy quyền:** họ tên (bắt buộc), điện thoại, số giấy tờ; nếu người ký gửi là người được ủy quyền thì bắt buộc ghi thông tin ủy quyền.
+- **Thỏa thuận có phiên bản, không sửa:** mỗi phiên bản gồm giá chủ xe muốn nhận (thực nhận), giá chào, quyền giảm giá, phí ký gửi, bên ký hợp đồng mua bán với người mua, bên thu tiền, điều khoản khác.
+  Thay đổi = thêm phiên bản mới. Chỉ **phiên bản đã có ngày chủ xe ký** mới có hiệu lực; hiệu lực = phiên bản đã ký mới nhất. Bản chưa ký chỉ là đề xuất.
+- **Phí ký gửi showroom hưởng (anh Kỳ chốt 05/10/2026):** **số tiền cố định** HOẶC **phần trăm trên giá bán** — chọn riêng từng xe, **không có mặc định** (mức 2–4% chỉ là ví dụ thường gặp, không tự áp).
+  Phần trăm có tối đa 4 chữ số thập phân, từ 0 đến 100; làm tròn nửa lên đến 1 VND (hàm `private.consignment_fee`). Không chọn "chênh lệch" ở bản này.
+- **Quyền giảm giá** (showroom giảm mà không cần hỏi chủ xe): không được giảm / tối đa một số tiền / tối đa một tỷ lệ % giá chào. Việc duyệt giảm giá khi bán thuộc chặng 5.
+- **Điều kiện kích hoạt:** có thỏa thuận đã ký; điện thoại chủ xe; thời hạn (từ–đến); biên bản nhận xe (ngày nhận, số chìa khóa — 0 là số thật, giấy tờ nhận, tình trạng khi nhận).
+  Kích hoạt chốt biên bản nhận xe và ngày bắt đầu (không sửa nữa); vẫn gia hạn ngày kết thúc và sửa thông tin liên hệ được (có nhật ký).
+- **Xe ký gửi chỉ được chào bán/giữ/cọc/bán khi có hợp đồng đang hiệu lực** (database chặn kể cả khi sửa trực tiếp). Xe sở hữu không bị ảnh hưởng.
+- **Trả/rút xe:** biên bản bắt buộc có ngày, lý do, tình trạng khi trả, số chìa khóa và giấy tờ trả lại. Chỉ trả khi xe chưa giữ/cọc/bán. Không còn khoản chi phí "dự kiến" chưa xác nhận/hủy.
+  Chi phí chủ xe chịu đã xác nhận mà chưa thanh toán → bắt buộc ghi cách xử lý (chủ xe hoàn trả, trừ vào đâu…). Ảnh chụp "chủ xe chịu đã xác nhận / còn chưa thanh toán" do database tính lúc trả, không tin dữ liệu gửi lên.
+  Trả xe chuyển xe sang "Đã trả chủ xe" (hết vòng, không mở lại); trạng thái này chỉ đặt được qua biên bản trả xe.
+- **Tách tiền (§6):** hợp đồng chỉ ghi điều khoản. Tiền thu hộ, phần showroom hưởng, khoản khấu trừ, đã trả và còn phải trả chủ xe làm ở quyết toán (chặng 5, cần giao dịch bán).
+  Màn hình chỉ có **ước tính** "nếu bán đúng giá chào thì phí = …, chủ xe nhận = …" kèm cảnh báo khi thấp hơn số chủ xe muốn nhận; đây không phải quyết toán.
+- Xe ký gửi không tăng giá trị vốn tồn kho sở hữu (không giá mua; chi phí tách bên chịu — mục 7d).
+- Chỉ quản lý/admin ghi; kế toán đọc; sales và kỹ thuật không thấy (có định danh chủ xe và điều khoản tiền). Nhật ký kiểm toán của hợp đồng không lưu điện thoại/số giấy tờ/ghi chú ủy quyền của chủ xe.
 
 ## 8. Chưa định nghĩa — sẽ bổ sung ở chặng tương ứng
 
-Hợp đồng mua, ký gửi (phí, quyết toán chủ xe), việc chi phí nào được trừ trước khi chia lợi nhuận, giữ/cọc xe đồng thời, thu cũ đổi mới đối trừ, hoa hồng, chỉ tiêu báo cáo.
+Hợp đồng mua, quyết toán chủ xe xe ký gửi (thu hộ, phần showroom, khấu trừ, còn phải trả; định nghĩa chính xác "giá bán" để tính phần trăm — giá ghi trên hợp đồng bán, đã/chưa trừ giảm giá, thuế, lệ phí), việc chi phí nào được trừ trước khi chia lợi nhuận, giữ/cọc xe đồng thời, thu cũ đổi mới đối trừ, hoa hồng, chỉ tiêu báo cáo.

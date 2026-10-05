@@ -8,6 +8,12 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
   demands_year_range: "Năm bắt đầu không được lớn hơn năm kết thúc.",
   demands_status_valid: "Trạng thái không hợp lệ với loại nhu cầu.",
   vehicles_vin_key: "Số VIN này đã có trong hệ thống.",
+  consignment_dates_order: "Ngày kết thúc ký gửi không được trước ngày bắt đầu.",
+  consignment_proxy_note: "Khai là người được ủy quyền thì phải ghi thông tin ủy quyền.",
+  consignment_terms_fee_shape: "Phí ký gửi: chọn số tiền cố định HOẶC phần trăm trên giá bán, và nhập đúng một loại.",
+  consignment_terms_discount_shape: "Quyền giảm giá: nhập đúng giá trị của loại đã chọn.",
+  consignment_terms_fee_percent_check: "Tỷ lệ phí ký gửi phải từ 0 đến 100%.",
+  consignment_one_open_per_vehicle: "Xe này đã có hợp đồng ký gửi đang soạn hoặc đang hiệu lực.",
 };
 
 export function friendlyError(err: unknown): string {

@@ -46,7 +46,7 @@ export function CostsPanel({ vehicleId, businessType, costs, summary, manager, a
       <p className="text-xs text-ink-soft">
         Ba con số tách riêng, không cộng dồn: <b>dự kiến</b> là kế hoạch, <b>đã xác nhận</b> là số thực tế đã nghiệm thu, <b>đã thanh toán</b> là tiền đã chi. Khoản đã xác nhận không còn tính vào “dự kiến”.
         {consignment
-          ? " Xe ký gửi: chi phí không làm tăng giá vốn tồn kho của showroom; phần chủ xe chịu được tách riêng."
+          ? " Xe ký gửi: chi phí không làm tăng giá vốn tồn kho của showroom; phần chủ xe chịu được tách riêng. Chi phí phát sinh không cần chủ xe duyệt."
           : confirmedShowroom !== null && ` Chi phí đã xác nhận (${formatVnd(confirmedShowroom)}) được tính vào giá vốn xe.`}
       </p>
 
