@@ -1,6 +1,6 @@
 # Tiến độ
 
-Cập nhật: 05/10/2026 · Chặng hiện tại: **chặng 3 — lát 1–3 đã xong và đã áp lên Supabase; lát 4 (hợp đồng ký gửi) có mã + test, CHƯA áp lên Supabase** · Tiếp theo: áp migration 1100 sau khi anh Kỳ duyệt, rồi ảnh/tệp gắn với xe; quyết toán ký gửi ở chặng 5
+Cập nhật: 05/10/2026 · Chặng hiện tại: **chặng 3 — lát 1–3 đã xong và đã áp lên Supabase; lát 4 (hợp đồng ký gửi) có mã + test, đã áp lên Supabase 05/10/2026** · Tiếp theo: ảnh/tệp gắn với xe; quyết toán ký gửi ở chặng 5
 
 ## Tổng quan theo chặng (CLAUDE.md §14)
 
@@ -8,7 +8,7 @@ Cập nhật: 05/10/2026 · Chặng hiện tại: **chặng 3 — lát 1–3 đ�
 |---|---|---|
 | 1 | Nền tảng, Auth, schema, quyền, Storage | **Có mã + test database.** Chưa chạy trên Supabase thật |
 | 2 | Khách → nhu cầu → lọc → chăm sóc → ghép xe | **Có mã + test database + build.** Chưa kiểm tra trên trình duyệt với tài khoản thật |
-| 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Đang làm — lát 1, 2, 3 xong:** kho xe, vòng sở hữu theo VIN, nhập kho; thẩm định + duyệt mua; chi phí chuẩn bị xe (dự kiến / đã xác nhận / đã thanh toán). **Lát 4 (có mã + test, chưa áp lên Supabase):** hợp đồng ký gửi. **Còn:** ảnh/tệp gắn với xe, giao diện quản lý địa điểm/mẫu checklist, kỹ thuật viên tự nhập kết quả kiểm tra |
+| 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Đang làm — lát 1, 2, 3 xong:** kho xe, vòng sở hữu theo VIN, nhập kho; thẩm định + duyệt mua; chi phí chuẩn bị xe (dự kiến / đã xác nhận / đã thanh toán). **Lát 4 (có mã + test, đã áp lên Supabase):** hợp đồng ký gửi. **Còn:** ảnh/tệp gắn với xe, giao diện quản lý địa điểm/mẫu checklist, kỹ thuật viên tự nhập kết quả kiểm tra |
 | 4 | Vốn góp/vay, công thức, quyết toán | Chưa làm (đã có thư viện công thức + unit test) |
 | 5 | Bán, thu chi, thu cũ đổi mới, bàn giao | Chưa làm |
 | 6 | Dashboard, báo cáo, hậu mãi, hoa hồng, nghiệm thu | Chưa làm |
@@ -60,7 +60,7 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 | 12.2 | Lọc kết hợp; 600–700tr khớp 650tr; thiếu dữ liệu không giả phù hợp | ✔ | `search`, `matching`, `ui-flow` |
 | 12.3 | Nguồn chưa nhập không phải xe sẵn giao; lịch nhắc; trạng thái đóng | ✔ | `matching`, `ui-flow`, `demands-rls`, `search` |
 | 12.4 | Hai người giữ/cọc cùng xe | Chưa — chặng 5 | |
-| 12.5 | Ký gửi tách tồn, quyết toán khớp | ◐ đã tách hình thức sở hữu/ký gửi, ký gửi không có giá mua, chi phí ký gửi tách bên chịu và không tăng vốn tồn, lọc tồn riêng; hợp đồng ký gửi đã làm (lát 4; chưa áp lên Supabase); quyết toán chưa làm (chặng 5) | `inventory`, `costs`, `consignment` |
+| 12.5 | Ký gửi tách tồn, quyết toán khớp | ◐ đã tách hình thức sở hữu/ký gửi, ký gửi không có giá mua, chi phí ký gửi tách bên chịu và không tăng vốn tồn, lọc tồn riêng; hợp đồng ký gửi đã làm (lát 4; đã áp lên Supabase); quyết toán chưa làm (chặng 5) | `inventory`, `costs`, `consignment` |
 | 12.6 | P=40tr, c=20%, 60/40 → 8 / 19,2 / 12,8tr | ✔ ở thư viện | `profit-split` |
 | 12.7 | Công ty vừa góp vốn vừa vận hành không đếm trùng | ✔ ở thư viện | `profit-split` |
 | 12.8 | Thiếu điều khoản/lỗ không quyết toán; làm tròn khớp tổng | ◐ thư viện xong; "tỷ lệ xe không đổi theo cấu hình chung" cần bảng điều khoản (chặng 4) | `profit-split` |
@@ -128,7 +128,11 @@ Anh Kỳ chốt: phí = **số tiền cố định hoặc phần trăm trên gi�
 - **Test:** 14 test database (`tests/db/consignment.test.ts`: phân quyền gồm sửa/trả bằng ID trực tiếp và anon, bấm lặp song song, phiên bản thỏa thuận và đánh số khi hai người cùng thêm, không sửa/xóa thỏa thuận,
   điều kiện kích hoạt, chặn chào bán khi chưa có hợp đồng, luồng trả xe, hàm tính phí, nhật ký không lộ PII) + 21 test unit (`tests/unit/consignment.test.ts`).
   Test cũ `inventory` "xe ký gửi trả chủ" được cập nhật theo luật mới (không đặt trạng thái trả chủ trực tiếp).
-- Migration `20261001001100_consignment_contracts.sql`: **mới áp lên database test cục bộ, CHƯA áp lên Supabase `minhky-auto`** (chờ anh Kỳ đồng ý áp lên project đang chạy thật).
+- Migration `20261001001100_consignment_contracts.sql` **đã áp lên Supabase `minhky-auto` ngày 05/10/2026** (anh Kỳ đồng ý). Đã xác minh đúng project (`fawbojbquxfjxbmhwlxm`, tên minhky-auto, ap-southeast-1) và database còn trống (0 xe) trước khi áp.
+  Sau khi áp: 0 bảng chưa bật RLS; 2 bảng mới có RLS + 6 policy; `anon` 0 quyền bảng; Security Advisor không có cảnh báo mới (vẫn 5 WARN có chủ ý D17 + cảnh báo cài đặt Auth "bảo vệ mật khẩu bị lộ" đang tắt);
+  hàm phí 3% × 650 triệu = 19.500.000. Luồng thử trong giao dịch tự hủy (quản lý + sales giả): chặn chào bán khi chưa có hợp đồng, chặn kích hoạt khi thỏa thuận chưa ký, chào bán được sau khi hợp đồng hiệu lực,
+  sales thấy 0 hợp đồng/0 thỏa thuận và bị chặn trả xe; sau thử nghiệm còn đúng 1 tài khoản admin có sẵn, 0 xe, 0 hợp đồng (không sót dữ liệu).
+  Lưu ý: lịch sử migration trên Supabase có thêm 3 migration `appraisal_ai_valuation_*` (áp 05/10/2026, không có trong repo) — xem mục Trở ngại.
 
 **Giới hạn của lát 4:** chưa có quyết toán ký gửi (thu hộ, phần showroom, khấu trừ, còn phải trả chủ xe) — cần giao dịch bán (chặng 5); chưa có tệp scan hợp đồng/biên bản (chưa có Storage cho xe, ghi số hợp đồng giấy vào ô tham chiếu);
 sales chưa xem được quyền giảm giá (D33); chưa có mục "Ký gửi" riêng trên menu (làm trong trang chi tiết xe); chưa kiểm tra bằng trình duyệt thật.
@@ -163,7 +167,8 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 ## Trở ngại hiện tại (cần anh Kỳ)
 
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
-1b. **Áp migration `1100_consignment_contracts.sql` lên Supabase `minhky-auto`?** (project đang chạy thật, chưa có dữ liệu thật) — cần anh Kỳ đồng ý; sau khi áp sẽ kiểm tra RLS/advisor như các lát trước.
+1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
+1d. **Supabase có 3 migration không có trong repo:** `appraisal_ai_valuation_tables_v1`, `_security_v1`, `_views_v1` (áp 05/10/2026 07:58, tạo các bảng `appraisal_ai_*`). Không do phiên làm việc này tạo. Cần đưa mã nguồn vào repo (CLAUDE.md §13: không để mã lệch database) và xác nhận phạm vi — CLAUDE.md §14 ghi chưa mở rộng sang "AI định giá" khi chưa được yêu cầu.
 1c. Xác nhận định nghĩa "giá bán" để tính phí % (D30) và các mục **Tạm** D32, D33, D35.
 2. Admin đầu tiên đã được gán (01/10/2026). Cần xác nhận đăng nhập thực tế trên `minhky-auto.vercel.app` và cấu hình Site URL/Redirect URL trong Supabase Auth.
 3. Xác nhận các tham số tạm D7, D8, D9, D11, D12 (xem `DECISIONS.md`).
