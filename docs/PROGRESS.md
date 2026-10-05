@@ -8,7 +8,7 @@ Cập nhật: 05/10/2026 · Chặng hiện tại: **chặng 3 — lát 1–3 đ�
 |---|---|---|
 | 1 | Nền tảng, Auth, schema, quyền, Storage | **Có mã + test database.** Chưa chạy trên Supabase thật |
 | 2 | Khách → nhu cầu → lọc → chăm sóc → ghép xe | **Có mã + test database + build.** Chưa kiểm tra trên trình duyệt với tài khoản thật |
-| 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Đang làm — lát 1, 2, 3 xong:** kho xe, vòng sở hữu theo VIN, nhập kho; thẩm định + duyệt mua; chi phí chuẩn bị xe (dự kiến / đã xác nhận / đã thanh toán). **Lát 4 (có mã + test, đã áp lên Supabase):** hợp đồng ký gửi. **Còn:** ảnh/tệp gắn với xe, giao diện quản lý địa điểm/mẫu checklist, kỹ thuật viên tự nhập kết quả kiểm tra |
+| 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Đang làm — lát 1, 2, 3 xong:** kho xe, vòng sở hữu theo VIN, nhập kho; thẩm định + duyệt mua; chi phí chuẩn bị xe (dự kiến / đã xác nhận / đã thanh toán). **Lát 4 (có mã + test, đã áp lên Supabase):** hợp đồng ký gửi. **Còn:** giao diện quản lý địa điểm/mẫu checklist, kỹ thuật viên tự nhập kết quả kiểm tra |
 | 4 | Vốn góp/vay, công thức, quyết toán | Chưa làm (đã có thư viện công thức + unit test) |
 | 5 | Bán, thu chi, thu cũ đổi mới, bàn giao | Chưa làm |
 | 6 | Dashboard, báo cáo, hậu mãi, hoa hồng, nghiệm thu | Chưa làm |
@@ -45,8 +45,8 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 |---|---|
 | `npm run typecheck` | Không lỗi |
 | `npm run lint` | Không lỗi, không cảnh báo |
-| `npm test` | **77/77** unit test đạt (8 file) — chạy lại 05/10/2026 |
-| `npm run test:db` | 01/10: 61/61. **05/10/2026: 73/75 đạt, 2 test cũ không chạy được do môi trường** (xem "Chưa xác minh") — 14 test mới của hợp đồng ký gửi đều đạt |
+| `npm test` | **85/85** unit test đạt (9 file) — chạy lại 05/10/2026 sau tệp xe |
+| `npm run test:db` | 01/10: 61/61. **05/10/2026: 78/80 đạt, 2 test cũ không chạy được do môi trường** (xem "Chưa xác minh") — 14 test hợp đồng ký gửi và 5 test tệp xe đều đạt |
 | `npm run build` | Đạt (chạy lại 05/10/2026); 17 trang biên dịch |
 | `npm run typecheck`, `npm run lint` | Không lỗi (chạy lại 05/10/2026 sau lát 4) |
 | `next start` + curl | `/dang-nhap` trả 200 và có form; `/nhu-cau`, `/nhu-cau/moi`, `/tong-quan`, `/cai-dat/nguoi-dung` chuyển hướng về đăng nhập khi chưa đăng nhập |
@@ -137,6 +137,17 @@ Anh Kỳ chốt: phí = **số tiền cố định hoặc phần trăm trên gi�
 **Giới hạn của lát 4:** chưa có quyết toán ký gửi (thu hộ, phần showroom, khấu trừ, còn phải trả chủ xe) — cần giao dịch bán (chặng 5); chưa có tệp scan hợp đồng/biên bản (chưa có Storage cho xe, ghi số hợp đồng giấy vào ô tham chiếu);
 sales chưa xem được quyền giảm giá (D33); chưa có mục "Ký gửi" riêng trên menu (làm trong trang chi tiết xe); chưa kiểm tra bằng trình duyệt thật.
 
+## Chặng 3 — ảnh, video, giấy tờ gắn với xe (05/10/2026)
+
+- Khối "Ảnh, video và giấy tờ" ở trang chi tiết xe: lưới ảnh, danh sách video, giấy tờ (cà vẹt, biên bản, scan hợp đồng ký gửi). Tải lên nhiều tệp một lần; lưu trữ (không xóa) có lý do — quản lý.
+- Tải **thẳng lên Storage bằng URL ký** (D36), rồi ghi vào hồ sơ qua `register_vehicle_file` (kiểm tra tệp đã có thật, đúng xe/loại/loại tệp, chống ghi trùng). Quyền: media ai thấy xe thì thấy; giấy tờ chỉ quản lý/kế toán/admin (D37) — cả bảng lẫn Storage.
+- Migration `20261001001200_vehicle_files.sql` (bảng `vehicle_files`, bucket riêng tư `vehicle-files`, policy Storage theo đường dẫn `<xe>/<loại>/<tệp>`): **mới áp lên database test cục bộ, CHƯA áp lên Supabase** (chờ anh Kỳ đồng ý).
+- Test: 5 test database (`tests/db/vehicle-files.test.ts`: quyền theo loại tệp và theo xe nhìn thấy được, đường dẫn Storage sai dạng bị chặn, tệp phải có thật mới ghi được, gửi lặp song song, không xóa/không đổi/lưu trữ cần lý do và đúng người) + 8 test unit (`tests/unit/vehicle-files.test.ts`).
+- **Chưa kiểm tra được:** luồng tải lên thật qua trình duyệt + Supabase Storage (cấp URL ký, tải lên, xem bằng URL ký) — test database chỉ kiểm tra policy trên lớp giả lập Storage. Cần thử trên bản xem trước với tài khoản thật sau khi áp migration.
+- Trang chi tiết xe nặng hơn (khoảng 76 kB so với 9 kB) vì thư viện Supabase chạy ở trình duyệt để tải thẳng lên Storage.
+
+**Rủi ro biết trước:** tệp đính kèm *nhu cầu* (`demand-files`) vẫn tải qua Server Action; Vercel giới hạn thân yêu cầu ~4,5 MB nên ảnh/video lớn hơn có thể bị từ chối trên bản đang chạy dù cấu hình ghi 20 MB. Chưa được kiểm chứng trên Vercel; nên chuyển sang cùng cách tải thẳng như tệp xe.
+
 ## Kiểm tra trên Supabase thật — project `minhky-auto` (01/10/2026)
 
 Đã xác minh đúng project (tổ chức "Minh Kỳ Auto", ap-southeast-1, ban đầu hoàn toàn trống) trước khi áp.
@@ -161,13 +172,14 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
   Data API/PostgREST từ ứng dụng (cú pháp `select` lồng bảng, tên khóa ngoại), Security Advisors mức Performance.
 - Chưa kiểm tra trên trình duyệt có đăng nhập (desktop + điện thoại). Test database dùng SQL trực tiếp, không qua PostgREST.
 - **Test database ngày 05/10/2026 chạy bằng vai trò `root`, không phải `postgres`:** 2 test cũ của `demands-rls` (§12.3 người phụ trách bắt buộc, §12.12 khóa tài khoản) phụ thuộc hàm `private.is_system()` chỉ nhận vai trò `postgres/service_role/supabase_admin`,
-  nên báo lỗi do môi trường (cùng 2 test này lỗi trên bản trước lát 4, trước khi có migration mới). Cần chạy lại `npm run test:db` bằng vai trò `postgres` (máy anh Kỳ hoặc CI) để xác nhận 75/75.
+  nên báo lỗi do môi trường (cùng 2 test này lỗi trên bản trước lát 4, trước khi có migration mới). Cần chạy lại `npm run test:db` bằng vai trò `postgres` (máy anh Kỳ hoặc CI) để xác nhận 80/80.
 - Chưa đo hiệu năng với dữ liệu lớn (bộ lọc dùng view + LIKE trên chuỗi chuẩn hóa; có chỉ mục trigram nhưng chưa đo).
 
 ## Trở ngại hiện tại (cần anh Kỳ)
 
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
+1e. **Áp migration `1200_vehicle_files.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (thêm bucket Storage `vehicle-files` và bảng `vehicle_files`).
 1d. **Supabase có 3 migration không có trong repo:** `appraisal_ai_valuation_tables_v1`, `_security_v1`, `_views_v1` (áp 05/10/2026 07:58, tạo các bảng `appraisal_ai_*`). Không do phiên làm việc này tạo. Cần đưa mã nguồn vào repo (CLAUDE.md §13: không để mã lệch database) và xác nhận phạm vi — CLAUDE.md §14 ghi chưa mở rộng sang "AI định giá" khi chưa được yêu cầu.
 1c. Xác nhận định nghĩa "giá bán" để tính phí % (D30) và các mục **Tạm** D32, D33, D35.
 2. Admin đầu tiên đã được gán (01/10/2026). Cần xác nhận đăng nhập thực tế trên `minhky-auto.vercel.app` và cấu hình Site URL/Redirect URL trong Supabase Auth.
@@ -179,5 +191,5 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 0. Chuyển sang làm việc bằng Claude Code trên máy anh Kỳ để tự commit/push (hướng dẫn: `docs/CLAUDE_CODE.md`).
 
 1. Bootstrap admin → đăng nhập app → kiểm tra theo `DEPLOYMENT.md` §5 trên máy tính và điện thoại; sửa lỗi tích hợp nếu có. (Project hiện là bản duy nhất: không nạp dữ liệu demo vào đây nếu sắp dùng thật.)
-2. Chặng 3 còn lại: ảnh/video/tệp gắn với xe (kể cả scan hợp đồng ký gửi), giao diện quản lý danh mục/địa điểm/mẫu checklist, kỹ thuật viên nhập kết quả kiểm tra.
+2. Chặng 3 còn lại: giao diện quản lý danh mục/địa điểm/mẫu checklist, kỹ thuật viên nhập kết quả kiểm tra.
 3. Chặng 4 (vốn góp/vay, quyết toán) rồi chặng 5 (bán, thu chi, quyết toán ký gửi).

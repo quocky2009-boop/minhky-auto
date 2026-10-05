@@ -5,7 +5,7 @@ Quản lý khách, nhu cầu mua/bán xe, kho xe, ký gửi, góp vốn theo xe,
 **Làm việc với Claude Code** (cài đặt, bàn giao bối cảnh, quy tắc an toàn khi tự chủ push/migrate): [`docs/CLAUDE_CODE.md`](docs/CLAUDE_CODE.md).
 
 **Trạng thái (05/10/2026):** chặng 1–2 và chặng 3 (lát 1–3: kho xe, thẩm định + duyệt mua, chi phí chuẩn bị xe) đã có mã, test và đã áp lên Supabase `minhky-auto`; app chạy trên Vercel.
-Lát 4 (hợp đồng ký gửi) đã có mã, test và đã áp lên Supabase. Còn lại: ảnh/tệp gắn với xe (chặng 3), chặng 4–6. Menu của phân hệ chưa làm hiện mờ, không có nút giả. Chi tiết: `docs/PROGRESS.md`.
+Lát 4 (hợp đồng ký gửi) đã có mã, test và đã áp lên Supabase. Ảnh/video/giấy tờ gắn với xe có mã và test, migration 1200 chưa áp lên Supabase. Còn lại: chặng 4–6. Menu của phân hệ chưa làm hiện mờ, không có nút giả. Chi tiết: `docs/PROGRESS.md`.
 
 ## Công nghệ
 

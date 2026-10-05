@@ -12,6 +12,9 @@ import { loadCosts } from "./cost-load";
 import { CostsPanel } from "./costs-panel";
 import { loadConsignment } from "./consignment-load";
 import { ConsignmentPanel } from "./consignment-panel";
+import { loadVehicleFiles } from "./file-load";
+import { FilesPanel } from "./files-panel";
+import { allowedCategories } from "@/lib/vehicle-files";
 import { randomUUID } from "node:crypto";
 
 export const metadata = { title: "Chi tiết xe" };
@@ -36,7 +39,8 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
   const finance = canSeeFinance(user.roles);
   const manager = isManager(user.roles);
   const isConsignment = v.business_type === "consignment";
-  const [costData, consignment] = await Promise.all([
+  const [files, costData, consignment] = await Promise.all([
+    loadVehicleFiles(supabase, v.id),
     finance ? loadCosts(supabase, v.id) : Promise.resolve(null),
     finance && isConsignment ? loadConsignment(supabase, v.id) : Promise.resolve(null),
   ]);
@@ -109,6 +113,10 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
           <p className="mt-3 text-xs text-ink-soft">Mỗi lần xe quay lại showroom là một hồ sơ mới; hồ sơ và giao dịch cũ được giữ nguyên.</p>
         </section>
       </div>
+      <section className="panel p-4">
+        <h2 className="mb-3 font-semibold">Ảnh, video và giấy tờ</h2>
+        <FilesPanel vehicleId={v.id} files={files} categories={allowedCategories(user.roles)} manager={manager} />
+      </section>
       {costData && (
         <section className="panel p-4">
           <h2 className="mb-3 font-semibold">Chi phí chuẩn bị xe</h2>
