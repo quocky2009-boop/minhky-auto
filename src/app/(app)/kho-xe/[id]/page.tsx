@@ -8,6 +8,9 @@ import { formatVnd } from "@/lib/money";
 import { BUSINESS_TYPE_LABEL, CONDITION_LABEL, FUEL_LABEL, PAPERWORK_LABEL, PREP_LABEL, SOURCE_TYPE_LABEL, VEHICLE_SALE_STATUS } from "@/lib/labels";
 import { PageHeader } from "@/components/ui";
 import { loadVehicle } from "./load";
+import { loadCosts } from "./cost-load";
+import { CostsPanel } from "./costs-panel";
+import { randomUUID } from "node:crypto";
 
 export const metadata = { title: "Chi tiết xe" };
 
@@ -30,6 +33,7 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
   ]);
   const finance = canSeeFinance(user.roles);
   const manager = isManager(user.roles);
+  const costData = finance ? await loadCosts(supabase, v.id) : null;
   const title = [v.make, v.model, v.variant, v.year_made].filter(Boolean).join(" ");
   const cycles = ((history ?? []) as { id: string; code: string; sale_status: string; business_type: string; intake_date: string | null; depth: number }[]).filter((h) => h.depth > 0);
   const age = v.intake_date ? Math.floor((Date.now() - new Date(`${v.intake_date}T00:00:00+07:00`).getTime()) / 86400000) : null;
@@ -99,7 +103,14 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
           <p className="mt-3 text-xs text-ink-soft">Mỗi lần xe quay lại showroom là một hồ sơ mới; hồ sơ và giao dịch cũ được giữ nguyên.</p>
         </section>
       </div>
-      <p className="text-xs text-ink-soft">Thu mua/thẩm định, chi phí chuẩn bị, hợp đồng ký gửi: các phần tiếp theo của chặng 3, chưa triển khai.</p>
+      {costData && (
+        <section className="panel p-4">
+          <h2 className="mb-3 font-semibold">Chi phí chuẩn bị xe</h2>
+          <CostsPanel vehicleId={v.id} businessType={v.business_type} costs={costData.costs} summary={costData.summary} manager={manager}
+            addRequestId={randomUUID()} payRequestIds={Object.fromEntries(costData.costs.map((c) => [c.id, randomUUID()]))} />
+        </section>
+      )}
+      <p className="text-xs text-ink-soft">Hợp đồng ký gửi: phần tiếp theo của chặng 3, chưa triển khai.</p>
     </div>
   );
 }
