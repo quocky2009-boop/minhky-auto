@@ -2,9 +2,10 @@
 
 Quản lý khách, nhu cầu mua/bán xe, kho xe, ký gửi, góp vốn theo xe, thu cũ đổi mới cho Showroom Minh Kỳ Auto (TP Tuyên Quang).
 Đặc tả gốc: [`CLAUDE.md`](CLAUDE.md). Tiến độ hiện tại: [`docs/PROGRESS.md`](docs/PROGRESS.md).
+**Làm việc với Claude Code** (cài đặt, bàn giao bối cảnh, quy tắc an toàn khi tự chủ push/migrate): [`docs/CLAUDE_CODE.md`](docs/CLAUDE_CODE.md).
 
-**Trạng thái:** chặng 1 (nền tảng) và chặng 2 (khách → nhu cầu → lọc → chăm sóc → ghép xe) đã có mã và test.
-Chưa chạy trên Supabase thật, chưa deploy. Các chặng 3–6 chưa triển khai (menu hiện mờ, không có nút giả).
+**Trạng thái (01/10/2026):** chặng 1–2 và chặng 3 (lát 1–3: kho xe, thẩm định + duyệt mua, chi phí chuẩn bị xe) đã có mã, test và đã áp lên Supabase `minhky-auto`; app chạy trên Vercel.
+Còn lại: hợp đồng ký gửi (chặng 3), chặng 4–6. Menu của phân hệ chưa làm hiện mờ, không có nút giả. Chi tiết: `docs/PROGRESS.md`.
 
 ## Công nghệ
 

@@ -45,6 +45,9 @@ Ký hiệu: ✔ toàn bộ · ◐ một phần (ghi chú) · — không có quy�
 | Thẩm định — xem tình trạng + checklist | ✔ | ✔ | — | ◐ nhu cầu của mình | — |
 | Thẩm định — ghi, duyệt mua, mở lại | ✔ | ✔ | — | — | — |
 | Giá đề xuất / giá mua tối đa được duyệt | ✔ | ✔ | ✔ (xem) | — | — |
+| Chi phí xe — xem | ✔ | ✔ | ✔ | — | — |
+| Chi phí xe — thêm khoản, xác nhận số thực tế, ghi/hủy thanh toán | ✔ | ✔ | ✔ | — | — |
+| Chi phí xe — duyệt/sửa dự toán, hủy khoản | ✔ | ✔ | — | — | — |
 | Mẫu checklist thẩm định — sửa | ✔ | — | — | — | — |
 | Danh mục hãng/model — thêm | ✔ | ✔ | ✔ | ✔ | ✔ |
 | Danh mục — sửa | ✔ | ✔ | — | — | — |

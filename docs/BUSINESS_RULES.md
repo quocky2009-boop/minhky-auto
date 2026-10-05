@@ -109,6 +109,19 @@ Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c 
 - Thẩm định đã duyệt/từ chối bị khóa; mở lại được (trừ khi xe đã nhập kho), mở lại xóa giá tối đa đã duyệt.
 - Giá đề xuất và giá tối đa là dữ liệu tài chính: chỉ quản lý/kế toán xem. Nhật ký nhu cầu (sales đọc được) không ghi số tiền.
 
+## 7d. Chi phí chuẩn bị xe (chặng 3 — lát 3)
+
+- **Ba thông tin tách biệt, không cộng dồn:** (1) **Dự kiến** = dự toán, kế hoạch; (2) **Đã xác nhận** = số thực tế đã nghiệm thu, có người xác nhận và thời điểm; (3) **Đã thanh toán** = tiền đã chi, nhiều lần, mỗi lần một dòng.
+  Khoản đã xác nhận không còn tính vào "dự kiến". Còn phải trả = đã xác nhận − đã thanh toán.
+- Vòng đời một khoản: **Dự kiến** (quản lý duyệt dự toán — tùy chọn, đổi số dự toán thì phải duyệt lại) → **Đã xác nhận** (nhập số thực tế; nhập 0 nếu không phát sinh; để trống bị chặn) → ghi thanh toán. **Đã hủy** (cần lý do).
+- Thanh toán chỉ ghi cho khoản đã xác nhận; tổng không vượt số đã xác nhận (hai người ghi cùng lúc cũng không vượt: khóa dòng).
+- **Không sửa chứng từ:** khoản đã xác nhận không sửa; sai thì hủy (giữ lại) rồi tạo khoản thay thế liên kết với khoản đã hủy. Khoản đang có thanh toán phải hủy thanh toán trước khi hủy khoản. Thanh toán sai thì hủy (có lý do, dòng được giữ) và ghi lại.
+- Người xác nhận / người chi / người hủy do **database tự điền** bằng người đang đăng nhập, không giả mạo được.
+- **Đơn vị thực hiện** ghi tự do (ví dụ gara nội bộ, spa, bên ngoài). **Dự toán để trống = "chưa rõ"**; tổng hợp đếm riêng số khoản chưa có dự toán.
+- **Xe showroom sở hữu:** showroom chịu; chi phí đã xác nhận tính vào giá vốn xe.
+  **Xe ký gửi:** bắt buộc chọn bên chịu (showroom hoặc chủ xe); không làm tăng giá trị vốn tồn kho sở hữu; phần chủ xe chịu tách riêng. Bước chủ xe duyệt từng khoản làm cùng hợp đồng ký gửi.
+- Chỉ quản lý/kế toán xem chi phí; sales và kỹ thuật không thấy.
+
 ## 8. Chưa định nghĩa — sẽ bổ sung ở chặng tương ứng
 
-Hợp đồng mua, ký gửi (phí, quyết toán chủ xe), chi phí được trừ trước khi chia, giữ/cọc xe đồng thời, thu cũ đổi mới đối trừ, hoa hồng, chỉ tiêu báo cáo.
+Hợp đồng mua, ký gửi (phí, quyết toán chủ xe), việc chi phí nào được trừ trước khi chia lợi nhuận, giữ/cọc xe đồng thời, thu cũ đổi mới đối trừ, hoa hồng, chỉ tiêu báo cáo.

@@ -1,6 +1,6 @@
 # Tiến độ
 
-Cập nhật: 01/10/2026 · Chặng hiện tại: **chặng 3 — lát 1 (kho xe + nhập kho) và lát 2 (thẩm định + duyệt mua) đã xong, đã áp lên Supabase** · Tiếp theo: lát 3 (chi phí), lát 4 (ký gửi)
+Cập nhật: 01/10/2026 · Chặng hiện tại: **chặng 3 — lát 1 (kho xe + nhập kho), lát 2 (thẩm định + duyệt mua), lát 3 (chi phí chuẩn bị xe) đã xong, đã áp lên Supabase** · Tiếp theo: lát 4 (hợp đồng ký gửi)
 
 ## Tổng quan theo chặng (CLAUDE.md §14)
 
@@ -8,7 +8,7 @@ Cập nhật: 01/10/2026 · Chặng hiện tại: **chặng 3 — lát 1 (kho xe
 |---|---|---|
 | 1 | Nền tảng, Auth, schema, quyền, Storage | **Có mã + test database.** Chưa chạy trên Supabase thật |
 | 2 | Khách → nhu cầu → lọc → chăm sóc → ghép xe | **Có mã + test database + build.** Chưa kiểm tra trên trình duyệt với tài khoản thật |
-| 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Đang làm — lát 1, 2 xong:** kho xe, vòng sở hữu theo VIN, nhập kho; thẩm định có checklist + duyệt mua. **Còn:** chi phí (dự kiến/xác nhận/đã trả), hợp đồng ký gửi, ảnh/tệp gắn với xe, giao diện quản lý địa điểm/mẫu checklist, kỹ thuật viên tự nhập kết quả kiểm tra |
+| 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Đang làm — lát 1, 2, 3 xong:** kho xe, vòng sở hữu theo VIN, nhập kho; thẩm định + duyệt mua; chi phí chuẩn bị xe (dự kiến / đã xác nhận / đã thanh toán). **Còn:** hợp đồng ký gửi, ảnh/tệp gắn với xe, giao diện quản lý địa điểm/mẫu checklist, kỹ thuật viên tự nhập kết quả kiểm tra |
 | 4 | Vốn góp/vay, công thức, quyết toán | Chưa làm (đã có thư viện công thức + unit test) |
 | 5 | Bán, thu chi, thu cũ đổi mới, bàn giao | Chưa làm |
 | 6 | Dashboard, báo cáo, hậu mãi, hoa hồng, nghiệm thu | Chưa làm |
@@ -45,8 +45,8 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 |---|---|
 | `npm run typecheck` | Không lỗi |
 | `npm run lint` | Không lỗi, không cảnh báo |
-| `npm test` | **49/49** unit test đạt (6 file) |
-| `npm run test:db` | **49/49** test đạt trên PostgreSQL 16 thật + lớp giả lập auth/storage (5 file) |
+| `npm test` | **56/56** unit test đạt (7 file) |
+| `npm run test:db` | **61/61** test đạt trên PostgreSQL 16 thật + lớp giả lập auth/storage (6 file) |
 | `npm run build` | Đạt; 17 trang biên dịch (có 4 route kho xe) |
 | `next start` + curl | `/dang-nhap` trả 200 và có form; `/nhu-cau`, `/nhu-cau/moi`, `/tong-quan`, `/cai-dat/nguoi-dung` chuyển hướng về đăng nhập khi chưa đăng nhập |
 | `supabase/bootstrap/first_admin.sql`, `supabase/seed/demo_staging.sql` | Chạy đúng trên database test; seed tự chặn khi thiếu cờ an toàn và khi chạy lần hai |
@@ -59,7 +59,7 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 | 12.2 | Lọc kết hợp; 600–700tr khớp 650tr; thiếu dữ liệu không giả phù hợp | ✔ | `search`, `matching`, `ui-flow` |
 | 12.3 | Nguồn chưa nhập không phải xe sẵn giao; lịch nhắc; trạng thái đóng | ✔ | `matching`, `ui-flow`, `demands-rls`, `search` |
 | 12.4 | Hai người giữ/cọc cùng xe | Chưa — chặng 5 | |
-| 12.5 | Ký gửi tách tồn, quyết toán khớp | ◐ đã tách hình thức sở hữu/ký gửi, ký gửi không có giá mua, lọc tồn riêng; hợp đồng + quyết toán chưa làm | `inventory` |
+| 12.5 | Ký gửi tách tồn, quyết toán khớp | ◐ đã tách hình thức sở hữu/ký gửi, ký gửi không có giá mua, chi phí ký gửi tách bên chịu và không tăng vốn tồn, lọc tồn riêng; hợp đồng + quyết toán chưa làm | `inventory`, `costs` |
 | 12.6 | P=40tr, c=20%, 60/40 → 8 / 19,2 / 12,8tr | ✔ ở thư viện | `profit-split` |
 | 12.7 | Công ty vừa góp vốn vừa vận hành không đếm trùng | ✔ ở thư viện | `profit-split` |
 | 12.8 | Thiếu điều khoản/lỗ không quyết toán; làm tròn khớp tổng | ◐ thư viện xong; "tỷ lệ xe không đổi theo cấu hình chung" cần bảng điều khoản (chặng 4) | `profit-split` |
@@ -99,6 +99,20 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 **Giới hạn của lát 2:** ảnh/video bằng chứng chưa gắn trực tiếp vào từng mục (hiện dùng "Tệp đính kèm" của nhu cầu và ghi tên tệp vào ghi chú); kỹ thuật viên chưa tự nhập được kết quả kiểm tra;
 chưa có giao diện sửa mẫu checklist (sửa qua SQL bảng `appraisal_templates`); chưa có hợp đồng mua.
 
+## Chặng 3 — lát 3: chi phí chuẩn bị xe (01/10/2026)
+
+- **Ba thông tin tách biệt** trong khối "Chi phí chuẩn bị xe" ở trang chi tiết xe (quản lý/kế toán): dự kiến, đã xác nhận (thực tế đã nghiệm thu), đã thanh toán; có ô "còn phải trả".
+  Khoản đã xác nhận không còn tính vào dự kiến. Dự toán để trống là "chưa rõ" (đếm riêng), không phải 0.
+- Vòng đời: thêm khoản (dự kiến) → quản lý duyệt dự toán (tùy chọn; đổi số thì duyệt lại) → xác nhận số thực tế (nhập 0 nếu không phát sinh) → ghi thanh toán nhiều lần (không vượt số đã xác nhận).
+- Không sửa chứng từ: khoản đã xác nhận không sửa, sai thì hủy (có lý do, giữ lại) rồi tạo khoản thay thế; thanh toán sai thì hủy và ghi lại.
+- Xe ký gửi bắt buộc chọn bên chịu chi phí, phần chủ xe chịu tách riêng, không làm tăng vốn tồn kho. Xe sở hữu: chi phí đã xác nhận tính vào giá vốn.
+- Người xác nhận/người chi/người hủy do database tự điền (không giả mạo). Hai người ghi thanh toán cùng lúc không thể cùng vượt hạn mức.
+- Test: 12 test database + 7 test unit mới. Migration `1000_vehicle_costs.sql` đã áp lên `minhky-auto` và thử trong giao dịch tự hủy.
+- Bản nháp migration này đã có sẵn trong thư mục làm việc (chưa commit, chưa áp, chưa có test/giao diện); đã rà, vá 2 điểm (xe ký gửi mặc định âm thầm "showroom chịu"; các cột người xác nhận/chi/hủy có thể bị ghi giả khi SQL trực tiếp) rồi dùng lại.
+
+**Giới hạn của lát 3:** chưa có tạm ứng trước khi nghiệm thu (D26); chưa có bước chủ xe duyệt từng khoản của xe ký gửi (làm cùng hợp đồng ký gửi);
+chưa có tệp/hóa đơn đính kèm cho từng khoản (hiện ghi số chứng từ vào ô "chứng từ / số tham chiếu"); chưa đưa chi phí vào báo cáo lợi nhuận (chặng 4–6).
+
 ## Kiểm tra trên Supabase thật — project `minhky-auto` (01/10/2026)
 
 Đã xác minh đúng project (tổ chức "Minh Kỳ Auto", ap-southeast-1, ban đầu hoàn toàn trống) trước khi áp.
@@ -132,6 +146,8 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 4. Dự án đang để gói Free; nâng gói Pro của tổ chức "Minh Kỳ Auto" trước khi nhập khách thật (để có sao lưu).
 
 ## Bước tiếp theo
+
+0. Chuyển sang làm việc bằng Claude Code trên máy anh Kỳ để tự commit/push (hướng dẫn: `docs/CLAUDE_CODE.md`).
 
 1. Bootstrap admin → đăng nhập app → kiểm tra theo `DEPLOYMENT.md` §5 trên máy tính và điện thoại; sửa lỗi tích hợp nếu có. (Project hiện là bản duy nhất: không nạp dữ liệu demo vào đây nếu sắp dùng thật.)
 2. Chặng 3: nhập xe (mới/cũ/ký gửi), hồ sơ thu mua + thẩm định (tách thông tin khách khai với kết quả kiểm tra), chuyển nhu cầu bán → xe trong kho

@@ -62,7 +62,9 @@ erDiagram
   appraisals ||--o{ appraisal_items : "checklist"
   appraisals ||--o| appraisal_financials : "giá đề xuất / tối đa được duyệt"
   appraisal_templates ||--o{ appraisal_items : ""
-  vehicles ||--o{ vehicle_costs : "(chặng 3)"
+  vehicles ||--o{ vehicle_costs : "chi phí chuẩn bị (dự kiến / đã xác nhận)"
+  vehicle_costs ||--o{ vehicle_cost_payments : "thanh toán (nhiều lần)"
+  vehicle_costs |o--o| vehicle_costs : "replaces_cost_id"
   vehicles ||--o| consignment_contracts : "(chặng 3)"
   vehicles ||--o{ capital_terms : "(chặng 4) điều khoản có phiên bản"
   capital_terms ||--o{ capital_participants : "(chặng 4)"
@@ -94,5 +96,5 @@ Bảng hệ thống: `app_settings` (cấu hình vận hành, ví dụ số ngà
 
 - Khách chỉ có một số điện thoại; chưa có màn hình gộp khách trùng (chỉ cảnh báo khi nhập).
 - Chưa có giao diện quản lý danh mục (hãng/model/màu/nguồn khách) và cấu hình `app_settings` — sửa qua SQL.
-- Kho xe đã có nhập/sửa/lọc và nhập kho từ nhu cầu bán; thẩm định có checklist + duyệt mua đã có (lát 2); chi phí, ký gửi, ảnh/tệp xe là các lát tiếp theo của chặng 3.
+- Kho xe đã có nhập/sửa/lọc và nhập kho từ nhu cầu bán; thẩm định có checklist + duyệt mua đã có (lát 2); chi phí chuẩn bị xe đã có (lát 3); ký gửi, ảnh/tệp xe là các lát tiếp theo của chặng 3.
 - Thông báo nhắc việc chỉ hiển thị trong app (Việc hôm nay, đèn báo); chưa gửi Zalo/email/push.
