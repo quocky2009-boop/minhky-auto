@@ -156,7 +156,7 @@ Nay tệp nhu cầu cũng tải thẳng lên Storage bằng URL ký (không đ�
 
 - **Bên góp vốn/cho vay** (mã GV…); **điều khoản chia lợi nhuận theo xe có phiên bản** (nháp → duyệt → thay thế; tỷ lệ công ty bắt buộc nhập, không mặc định; duyệt chỉ khi tổng chia đúng 100%; bản duyệt bất biến) — D38.
 - **Sổ vốn góp**: cam kết / thực nhận / rút vốn tách riêng, không sửa, hủy có lý do; rút không vượt thực nhận ròng (khóa chống hai người rút cùng lúc). **Vốn đổi sau khi duyệt → cờ "cần xác nhận lại căn cứ phân chia", không tự đổi tỷ lệ** (D40).
-- **Cho vay** tách khỏi góp vốn: gốc, ngày, lãi thỏa thuận ghi nguyên văn, trả gốc/lãi (trả gốc không vượt gốc) — D41. Chỉ xe showroom sở hữu (D43).
+- **Cho vay** tách khỏi góp vốn: gốc, ngày, lãi thỏa thuận ghi nguyên văn, trả gốc/lãi (trả gốc không vượt gốc); **không tính và không trừ lãi vay** — D41. Chỉ xe showroom sở hữu (D43).
 - **Điều kiện quyết toán** hiển thị trên xe: chưa có điều khoản duyệt / chưa chốt căn cứ chi phí / vốn đổi chưa xác nhận lại (D39). **Ước tính chia** theo giá bán giả định bằng đúng công thức `profit-split.ts` (từ chối khi thiếu dữ liệu) — D44.
 - Khối "Vốn góp và chia lợi nhuận" ở trang chi tiết xe sở hữu (quản lý/kế toán). Quyền: D42.
 - Migration `20261001001300_capital_terms.sql` **đã áp lên Supabase `minhky-auto` ngày 05/10/2026** (anh Kỳ đồng ý). Đã xác minh đúng project và chưa có đối tượng trùng trước khi áp.
@@ -198,7 +198,7 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
-1f. ~~Áp migration 1300~~ — đã xong 05/10/2026. **Cần anh Kỳ xác nhận D39:** "chi phí chung" trừ trước khi chia trái quy tắc §7 đã chốt (C dành cho công ty bù vận hành, không trừ thêm điện nước/thuê nhà/cơ sở vật chất) — giữ quy tắc đó hay đổi?
+1f. ~~Áp migration 1300~~ — đã xong 05/10/2026. **Đã chốt D39/D41 (05/10/2026):** chi phí chung KHÔNG trừ trước khi chia (giữ quy tắc §7); lãi vay không tính, không trừ. Còn lại: hoa hồng bán xe có trừ trước khi chia không — để chặng 6.
 1g. **Bảo mật — 4 hàm `valuation_agent_*` (không do phiên này tạo, thuộc 3 migration `appraisal_ai_*`/`valuation_agent_*` ngoài repo) đang cho `anon` (chưa đăng nhập) gọi được** dù là SECURITY DEFINER và có ghi dữ liệu (`save_comparables`, `save_decision`, `save_new_car_evidence`, `fail_run`); có tham số `p_token` nên có thể đã tự kiểm tra token, nhưng chưa được rà. Cần chủ dự án xác nhận ai tạo, đưa mã vào repo và rà quyền (CLAUDE.md §11).
 1e. ~~Áp migration 1200~~ — đã xong 05/10/2026. Cần thử tải ảnh thật trên giao diện (Preview/production) rồi mới coi là nghiệm thu.
 1d. **Supabase có 3 migration không có trong repo:** `appraisal_ai_valuation_tables_v1`, `_security_v1`, `_views_v1` (áp 05/10/2026 07:58, tạo các bảng `appraisal_ai_*`). Không do phiên làm việc này tạo. Cần đưa mã nguồn vào repo (CLAUDE.md §13: không để mã lệch database) và xác nhận phạm vi — CLAUDE.md §14 ghi chưa mở rộng sang "AI định giá" khi chưa được yêu cầu.

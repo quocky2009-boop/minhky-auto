@@ -311,7 +311,7 @@ export function CapitalPanel(p: Props) {
               <label className="md:col-span-2"><span className="label">Lãi thỏa thuận (nguyên văn) *</span><input name="interest_terms" className="field" placeholder="1,2%/tháng, trả lãi cuối kỳ" /><Err k="interest_terms" /></label>
               <label className="md:col-span-3"><span className="label">Chứng từ / số hợp đồng vay</span><input name="reference" className="field" /></label>
               <button className="btn btn-primary md:w-fit" disabled={pending}>Ghi khoản vay</button>
-              <p className="text-xs text-ink-soft md:col-span-3">Hệ thống chưa tự tính lãi vay: lãi ghi theo văn bản thỏa thuận; việc đưa lãi vào kết quả sau lãi vốn làm khi có định nghĩa cách tính.</p>
+              <p className="text-xs text-ink-soft md:col-span-3">Hệ thống không tính lãi vay và không trừ lãi vay khi chia lợi nhuận: khoản vay chỉ được ghi (gốc, lãi thỏa thuận nguyên văn, các lần trả) để đối chiếu.</p>
             </form>
           </details>
         )}

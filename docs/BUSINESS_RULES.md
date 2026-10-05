@@ -160,13 +160,14 @@ Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c 
   căn cứ chi phí trừ trước khi chia, cách xử lý hòa vốn/lỗ, căn cứ phân chia, số văn bản.
   *Bản nháp* sửa được; **duyệt** (quản lý) chỉ khi tổng tỷ lệ chia **đúng 100%** và các bên còn hoạt động; *bản đã duyệt bất biến*. Mỗi xe một bản hiệu lực: duyệt bản mới thì bản cũ thành "đã thay thế". Bản nháp chỉ hủy (có lý do), không xóa.
   Sửa cấu hình chung không đổi điều khoản xe đã duyệt (không có cấu hình chung tự áp).
+- **Chi phí chung (điện nước, thuê nhà, cơ sở vật chất…) KHÔNG trừ trước khi chia** — khoản C đã bù vận hành; chi phí chung vẫn vào báo cáo toàn công ty (anh Kỳ 05/10/2026 giữ quy tắc §7).
 - **Căn cứ chi phí và cách xử lý hòa vốn/lỗ có thể để "chờ xác nhận":** không chặn nhập/duyệt điều khoản nhưng **chặn quyết toán**. Căn cứ chi phí: *mọi chi phí đã xác nhận của xe* / *chỉ các khoản được chọn* (chưa hỗ trợ) / *không trừ chi phí*.
 - **Sổ vốn góp** (không sửa, hủy có lý do): *vốn cam kết* (chỉ quản lý), *tiền thực nhận* và *rút vốn* (kế toán hoặc quản lý) — ba số tách riêng. Bên phải có trong điều khoản (nháp hoặc đã duyệt). Rút vốn không vượt vốn thực nhận ròng (kể cả hai người rút cùng lúc: khóa).
   Hủy khoản nhận không được làm vốn ròng âm. Chưa ghi gì thì hiện "Chưa ghi", không hiện 0 như đã góp.
 - **Khi vốn thay đổi sau khi duyệt** (ghi hoặc hủy dòng sổ), hệ thống **không tự đổi tỷ lệ** (CLAUDE.md §7): đánh dấu "cần xác nhận lại căn cứ phân chia" cho đến khi quản lý xác nhận lại (bắt buộc nêu lý do tỷ lệ vẫn đúng) hoặc duyệt phiên bản mới. Cờ này chặn quyết toán.
 - **Cho vay hưởng lãi tách khỏi góp vốn:** khoản vay (bên cho vay, gốc, ngày nhận, hạn, lãi thỏa thuận ghi nguyên văn) không vào sổ vốn góp và không chia lãi/lỗ theo tỷ lệ. Trả gốc không vượt gốc (khóa); trả lãi ghi riêng. **Chưa tự tính lãi vay** — chờ định nghĩa cách tính.
 - **Ước tính chia lợi nhuận** trên trang xe: "nếu bán giá X" → P = giá bán − giá mua − chi phí đã xác nhận (theo căn cứ) rồi dùng công thức mục 7. Từ chối (không đoán) khi thiếu căn cứ chi phí, thiếu giá mua, chưa có chi phí đã xác nhận, hòa vốn/lỗ, hoặc tổng tỷ lệ sai. **Đây là ước tính, không phải quyết toán.**
-- **Chưa làm:** quyết toán (tạm tính → kiểm tra → phê duyệt → thanh toán), hoàn vốn/chia lợi nhuận thực chi, chi phí muộn qua điều chỉnh, xử lý hòa vốn/lỗ được duyệt, lãi vay trong báo cáo. Cần giao dịch bán (chặng 5).
+- **Chưa làm:** quyết toán (tạm tính → kiểm tra → phê duyệt → thanh toán), hoàn vốn/chia lợi nhuận thực chi, chi phí muộn qua điều chỉnh, xử lý hòa vốn/lỗ được duyệt, Cần giao dịch bán (chặng 5).
 
 ## 8. Chưa định nghĩa — sẽ bổ sung ở chặng tương ứng
 
