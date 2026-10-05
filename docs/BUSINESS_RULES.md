@@ -144,14 +144,13 @@ Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c 
 - Xe ký gửi không tăng giá trị vốn tồn kho sở hữu (không giá mua; chi phí tách bên chịu — mục 7d).
 - Chỉ quản lý/admin ghi; kế toán đọc; sales và kỹ thuật không thấy (có định danh chủ xe và điều khoản tiền). Nhật ký kiểm toán của hợp đồng không lưu điện thoại/số giấy tờ/ghi chú ủy quyền của chủ xe.
 
-## 7f. Ảnh, video và giấy tờ gắn với xe (chặng 3)
+## 7f. Ảnh và video gắn với xe (chặng 3)
 
-- **Hai nhóm theo độ nhạy:** *Media* (ảnh, video) — ai thấy xe thì thấy (sales chỉ với xe đang bán/giữ/cọc hoặc của mình; kỹ thuật với xe chưa bán); nhân viên có vai trò nào cũng tải lên được cho xe mình thấy.
-  *Giấy tờ* (cà vẹt, biên bản kiểm tra/đăng kiểm, bản scan hợp đồng/biên bản ký gửi, giấy tờ khác) — chỉ quản lý/kế toán/admin xem và tải lên; sales và kỹ thuật không thấy, kể cả khi biết đường dẫn.
-- **Loại tệp và giới hạn:** ảnh JPG/PNG/WEBP/HEIC ≤ 20 MB; video MP4/MOV ≤ 50 MB; giấy tờ là ảnh chụp hoặc PDF ≤ 20 MB. Storage riêng tư, đường dẫn xem là URL ký hiệu lực 10 phút.
+- **Chỉ ảnh và video** (anh Kỳ chốt 05/10/2026: không cần tải giấy tờ lên). Ai thấy xe thì thấy (sales chỉ với xe đang bán/giữ/cọc hoặc của mình; kỹ thuật với xe chưa bán); mọi nhân viên có vai trò đều tải lên được cho xe mình thấy.
+- **Loại tệp và giới hạn:** ảnh JPG/PNG/WEBP/HEIC ≤ 20 MB; video MP4/MOV ≤ 50 MB. Storage riêng tư, đường dẫn xem là URL ký hiệu lực 10 phút. PDF và các loại khác bị từ chối.
 - **Không xóa:** tệp chỉ được *lưu trữ* (quản lý, bắt buộc lý do; ẩn khỏi giao diện nhưng tệp gốc và bản ghi được giữ). Không sửa tên/loại/đường dẫn tệp; tải tệp mới nếu cần.
 - **Người tải lên** do database ghi; gửi lặp cùng mã yêu cầu không sinh trùng; ghi vào hồ sơ chỉ khi tệp thật sự đã có trong Storage.
-- Chưa gắn tệp vào từng khoản chi phí/từng mục thẩm định (hiện ghi số chứng từ/tên tệp ở ô tham chiếu); đây là bước sau.
+- Bản scan giấy tờ (cà vẹt, hợp đồng ký gửi) **không** lưu trong app; số hợp đồng giấy ghi ở ô tham chiếu của hợp đồng ký gửi/chứng từ chi phí.
 
 ## 8. Chưa định nghĩa — sẽ bổ sung ở chặng tương ứng
 

@@ -1,24 +1,21 @@
 -- =====================================================================
--- MINH KỲ AUTO — 1200 Chặng 3: ảnh / video / giấy tờ gắn với xe (Storage riêng tư)
+-- MINH KỲ AUTO — 1200 Chặng 3: ảnh / video gắn với xe (Storage riêng tư)
 --
--- Hai nhóm tệp theo độ nhạy (RLS lọc hàng, nên tách theo loại ở đường dẫn và ở bảng):
---   Media (photo, video)  : nhân viên thấy xe đó thì thấy; nhân viên (trừ ai không có vai trò) tải lên được.
---   Giấy tờ (registration, inspection, consignment, other_doc): chỉ quản lý/kế toán/admin xem và tải lên
---       (cà vẹt, biên bản, scan hợp đồng ký gửi có định danh chủ xe).
--- Đường dẫn Storage: <vehicle_id>/<loại>/<uuid>-<tên an toàn>. Không xóa tệp: chỉ "lưu trữ" (có lý do), tệp gốc được giữ.
+-- Chỉ ảnh và video xe (anh Kỳ 05/10/2026: không cần tải giấy tờ lên). Ai thấy xe thì thấy; nhân viên có vai trò tải lên được cho xe mình thấy.
+-- Đường dẫn Storage: <vehicle_id>/<loại>/<uuid>-<tên an toàn>. Không xóa tệp: chỉ "lưu trữ" (quản lý, có lý do), tệp gốc được giữ.
 -- Tải lên đi thẳng từ trình duyệt lên Storage bằng URL ký có thời hạn (Vercel giới hạn thân yêu cầu ~4,5 MB nên không đi qua máy chủ ứng dụng);
 -- sau đó ứng dụng gọi register_vehicle_file để ghi vào bảng, hàm kiểm tra tệp thật sự đã có trong Storage.
 -- =====================================================================
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('vehicle-files', 'vehicle-files', false, 52428800,
-        array['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'video/mp4', 'video/quicktime', 'application/pdf'])
+        array['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'video/mp4', 'video/quicktime'])
 on conflict (id) do nothing;
 
 create table public.vehicle_files (
   id uuid primary key default gen_random_uuid(),
   vehicle_id uuid not null references public.vehicles (id),
-  category text not null check (category in ('photo', 'video', 'registration', 'inspection', 'consignment', 'other_doc')),
+  category text not null check (category in ('photo', 'video')),
   storage_path text not null unique,
   file_name text not null check (length(btrim(file_name)) > 0),
   mime_type text not null,
@@ -39,14 +36,10 @@ create index vehicle_files_vehicle_idx on public.vehicle_files (vehicle_id, cate
 
 create trigger vehicle_files_audit after insert or update on public.vehicle_files for each row execute function private.audit_row();
 
--- Nhóm media: ai thấy xe thì thấy. Nhóm giấy tờ: chỉ vai trò tài chính/quản lý.
+-- Ai thấy xe (RLS của vehicles) và là nhân viên thì thấy/thêm được ảnh, video của xe đó.
 create or replace function private.vehicle_file_allowed(p_vehicle uuid, p_category text)
 returns boolean language sql stable set search_path = '' as $$
-  select case
-    when p_category in ('photo', 'video') then private.is_staff() and exists (select 1 from public.vehicles v where v.id = p_vehicle)
-    when p_category in ('registration', 'inspection', 'consignment', 'other_doc') then private.can_see_finance() and exists (select 1 from public.vehicles v where v.id = p_vehicle)
-    else false
-  end
+  select p_category in ('photo', 'video') and private.is_staff() and exists (select 1 from public.vehicles v where v.id = p_vehicle)
 $$;
 
 create or replace function private.vehicle_files_guard()
@@ -61,9 +54,6 @@ begin
     end if;
     if new.category = 'video' and new.mime_type not like 'video/%' then
       raise exception 'Video phải là tệp video.' using errcode = '22023';
-    end if;
-    if new.category not in ('photo', 'video') and new.mime_type not like 'image/%' and new.mime_type <> 'application/pdf' then
-      raise exception 'Giấy tờ chỉ nhận ảnh chụp hoặc PDF.' using errcode = '22023';
     end if;
     if new.archived_at is not null then
       raise exception 'Tệp mới không được ở trạng thái lưu trữ.' using errcode = '22023';

@@ -114,7 +114,7 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
         </section>
       </div>
       <section className="panel p-4">
-        <h2 className="mb-3 font-semibold">Ảnh, video và giấy tờ</h2>
+        <h2 className="mb-3 font-semibold">Ảnh và video</h2>
         <FilesPanel vehicleId={v.id} files={files} categories={allowedCategories(user.roles)} manager={manager} />
       </section>
       {costData && (

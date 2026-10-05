@@ -45,7 +45,7 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 |---|---|
 | `npm run typecheck` | Không lỗi |
 | `npm run lint` | Không lỗi, không cảnh báo |
-| `npm test` | **85/85** unit test đạt (9 file) — chạy lại 05/10/2026 sau tệp xe |
+| `npm test` | **84/84** unit test đạt (9 file) — chạy lại 05/10/2026 sau ảnh/video xe |
 | `npm run test:db` | 01/10: 61/61. **05/10/2026: 78/80 đạt, 2 test cũ không chạy được do môi trường** (xem "Chưa xác minh") — 14 test hợp đồng ký gửi và 5 test tệp xe đều đạt |
 | `npm run build` | Đạt (chạy lại 05/10/2026); 17 trang biên dịch |
 | `npm run typecheck`, `npm run lint` | Không lỗi (chạy lại 05/10/2026 sau lát 4) |
@@ -137,13 +137,16 @@ Anh Kỳ chốt: phí = **số tiền cố định hoặc phần trăm trên gi�
 **Giới hạn của lát 4:** chưa có quyết toán ký gửi (thu hộ, phần showroom, khấu trừ, còn phải trả chủ xe) — cần giao dịch bán (chặng 5); chưa có tệp scan hợp đồng/biên bản (chưa có Storage cho xe, ghi số hợp đồng giấy vào ô tham chiếu);
 sales chưa xem được quyền giảm giá (D33); chưa có mục "Ký gửi" riêng trên menu (làm trong trang chi tiết xe); chưa kiểm tra bằng trình duyệt thật.
 
-## Chặng 3 — ảnh, video, giấy tờ gắn với xe (05/10/2026)
+## Chặng 3 — ảnh và video gắn với xe (05/10/2026)
 
-- Khối "Ảnh, video và giấy tờ" ở trang chi tiết xe: lưới ảnh, danh sách video, giấy tờ (cà vẹt, biên bản, scan hợp đồng ký gửi). Tải lên nhiều tệp một lần; lưu trữ (không xóa) có lý do — quản lý.
-- Tải **thẳng lên Storage bằng URL ký** (D36), rồi ghi vào hồ sơ qua `register_vehicle_file` (kiểm tra tệp đã có thật, đúng xe/loại/loại tệp, chống ghi trùng). Quyền: media ai thấy xe thì thấy; giấy tờ chỉ quản lý/kế toán/admin (D37) — cả bảng lẫn Storage.
-- Migration `20261001001200_vehicle_files.sql` (bảng `vehicle_files`, bucket riêng tư `vehicle-files`, policy Storage theo đường dẫn `<xe>/<loại>/<tệp>`): **mới áp lên database test cục bộ, CHƯA áp lên Supabase** (chờ anh Kỳ đồng ý).
-- Test: 5 test database (`tests/db/vehicle-files.test.ts`: quyền theo loại tệp và theo xe nhìn thấy được, đường dẫn Storage sai dạng bị chặn, tệp phải có thật mới ghi được, gửi lặp song song, không xóa/không đổi/lưu trữ cần lý do và đúng người) + 8 test unit (`tests/unit/vehicle-files.test.ts`).
-- **Chưa kiểm tra được:** luồng tải lên thật qua trình duyệt + Supabase Storage (cấp URL ký, tải lên, xem bằng URL ký) — test database chỉ kiểm tra policy trên lớp giả lập Storage. Cần thử trên bản xem trước với tài khoản thật sau khi áp migration.
+- Khối "Ảnh và video" ở trang chi tiết xe: lưới ảnh, danh sách video. Tải lên nhiều tệp một lần; lưu trữ (không xóa) có lý do — quản lý. Không có tải giấy tờ (anh Kỳ 05/10/2026).
+- Tải **thẳng lên Storage bằng URL ký** (D36), rồi ghi vào hồ sơ qua `register_vehicle_file` (kiểm tra tệp đã có thật, đúng xe/loại/loại tệp, chống ghi trùng). Quyền: ai thấy xe thì thấy, mọi nhân viên có vai trò thêm được (D37) — cả bảng lẫn Storage; PDF và loại khác bị chặn ở bucket.
+- Migration `20261001001200_vehicle_files.sql` (bảng `vehicle_files`, bucket riêng tư `vehicle-files`, policy Storage theo đường dẫn `<xe>/<loại>/<tệp>`) **đã áp lên Supabase `minhky-auto` ngày 05/10/2026** (anh Kỳ đồng ý). Đã xác minh đúng project và chưa có đối tượng trùng trước khi áp.
+  Sau khi áp: 0 bảng chưa bật RLS; bucket riêng tư, giới hạn 50 MB, chỉ nhận ảnh/video; 3 policy bảng + 2 policy Storage; `anon` 0 quyền; Security Advisor không có cảnh báo mới (vẫn 5 WARN D17 + cảnh báo cài đặt Auth đang tắt).
+  Luồng thử trong giao dịch tự hủy (quản lý, sales, kỹ thuật giả): chặn ghi khi chưa có tệp trong Storage; ghi được khi có; chặn đường dẫn loại giấy tờ; sales thấy tệp xe đang bán (1) và không thấy xe chưa chào bán (0); sales không lưu trữ/xóa được; kỹ thuật thấy tệp xe chưa bán;
+  lưu trữ bởi quản lý còn nguyên tệp gốc. Sau thử nghiệm: 1 tài khoản admin có sẵn, 0 xe, 0 tệp, 0 đối tượng Storage.
+- Test: 5 test database (`tests/db/vehicle-files.test.ts`) + 7 test unit (`tests/unit/vehicle-files.test.ts`).
+- **Chưa kiểm tra được:** luồng tải lên thật qua trình duyệt + Supabase Storage (cấp URL ký, tải lên, xem bằng URL ký) — chỉ mới kiểm tra policy bằng SQL. Cần thử trên bản xem trước với tài khoản thật.
 - Trang chi tiết xe nặng hơn (khoảng 76 kB so với 9 kB) vì thư viện Supabase chạy ở trình duyệt để tải thẳng lên Storage.
 
 **Rủi ro biết trước:** tệp đính kèm *nhu cầu* (`demand-files`) vẫn tải qua Server Action; Vercel giới hạn thân yêu cầu ~4,5 MB nên ảnh/video lớn hơn có thể bị từ chối trên bản đang chạy dù cấu hình ghi 20 MB. Chưa được kiểm chứng trên Vercel; nên chuyển sang cùng cách tải thẳng như tệp xe.
@@ -179,7 +182,7 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
-1e. **Áp migration `1200_vehicle_files.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (thêm bucket Storage `vehicle-files` và bảng `vehicle_files`).
+1e. ~~Áp migration 1200~~ — đã xong 05/10/2026. Cần thử tải ảnh thật trên giao diện (Preview/production) rồi mới coi là nghiệm thu.
 1d. **Supabase có 3 migration không có trong repo:** `appraisal_ai_valuation_tables_v1`, `_security_v1`, `_views_v1` (áp 05/10/2026 07:58, tạo các bảng `appraisal_ai_*`). Không do phiên làm việc này tạo. Cần đưa mã nguồn vào repo (CLAUDE.md §13: không để mã lệch database) và xác nhận phạm vi — CLAUDE.md §14 ghi chưa mở rộng sang "AI định giá" khi chưa được yêu cầu.
 1c. Xác nhận định nghĩa "giá bán" để tính phí % (D30) và các mục **Tạm** D32, D33, D35.
 2. Admin đầu tiên đã được gán (01/10/2026). Cần xác nhận đăng nhập thực tế trên `minhky-auto.vercel.app` và cấu hình Site URL/Redirect URL trong Supabase Auth.

@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { archiveVehicleFile, prepareVehicleUpload, registerVehicleFile } from "../file-actions";
-import { FILE_CATEGORY_LABEL, isDocumentCategory, validateUpload, type FileCategory } from "@/lib/vehicle-files";
+import { FILE_CATEGORY_LABEL, validateUpload, type FileCategory } from "@/lib/vehicle-files";
 import { publicEnv } from "@/lib/env";
 import { formatDate } from "@/lib/dates";
 import type { VehicleFileRow } from "./file-load";
@@ -22,7 +22,6 @@ export function FilesPanel({ vehicleId, files, categories, manager }: Props) {
 
   const photos = files.filter((f) => f.category === "photo");
   const videos = files.filter((f) => f.category === "video");
-  const docs = files.filter((f) => isDocumentCategory(f.category));
 
   async function onUpload(e: React.FormEvent) {
     e.preventDefault();
@@ -104,19 +103,6 @@ export function FilesPanel({ vehicleId, files, categories, manager }: Props) {
         </div>
       )}
 
-      {docs.length > 0 && (
-        <div>
-          <h3 className="mb-1 text-sm font-semibold">Giấy tờ ({docs.length})</h3>
-          <ul className="space-y-1 text-sm">
-            {docs.map((f) => (
-              <li key={f.id}><span className="text-xs text-ink-soft">{FILE_CATEGORY_LABEL[f.category]}: </span>
-                {f.url ? <a href={f.url} target="_blank" rel="noopener noreferrer" className="text-petrol hover:underline">{f.file_name}</a> : f.file_name}
-                <span className="text-xs text-ink-soft"> · {formatDate(f.created_at)} · {sizeText(f.size_bytes)}</span><Archive f={f} /></li>
-            ))}
-          </ul>
-        </div>
-      )}
-
       {categories.length > 0 && (
         <form onSubmit={onUpload} className="grid gap-2 rounded-md border border-line p-3 md:grid-cols-[14rem_1fr_auto]">
           <label><span className="label">Loại tệp</span>
@@ -125,11 +111,10 @@ export function FilesPanel({ vehicleId, files, categories, manager }: Props) {
             </select></label>
           <label><span className="label">Chọn tệp (có thể chọn nhiều)</span>
             <input ref={input} type="file" multiple className="block w-full text-sm" disabled={busy}
-              accept={category === "video" ? "video/mp4,video/quicktime" : category === "photo" ? "image/*" : "image/*,application/pdf"} /></label>
+              accept={category === "video" ? "video/mp4,video/quicktime" : "image/*"} /></label>
           <button className="btn btn-primary self-end" disabled={busy}>{busy ? "Đang tải lên…" : "Tải lên"}</button>
           <p className="text-xs text-ink-soft md:col-span-3">
-            Ảnh tối đa 20 MB, video tối đa 50 MB (MP4/MOV), giấy tờ là ảnh chụp hoặc PDF tối đa 20 MB. Tệp riêng tư; đường dẫn xem chỉ có hiệu lực 10 phút. Tệp không bị xóa, chỉ lưu trữ.
-            {categories.some(isDocumentCategory) ? "" : " Giấy tờ chỉ quản lý/kế toán được xem và thêm."}
+            Ảnh tối đa 20 MB, video tối đa 50 MB (MP4/MOV). Tệp riêng tư; đường dẫn xem chỉ có hiệu lực 10 phút. Tệp không bị xóa, chỉ lưu trữ.
           </p>
         </form>
       )}

@@ -1,6 +1,6 @@
 /**
  * Chặng 3: ảnh / video / giấy tờ gắn với xe. Chạy SQL dưới vai trò `authenticated` của từng người.
- * Media (ảnh, video): ai thấy xe thì thấy. Giấy tờ: chỉ quản lý/kế toán. Không xóa tệp, chỉ lưu trữ có lý do.
+ * Chỉ ảnh và video (không có giấy tờ — anh Kỳ 05/10/2026): ai thấy xe thì thấy. Không xóa tệp, chỉ lưu trữ có lý do.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Client } from "pg";
@@ -53,19 +53,14 @@ d("Tệp gắn với xe — database thật", () => {
     expect(await seeObject(tech, hiddenPhoto.name)).toBe(1);   // kỹ thuật thấy xe chưa bán
   });
 
-  it("Giấy tờ (cà vẹt, biên bản, scan hợp đồng): chỉ quản lý/kế toán; sales và kỹ thuật không thấy, không tải lên, không đọc bằng đường dẫn trực tiếp", async () => {
-    const reg = await upload(manager, listed, "registration", { mime_type: "application/pdf", file_name: "cavet.pdf" });
-    const con = await upload(accountant, listed, "consignment", { mime_type: "application/pdf", file_name: "hop-dong.pdf" });
-    for (const u of [sales, tech]) {
-      expect(await seeObject(u, reg.name)).toBe(0);
-      expect(await seeObject(u, con.name)).toBe(0);
-      expect(await as(c, u, async (db) => (await db.query("select count(*)::int n from public.vehicle_files where category in ('registration','consignment')")).rows[0].n)).toBe(0);
-      await expect(putObject(u, path(listed, "registration"))).rejects.toThrow(/row-level security/);
-      await expect(register(u, listed, "inspection", reg.name)).rejects.toThrow(/Đường dẫn tệp không khớp|không có quyền|row-level security/);
+  it("Không còn loại giấy tờ: đường dẫn hoặc bản ghi loại khác 'photo'/'video' bị chặn, kể cả với quản lý; người chưa đăng nhập bị chặn", async () => {
+    for (const cat of ["registration", "inspection", "consignment", "other_doc"]) {
+      await expect(putObject(manager, path(listed, cat))).rejects.toThrow(/row-level security/);
+      await expect(sys.query("insert into public.vehicle_files (vehicle_id, category, storage_path, file_name, mime_type, size_bytes, uploaded_by) values ($1, $2, $3, 'x.pdf', 'application/pdf', 10, $4)",
+        [listed, cat, `${listed}/${cat}/${uuid()}-x.pdf`, manager])).rejects.toThrow(/không có quyền thêm tệp loại này|vehicle_files_category_check/);
     }
-    expect(await seeObject(accountant, reg.name)).toBe(1);
-    // người không đăng nhập bị chặn
     await expect(as(c, null, (db) => db.query("select count(*) from public.vehicle_files"))).rejects.toThrow(/permission denied/);
+    await expect(as(c, null, (db) => db.query("insert into storage.objects (bucket_id, name) values ('vehicle-files', $1)", [path(listed, "photo")]))).rejects.toThrow(/permission denied|row-level security/);
   });
 
   it("Đường dẫn Storage phải đúng dạng <xe>/<loại>/<tệp>; sai dạng bị chặn kể cả với quản lý", async () => {
@@ -90,8 +85,6 @@ d("Tệp gắn với xe — database thật", () => {
     expect((await sys.query("select count(*)::int n from public.vehicle_files where storage_path = $1", [name])).rows[0].n).toBe(1);
     const vid = path(listed, "video"); await putObject(manager, vid);
     await expect(register(manager, listed, "video", vid, { mime_type: "image/png" })).rejects.toThrow(/Video phải là tệp video/);
-    const doc = path(listed, "inspection"); await putObject(manager, doc);
-    await expect(register(manager, listed, "inspection", doc, { mime_type: "video/mp4" })).rejects.toThrow(/Giấy tờ chỉ nhận ảnh chụp hoặc PDF/);
   });
 
   it("Không xóa, không đổi tệp; chỉ quản lý được lưu trữ (có lý do); người tải lên do database ghi, không giả mạo", async () => {

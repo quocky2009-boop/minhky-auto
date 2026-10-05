@@ -49,8 +49,7 @@ Ký hiệu: ✔ toàn bộ · ◐ một phần (ghi chú) · — không có quy�
 | Chi phí xe — thêm khoản, xác nhận số thực tế, ghi/hủy thanh toán | ✔ | ✔ | ✔ | — | — |
 | Chi phí xe — duyệt/sửa dự toán, hủy khoản | ✔ | ✔ | — | — | — |
 | Ảnh/video xe — xem, tải lên | ✔ | ✔ | ✔ | ◐ xe mình thấy | ◐ xe chưa bán |
-| Giấy tờ xe (cà vẹt, kiểm tra, scan ký gửi) — xem, tải lên | ✔ | ✔ | ✔ | — | — |
-| Tệp xe — lưu trữ (không xóa) | ✔ | ✔ | — | — | — |
+| Ảnh/video xe — lưu trữ (không xóa) | ✔ | ✔ | — | — | — |
 | Hợp đồng ký gửi — xem (chủ xe, thỏa thuận, biên bản) | ✔ | ✔ | ✔ | — | — |
 | Hợp đồng ký gửi — lập, thêm thỏa thuận, kích hoạt, hủy nháp, trả xe | ✔ | ✔ | — | — | — |
 | Mẫu checklist thẩm định — sửa | ✔ | — | — | — | — |
