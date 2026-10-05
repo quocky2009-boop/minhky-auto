@@ -10,6 +10,7 @@ import { friendlyError } from "@/lib/errors";
 import { parseDemandForm } from "@/lib/demands/form";
 import { fromLocalInput } from "@/lib/dates";
 import { NEEDS_NEXT_ACTION } from "@/lib/labels";
+import { buildAttachmentPath, validateAttachment } from "@/lib/attachments";
 
 export type ActionState = { ok: boolean; message?: string; fieldErrors?: Record<string, string> } | null;
 
@@ -149,35 +150,53 @@ export async function unshareDemand(fd: FormData) {
   revalidatePath(`/nhu-cau/${id}`);
 }
 
-const MAX_FILE = 20 * 1024 * 1024;
-const ALLOWED = /^(image\/|video\/|application\/pdf$)/;
+const BUCKET = "demand-files";
 
-export async function uploadAttachment(_prev: ActionState, fd: FormData): Promise<ActionState> {
+export type PrepareResult = { ok: true; path: string; token: string } | { ok: false; message: string };
+
+/**
+ * Bước 1 tải tệp đính kèm: kiểm tra rồi cấp URL ký để trình duyệt tải THẲNG lên Storage
+ * (không đi qua máy chủ ứng dụng nên không vướng giới hạn thân yêu cầu của Vercel). Quyền thật do Storage RLS kiểm tra khi cấp URL.
+ */
+export async function prepareAttachmentUpload(input: { demandId: string; fileName: string; mimeType: string; size: number }): Promise<PrepareResult> {
   try {
     await guard();
   } catch (e) {
     return { ok: false, message: (e as Error).message };
   }
-  const id = str(fd, "demand_id");
-  const file = fd.get("file");
-  if (!UUID.test(id)) return { ok: false, message: "Thiếu nhu cầu." };
-  if (!(file instanceof File) || file.size === 0) return { ok: false, message: "Chọn tệp cần tải lên." };
-  if (file.size > MAX_FILE) return { ok: false, message: "Tệp lớn hơn 20 MB." };
-  if (!ALLOWED.test(file.type)) return { ok: false, message: "Chỉ nhận ảnh, video hoặc PDF." };
-  const safe = file.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D")
-    .replace(/[^a-zA-Z0-9._-]+/g, "-").slice(-80) || "tep";
-  const path = `${id}/${randomUUID()}-${safe}`;
+  if (!UUID.test(input.demandId)) return { ok: false, message: "Thiếu nhu cầu." };
+  const invalid = validateAttachment(input.mimeType, input.size);
+  if (invalid) return { ok: false, message: invalid };
   const supabase = await createClient();
-  const up = await supabase.storage.from("demand-files").upload(path, file, { contentType: file.type, upsert: false });
-  if (up.error) return { ok: false, message: friendlyError(up.error) };
+  const path = buildAttachmentPath(input.demandId, randomUUID(), input.fileName);
+  const { data, error } = await supabase.storage.from(BUCKET).createSignedUploadUrl(path);
+  if (error || !data) return { ok: false, message: friendlyError(error) };
+  return { ok: true, path, token: data.token };
+}
+
+/** Bước 2: ghi tệp đã tải lên vào hồ sơ nhu cầu. Chỉ ghi khi tệp thật sự có trong Storage; tệp ghi dở được dọn. */
+export async function registerAttachment(input: { demandId: string; path: string; fileName: string; mimeType: string; size: number }): Promise<ActionState> {
+  try {
+    await guard();
+  } catch (e) {
+    return { ok: false, message: (e as Error).message };
+  }
+  if (!UUID.test(input.demandId) || !input.path.startsWith(`${input.demandId}/`) || input.path.split("/").length !== 2) {
+    return { ok: false, message: "Đường dẫn tệp không hợp lệ." };
+  }
+  const invalid = validateAttachment(input.mimeType, input.size);
+  if (invalid) return { ok: false, message: invalid };
+  const supabase = await createClient();
+  const exists = await supabase.storage.from(BUCKET).createSignedUrl(input.path, 60);   // lỗi nếu chưa có tệp hoặc không có quyền
+  if (exists.error) return { ok: false, message: "Chưa thấy tệp trong kho lưu trữ. Hãy tải lại tệp." };
   const { error } = await supabase.from("demand_attachments").insert({
-    demand_id: id, storage_path: path, file_name: file.name.slice(0, 200), mime_type: file.type, size_bytes: file.size,
+    demand_id: input.demandId, storage_path: input.path, file_name: input.fileName.slice(0, 200), mime_type: input.mimeType, size_bytes: input.size,
   });
   if (error) {
-    await supabase.storage.from("demand-files").remove([path]);
+    await supabase.storage.from(BUCKET).remove([input.path]);
     return { ok: false, message: friendlyError(error) };
   }
-  revalidatePath(`/nhu-cau/${id}`);
+  revalidatePath(`/nhu-cau/${input.demandId}`);
   return { ok: true, message: "Đã tải tệp lên." };
 }
 

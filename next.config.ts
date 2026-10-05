@@ -1,10 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    // Tệp đính kèm nhu cầu (ảnh/video/PDF) tối đa 20 MB, khớp giới hạn bucket.
-    serverActions: { bodySizeLimit: "21mb" },
-  },
+  // Tệp đính kèm (nhu cầu, xe) tải thẳng lên Storage bằng URL ký, không đi qua Server Action
+  // (Vercel giới hạn thân yêu cầu hàm ~4,5 MB) nên không cần nâng bodySizeLimit.
   poweredByHeader: false,
 };
 

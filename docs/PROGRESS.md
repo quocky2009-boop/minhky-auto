@@ -45,7 +45,7 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 |---|---|
 | `npm run typecheck` | Không lỗi |
 | `npm run lint` | Không lỗi, không cảnh báo |
-| `npm test` | **84/84** unit test đạt (9 file) — chạy lại 05/10/2026 sau ảnh/video xe |
+| `npm test` | **87/87** unit test đạt (10 file) — chạy lại 05/10/2026 sau khi chuyển tệp nhu cầu sang tải thẳng |
 | `npm run test:db` | 01/10: 61/61. **05/10/2026: 78/80 đạt, 2 test cũ không chạy được do môi trường** (xem "Chưa xác minh") — 14 test hợp đồng ký gửi và 5 test tệp xe đều đạt |
 | `npm run build` | Đạt (chạy lại 05/10/2026); 17 trang biên dịch |
 | `npm run typecheck`, `npm run lint` | Không lỗi (chạy lại 05/10/2026 sau lát 4) |
@@ -149,7 +149,8 @@ sales chưa xem được quyền giảm giá (D33); chưa có mục "Ký gửi" 
 - **Chưa kiểm tra được:** luồng tải lên thật qua trình duyệt + Supabase Storage (cấp URL ký, tải lên, xem bằng URL ký) — chỉ mới kiểm tra policy bằng SQL. Cần thử trên bản xem trước với tài khoản thật.
 - Trang chi tiết xe nặng hơn (khoảng 76 kB so với 9 kB) vì thư viện Supabase chạy ở trình duyệt để tải thẳng lên Storage.
 
-**Rủi ro biết trước:** tệp đính kèm *nhu cầu* (`demand-files`) vẫn tải qua Server Action; Vercel giới hạn thân yêu cầu ~4,5 MB nên ảnh/video lớn hơn có thể bị từ chối trên bản đang chạy dù cấu hình ghi 20 MB. Chưa được kiểm chứng trên Vercel; nên chuyển sang cùng cách tải thẳng như tệp xe.
+**Đã sửa rủi ro:** tệp đính kèm *nhu cầu* (`demand-files`) trước đây tải qua Server Action; Vercel giới hạn thân yêu cầu ~4,5 MB nên ảnh/video lớn hơn có thể bị từ chối trên bản đang chạy dù cấu hình ghi 20 MB (chưa từng kiểm chứng trên Vercel).
+Nay tệp nhu cầu cũng tải thẳng lên Storage bằng URL ký (không đổi database/policy; bỏ cấu hình `bodySizeLimit`), 3 test unit mới (`tests/unit/attachments.test.ts`). **Chưa thử tải thật qua trình duyệt** (cần thử trên bản xem trước).
 
 ## Kiểm tra trên Supabase thật — project `minhky-auto` (01/10/2026)
 
