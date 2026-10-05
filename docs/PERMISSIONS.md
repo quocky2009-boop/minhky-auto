@@ -48,6 +48,9 @@ Ký hiệu: ✔ toàn bộ · ◐ một phần (ghi chú) · — không có quy�
 | Chi phí xe — xem | ✔ | ✔ | ✔ | — | — |
 | Chi phí xe — thêm khoản, xác nhận số thực tế, ghi/hủy thanh toán | ✔ | ✔ | ✔ | — | — |
 | Chi phí xe — duyệt/sửa dự toán, hủy khoản | ✔ | ✔ | — | — | — |
+| Bên góp vốn, điều khoản chia lợi nhuận, vốn cam kết, khoản cho vay — xem | ✔ | ✔ | ✔ | — | — |
+| Bên góp vốn, điều khoản (lập/duyệt/hủy nháp/xác nhận lại), vốn cam kết, khoản vay, hủy dòng sổ | ✔ | ✔ | — | — | — |
+| Tiền thực nhận, rút vốn, thanh toán khoản vay — ghi | ✔ | ✔ | ✔ | — | — |
 | Ảnh/video xe — xem, tải lên | ✔ | ✔ | ✔ | ◐ xe mình thấy | ◐ xe chưa bán |
 | Ảnh/video xe — lưu trữ (không xóa) | ✔ | ✔ | — | — | — |
 | Hợp đồng ký gửi — xem (chủ xe, thỏa thuận, biên bản) | ✔ | ✔ | ✔ | — | — |

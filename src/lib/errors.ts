@@ -13,6 +13,10 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
   consignment_terms_fee_shape: "Phí ký gửi: chọn số tiền cố định HOẶC phần trăm trên giá bán, và nhập đúng một loại.",
   consignment_terms_discount_shape: "Quyền giảm giá: nhập đúng giá trị của loại đã chọn.",
   consignment_terms_fee_percent_check: "Tỷ lệ phí ký gửi phải từ 0 đến 100%.",
+  vehicle_capital_terms_company_rate_check: "Tỷ lệ công ty phải từ 0 đến 100%.",
+  vehicle_capital_shares_ratio_percent_check: "Tỷ lệ của mỗi bên góp vốn phải lớn hơn 0% và tối đa 100%.",
+  vehicle_capital_shares_pkey: "Một bên góp vốn bị chọn trùng trong điều khoản.",
+  vehicle_loan_payments_amount_check: "Số tiền thanh toán phải lớn hơn 0.",
   consignment_one_open_per_vehicle: "Xe này đã có hợp đồng ký gửi đang soạn hoặc đang hiệu lực.",
 };
 

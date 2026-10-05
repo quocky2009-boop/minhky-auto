@@ -1,6 +1,6 @@
 # Tiến độ
 
-Cập nhật: 05/10/2026 · Chặng hiện tại: **chặng 3 — lát 1–3 đã xong và đã áp lên Supabase; lát 4 (hợp đồng ký gửi) có mã + test, đã áp lên Supabase 05/10/2026** · Tiếp theo: ảnh/tệp gắn với xe; quyết toán ký gửi ở chặng 5
+Cập nhật: 05/10/2026 · Chặng hiện tại: **chặng 3 gần xong (còn giao diện danh mục) · chặng 4 lát 1 (vốn góp, điều khoản chia lợi nhuận, cho vay) có mã + test, CHƯA áp lên Supabase** · Tiếp theo: áp migration 1300 sau khi anh Kỳ duyệt, rồi quyết toán (cần chặng 5); quyết toán ký gửi ở chặng 5
 
 ## Tổng quan theo chặng (CLAUDE.md §14)
 
@@ -9,7 +9,7 @@ Cập nhật: 05/10/2026 · Chặng hiện tại: **chặng 3 — lát 1–3 đ�
 | 1 | Nền tảng, Auth, schema, quyền, Storage | **Có mã + test database.** Chưa chạy trên Supabase thật |
 | 2 | Khách → nhu cầu → lọc → chăm sóc → ghép xe | **Có mã + test database + build.** Chưa kiểm tra trên trình duyệt với tài khoản thật |
 | 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Đang làm — lát 1, 2, 3 xong:** kho xe, vòng sở hữu theo VIN, nhập kho; thẩm định + duyệt mua; chi phí chuẩn bị xe (dự kiến / đã xác nhận / đã thanh toán). **Lát 4 (có mã + test, đã áp lên Supabase):** hợp đồng ký gửi. **Còn:** giao diện quản lý địa điểm/mẫu checklist, kỹ thuật viên tự nhập kết quả kiểm tra |
-| 4 | Vốn góp/vay, công thức, quyết toán | Chưa làm (đã có thư viện công thức + unit test) |
+| 4 | Vốn góp/vay, công thức, quyết toán | **Đang làm — lát 1 xong (có mã + test, chưa áp lên Supabase):** bên góp vốn, điều khoản chia lợi nhuận theo xe có phiên bản, sổ vốn góp, cho vay tách riêng, ước tính chia. **Còn:** quyết toán (tạm tính → kiểm tra → phê duyệt → thanh toán), hoàn vốn/chia thực chi, chi phí muộn có điều chỉnh, xử lý hòa vốn/lỗ được duyệt — cần giao dịch bán (chặng 5) |
 | 5 | Bán, thu chi, thu cũ đổi mới, bàn giao | Chưa làm |
 | 6 | Dashboard, báo cáo, hậu mãi, hoa hồng, nghiệm thu | Chưa làm |
 
@@ -45,8 +45,8 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 |---|---|
 | `npm run typecheck` | Không lỗi |
 | `npm run lint` | Không lỗi, không cảnh báo |
-| `npm test` | **87/87** unit test đạt (10 file) — chạy lại 05/10/2026 sau khi chuyển tệp nhu cầu sang tải thẳng |
-| `npm run test:db` | 01/10: 61/61. **05/10/2026: 78/80 đạt, 2 test cũ không chạy được do môi trường** (xem "Chưa xác minh") — 14 test hợp đồng ký gửi và 5 test tệp xe đều đạt |
+| `npm test` | **104/104** unit test đạt (11 file) — chạy lại 05/10/2026 sau chặng 4 lát 1 |
+| `npm run test:db` | 01/10: 61/61. **05/10/2026: 88/90 đạt, 2 test cũ không chạy được do môi trường** (xem "Chưa xác minh") — test hợp đồng ký gửi, tệp xe và vốn góp đều đạt |
 | `npm run build` | Đạt (chạy lại 05/10/2026); 17 trang biên dịch |
 | `npm run typecheck`, `npm run lint` | Không lỗi (chạy lại 05/10/2026 sau lát 4) |
 | `next start` + curl | `/dang-nhap` trả 200 và có form; `/nhu-cau`, `/nhu-cau/moi`, `/tong-quan`, `/cai-dat/nguoi-dung` chuyển hướng về đăng nhập khi chưa đăng nhập |
@@ -62,8 +62,8 @@ Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth 
 | 12.4 | Hai người giữ/cọc cùng xe | Chưa — chặng 5 | |
 | 12.5 | Ký gửi tách tồn, quyết toán khớp | ◐ đã tách hình thức sở hữu/ký gửi, ký gửi không có giá mua, chi phí ký gửi tách bên chịu và không tăng vốn tồn, lọc tồn riêng; hợp đồng ký gửi đã làm (lát 4; đã áp lên Supabase); quyết toán chưa làm (chặng 5) | `inventory`, `costs`, `consignment` |
 | 12.6 | P=40tr, c=20%, 60/40 → 8 / 19,2 / 12,8tr | ✔ ở thư viện | `profit-split` |
-| 12.7 | Công ty vừa góp vốn vừa vận hành không đếm trùng | ✔ ở thư viện | `profit-split` |
-| 12.8 | Thiếu điều khoản/lỗ không quyết toán; làm tròn khớp tổng | ◐ thư viện xong; "tỷ lệ xe không đổi theo cấu hình chung" cần bảng điều khoản (chặng 4) | `profit-split` |
+| 12.7 | Công ty vừa góp vốn vừa vận hành không đếm trùng | ✔ ở thư viện và ở ước tính trên trang xe | `profit-split`, `capital` |
+| 12.8 | Thiếu điều khoản/lỗ không quyết toán; làm tròn khớp tổng; tỷ lệ xe không đổi theo cấu hình chung | ◐ thư viện + điều khoản bất biến theo xe (không có cấu hình chung tự áp) đã có; chặn quyết toán thật chờ chặng 5 | `profit-split`, `capital` |
 | 12.9 | Thu cũ đổi mới | Chưa — chặng 5 | |
 | 12.10 | Retry không sinh trùng | ◐ đã có cho tạo nhu cầu/khách và nhật ký (kể cả gửi song song); phiếu thu/chi ở chặng 5 | `demands-rls`, `ui-flow` |
 | 12.11 | Sales bị chặn khi truy cập dữ liệu/tệp ngoài quyền bằng ID trực tiếp | ✔ cho phạm vi hiện có (khách, nhu cầu, giá vốn, tệp) | `demands-rls`, `ui-flow` |
@@ -152,6 +152,17 @@ sales chưa xem được quyền giảm giá (D33); chưa có mục "Ký gửi" 
 **Đã sửa rủi ro:** tệp đính kèm *nhu cầu* (`demand-files`) trước đây tải qua Server Action; Vercel giới hạn thân yêu cầu ~4,5 MB nên ảnh/video lớn hơn có thể bị từ chối trên bản đang chạy dù cấu hình ghi 20 MB (chưa từng kiểm chứng trên Vercel).
 Nay tệp nhu cầu cũng tải thẳng lên Storage bằng URL ký (không đổi database/policy; bỏ cấu hình `bodySizeLimit`), 3 test unit mới (`tests/unit/attachments.test.ts`). **Chưa thử tải thật qua trình duyệt** (cần thử trên bản xem trước).
 
+## Chặng 4 — lát 1: vốn góp, điều khoản chia lợi nhuận, cho vay (05/10/2026)
+
+- **Bên góp vốn/cho vay** (mã GV…); **điều khoản chia lợi nhuận theo xe có phiên bản** (nháp → duyệt → thay thế; tỷ lệ công ty bắt buộc nhập, không mặc định; duyệt chỉ khi tổng chia đúng 100%; bản duyệt bất biến) — D38.
+- **Sổ vốn góp**: cam kết / thực nhận / rút vốn tách riêng, không sửa, hủy có lý do; rút không vượt thực nhận ròng (khóa chống hai người rút cùng lúc). **Vốn đổi sau khi duyệt → cờ "cần xác nhận lại căn cứ phân chia", không tự đổi tỷ lệ** (D40).
+- **Cho vay** tách khỏi góp vốn: gốc, ngày, lãi thỏa thuận ghi nguyên văn, trả gốc/lãi (trả gốc không vượt gốc) — D41. Chỉ xe showroom sở hữu (D43).
+- **Điều kiện quyết toán** hiển thị trên xe: chưa có điều khoản duyệt / chưa chốt căn cứ chi phí / vốn đổi chưa xác nhận lại (D39). **Ước tính chia** theo giá bán giả định bằng đúng công thức `profit-split.ts` (từ chối khi thiếu dữ liệu) — D44.
+- Khối "Vốn góp và chia lợi nhuận" ở trang chi tiết xe sở hữu (quản lý/kế toán). Quyền: D42.
+- Migration `20261001001300_capital_terms.sql`: **mới áp lên database test cục bộ, CHƯA áp lên Supabase** (chờ anh Kỳ đồng ý).
+- Test: 10 test database (`tests/db/capital.test.ts`: phân quyền gồm sales/kỹ thuật/anon và không xóa, chỉ xe sở hữu, tỷ lệ không mặc định, duyệt đúng 100%, bản duyệt bất biến và thay thế, hủy nháp, gửi lặp song song + đánh số phiên bản khi hai người cùng lập, sổ vốn và rút vốn, cờ xác nhận lại, cho vay tách riêng + hạn mức trả gốc song song, nhật ký không lộ SĐT) + 17 test unit (`tests/unit/capital.test.ts`, gồm dữ liệu test của đặc tả P=40tr/c=20%/60-40 qua ước tính).
+- **Chưa kiểm tra bằng trình duyệt thật.** Chưa có: sửa bản nháp trên giao diện (hủy nháp rồi lập lại; RPC `update_capital_terms` đã có), danh sách "chi phí được chọn" cho căn cứ `selected_costs`, màn hình riêng quản lý bên góp vốn (hiện thêm trong trang xe).
+
 ## Kiểm tra trên Supabase thật — project `minhky-auto` (01/10/2026)
 
 Đã xác minh đúng project (tổ chức "Minh Kỳ Auto", ap-southeast-1, ban đầu hoàn toàn trống) trước khi áp.
@@ -176,13 +187,14 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
   Data API/PostgREST từ ứng dụng (cú pháp `select` lồng bảng, tên khóa ngoại), Security Advisors mức Performance.
 - Chưa kiểm tra trên trình duyệt có đăng nhập (desktop + điện thoại). Test database dùng SQL trực tiếp, không qua PostgREST.
 - **Test database ngày 05/10/2026 chạy bằng vai trò `root`, không phải `postgres`:** 2 test cũ của `demands-rls` (§12.3 người phụ trách bắt buộc, §12.12 khóa tài khoản) phụ thuộc hàm `private.is_system()` chỉ nhận vai trò `postgres/service_role/supabase_admin`,
-  nên báo lỗi do môi trường (cùng 2 test này lỗi trên bản trước lát 4, trước khi có migration mới). Cần chạy lại `npm run test:db` bằng vai trò `postgres` (máy anh Kỳ hoặc CI) để xác nhận 80/80.
+  nên báo lỗi do môi trường (cùng 2 test này lỗi trên bản trước lát 4, trước khi có migration mới). Cần chạy lại `npm run test:db` bằng vai trò `postgres` (máy anh Kỳ hoặc CI) để xác nhận 90/90.
 - Chưa đo hiệu năng với dữ liệu lớn (bộ lọc dùng view + LIKE trên chuỗi chuẩn hóa; có chỉ mục trigram nhưng chưa đo).
 
 ## Trở ngại hiện tại (cần anh Kỳ)
 
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
+1f. **Áp migration `1300_capital_terms.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (thêm 6 bảng vốn góp/cho vay). Và các mục **Tạm** D38–D42 (đặc biệt D39: định nghĩa chi phí được trừ trước khi chia; D41: cách tính lãi vay).
 1e. ~~Áp migration 1200~~ — đã xong 05/10/2026. Cần thử tải ảnh thật trên giao diện (Preview/production) rồi mới coi là nghiệm thu.
 1d. **Supabase có 3 migration không có trong repo:** `appraisal_ai_valuation_tables_v1`, `_security_v1`, `_views_v1` (áp 05/10/2026 07:58, tạo các bảng `appraisal_ai_*`). Không do phiên làm việc này tạo. Cần đưa mã nguồn vào repo (CLAUDE.md §13: không để mã lệch database) và xác nhận phạm vi — CLAUDE.md §14 ghi chưa mở rộng sang "AI định giá" khi chưa được yêu cầu.
 1c. Xác nhận định nghĩa "giá bán" để tính phí % (D30) và các mục **Tạm** D32, D33, D35.

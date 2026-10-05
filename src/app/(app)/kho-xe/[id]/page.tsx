@@ -15,6 +15,9 @@ import { ConsignmentPanel } from "./consignment-panel";
 import { loadVehicleFiles } from "./file-load";
 import { FilesPanel } from "./files-panel";
 import { allowedCategories } from "@/lib/vehicle-files";
+import { loadCapital } from "./capital-load";
+import { CapitalPanel } from "./capital-panel";
+import { toVnd } from "@/lib/money";
 import { randomUUID } from "node:crypto";
 
 export const metadata = { title: "Chi tiết xe" };
@@ -39,10 +42,11 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
   const finance = canSeeFinance(user.roles);
   const manager = isManager(user.roles);
   const isConsignment = v.business_type === "consignment";
-  const [files, costData, consignment] = await Promise.all([
+  const [files, costData, consignment, capital] = await Promise.all([
     loadVehicleFiles(supabase, v.id),
     finance ? loadCosts(supabase, v.id) : Promise.resolve(null),
     finance && isConsignment ? loadConsignment(supabase, v.id) : Promise.resolve(null),
+    finance && !isConsignment ? loadCapital(supabase, v.id) : Promise.resolve(null),
   ]);
   const title = [v.make, v.model, v.variant, v.year_made].filter(Boolean).join(" ");
   const cycles = ((history ?? []) as { id: string; code: string; sale_status: string; business_type: string; intake_date: string | null; depth: number }[]).filter((h) => h.depth > 0);
@@ -131,6 +135,16 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
             createRequestId={randomUUID()} termsRequestId={randomUUID()}
             ownerCostConfirmed={costData?.summary?.confirmed_owner ?? null} ownerCostPaid={costData?.summary?.paid_owner ?? null}
             openCostLines={costData?.summary?.open_lines ?? 0} />
+        </section>
+      )}
+      {capital && (
+        <section className="panel p-4">
+          <h2 className="mb-3 font-semibold">Vốn góp và chia lợi nhuận</h2>
+          <CapitalPanel vehicleId={v.id} manager={manager} parties={capital.parties} terms={capital.terms} entries={capital.entries} summary={capital.summary}
+            loans={capital.loans} needsReconfirm={capital.needsReconfirm}
+            purchasePrice={toVnd(v.purchase_price)?.toString() ?? null} confirmedCosts={toVnd(costData?.summary?.confirmed_showroom)?.toString() ?? null}
+            openCostLines={costData?.summary?.open_lines ?? 0}
+            requestIds={{ party: randomUUID(), terms: randomUUID(), entry: randomUUID(), loan: randomUUID(), loanPay: Object.fromEntries(capital.loans.map((l) => [l.id, randomUUID()])) }} />
         </section>
       )}
       {isConsignment && !finance && <p className="text-xs text-ink-soft">Hợp đồng ký gửi chỉ hiển thị với quản lý/kế toán.</p>}

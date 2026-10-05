@@ -65,7 +65,7 @@ Kết quả mỗi cặp: **Phù hợp / Gần phù hợp / Cần xác minh / Kh�
 - Xe đang giữ cho khách khác vẫn hiện nhưng ghi rõ.
 - Gợi ý chéo giữa các sales chỉ lộ mã nhu cầu và người phụ trách; muốn liên hệ phải qua người phụ trách.
 
-## 7. Góp vốn và chia lợi nhuận (đã có thư viện + test; giao diện ở chặng 4)
+## 7. Góp vốn và chia lợi nhuận (thư viện + test; dữ liệu, điều khoản và sổ vốn xem 7g; quyết toán ở chặng sau)
 
 Công thức đã chốt (CLAUDE.md §7), với P = doanh thu bán − giá mua − chi phí được thống nhất trừ trước khi chia:
 
@@ -151,6 +151,22 @@ Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c 
 - **Không xóa:** tệp chỉ được *lưu trữ* (quản lý, bắt buộc lý do; ẩn khỏi giao diện nhưng tệp gốc và bản ghi được giữ). Không sửa tên/loại/đường dẫn tệp; tải tệp mới nếu cần.
 - **Người tải lên** do database ghi; gửi lặp cùng mã yêu cầu không sinh trùng; ghi vào hồ sơ chỉ khi tệp thật sự đã có trong Storage.
 - Bản scan giấy tờ (cà vẹt, hợp đồng ký gửi) **không** lưu trong app; số hợp đồng giấy ghi ở ô tham chiếu của hợp đồng ký gửi/chứng từ chi phí.
+
+## 7g. Vốn góp, điều khoản chia lợi nhuận theo xe, cho vay (chặng 4 — lát 1)
+
+- **Chỉ xe showroom sở hữu** (kể cả xe thu cũ đổi mới) có bên góp vốn/cho vay. Xe ký gửi có *chủ xe* (mục 7e), không phải bên góp vốn.
+- **Bên góp vốn / cho vay** (mã GV…): cá nhân, tổ chức hoặc "Công ty / showroom" (phần showroom tự góp vốn, để không đếm trùng với phần vận hành). Người ngoài chưa có tài khoản. Điện thoại không ghi vào nhật ký kiểm toán.
+- **Điều khoản chia lợi nhuận của từng xe, có phiên bản:** tỷ lệ dành cho công ty (c, **bắt buộc nhập, không có mặc định**; 0 là số thật nếu nhập rõ), danh sách bên góp với tỷ lệ chia (mỗi bên > 0, không trùng),
+  căn cứ chi phí trừ trước khi chia, cách xử lý hòa vốn/lỗ, căn cứ phân chia, số văn bản.
+  *Bản nháp* sửa được; **duyệt** (quản lý) chỉ khi tổng tỷ lệ chia **đúng 100%** và các bên còn hoạt động; *bản đã duyệt bất biến*. Mỗi xe một bản hiệu lực: duyệt bản mới thì bản cũ thành "đã thay thế". Bản nháp chỉ hủy (có lý do), không xóa.
+  Sửa cấu hình chung không đổi điều khoản xe đã duyệt (không có cấu hình chung tự áp).
+- **Căn cứ chi phí và cách xử lý hòa vốn/lỗ có thể để "chờ xác nhận":** không chặn nhập/duyệt điều khoản nhưng **chặn quyết toán**. Căn cứ chi phí: *mọi chi phí đã xác nhận của xe* / *chỉ các khoản được chọn* (chưa hỗ trợ) / *không trừ chi phí*.
+- **Sổ vốn góp** (không sửa, hủy có lý do): *vốn cam kết* (chỉ quản lý), *tiền thực nhận* và *rút vốn* (kế toán hoặc quản lý) — ba số tách riêng. Bên phải có trong điều khoản (nháp hoặc đã duyệt). Rút vốn không vượt vốn thực nhận ròng (kể cả hai người rút cùng lúc: khóa).
+  Hủy khoản nhận không được làm vốn ròng âm. Chưa ghi gì thì hiện "Chưa ghi", không hiện 0 như đã góp.
+- **Khi vốn thay đổi sau khi duyệt** (ghi hoặc hủy dòng sổ), hệ thống **không tự đổi tỷ lệ** (CLAUDE.md §7): đánh dấu "cần xác nhận lại căn cứ phân chia" cho đến khi quản lý xác nhận lại (bắt buộc nêu lý do tỷ lệ vẫn đúng) hoặc duyệt phiên bản mới. Cờ này chặn quyết toán.
+- **Cho vay hưởng lãi tách khỏi góp vốn:** khoản vay (bên cho vay, gốc, ngày nhận, hạn, lãi thỏa thuận ghi nguyên văn) không vào sổ vốn góp và không chia lãi/lỗ theo tỷ lệ. Trả gốc không vượt gốc (khóa); trả lãi ghi riêng. **Chưa tự tính lãi vay** — chờ định nghĩa cách tính.
+- **Ước tính chia lợi nhuận** trên trang xe: "nếu bán giá X" → P = giá bán − giá mua − chi phí đã xác nhận (theo căn cứ) rồi dùng công thức mục 7. Từ chối (không đoán) khi thiếu căn cứ chi phí, thiếu giá mua, chưa có chi phí đã xác nhận, hòa vốn/lỗ, hoặc tổng tỷ lệ sai. **Đây là ước tính, không phải quyết toán.**
+- **Chưa làm:** quyết toán (tạm tính → kiểm tra → phê duyệt → thanh toán), hoàn vốn/chia lợi nhuận thực chi, chi phí muộn qua điều chỉnh, xử lý hòa vốn/lỗ được duyệt, lãi vay trong báo cáo. Cần giao dịch bán (chặng 5).
 
 ## 8. Chưa định nghĩa — sẽ bổ sung ở chặng tương ứng
 
