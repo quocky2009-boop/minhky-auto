@@ -261,7 +261,7 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
 1h. ~~Áp migration 1400~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D46–D49.
 1m. **Áp migration `1900_handover.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (thêm 4 bảng + 14 dòng danh mục mặc định, 9 RPC, 1 trigger SECURITY DEFINER đồng bộ xe → đã giao, 2 hàm `private` trả cờ/boolean, thay hàm chặn hủy đơn). Mục **Tạm** D73, D75, D76, D78 — đặc biệt rà **danh mục checklist mặc định** và điều kiện thanh toán theo cả đơn.
-1l. ~~Áp migration 1800~~ — đã áp 06/10/2026. Còn chờ xác nhận D70 (xe cũ khi hủy hồ sơ) và D71 (sales có thấy cờ đổi xe cũ).
+1l. ~~Áp migration 1800~~ — đã áp 06/10/2026. D70, D71 đã chốt 06/10/2026.
 1k. ~~Áp migration 1700~~ — đã áp 06/10/2026. Còn chờ xác nhận D62–D66, đặc biệt D63: tiền cọc khi khách bỏ cọc (giữ lại làm thu nhập hay hoàn).
 1j. ~~Áp migration 1600~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D56–D59 (đặc biệt D59: có tự đóng nhu cầu khi xác nhận đơn không).
 1i. ~~Áp migration 1500~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D51–D53, D55 (đặc biệt D51 "giá sàn là ngưỡng duy nhất", D52 ai duyệt giá dưới sàn).
