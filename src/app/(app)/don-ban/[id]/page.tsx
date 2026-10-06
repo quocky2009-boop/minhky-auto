@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireModule } from "@/lib/auth";
-import { isManager } from "@/lib/modules";
+import { canSeeFinance, isManager } from "@/lib/modules";
 import { createClient } from "@/lib/supabase/server";
 import { formatVnd } from "@/lib/money";
 import { formatDate, formatDateTime } from "@/lib/dates";
@@ -27,6 +27,11 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
   const needsApproval = active.some((l) => l.needs_approval);
   const options = o.status === "draft" && mine ? await loadOrderOptions(supabase, o.id) : null;
   const history = o.lines.filter((l) => l.line_status !== "active");
+  const finance = canSeeFinance(user.roles);
+  const money = finance
+    ? ((await supabase.from("sales_order_balances").select("total, paid_direct, applied_deposit, outstanding").eq("order_id", o.id).maybeSingle()).data as
+        { total: unknown; paid_direct: unknown; applied_deposit: unknown; outstanding: unknown } | null)
+    : null;
 
   return (
     <>
@@ -73,6 +78,25 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             contractRef={o.contract_ref ?? ""} contractDate={o.contract_date ?? ""} />
           {o.status === "confirmed" && <p className="mt-2 text-xs text-ink-soft">Đơn đã ký hợp đồng không sửa được; nếu sai, quản lý hủy rồi lập đơn mới. Thu tiền, công nợ, bàn giao và quyết toán làm ở các phần sau.</p>}
         </section>
+
+        {money && (
+          <section className="panel p-4">
+            <h2 className="mb-2 font-semibold">Thu tiền và công nợ</h2>
+            <dl className="grid gap-2 text-sm md:grid-cols-4">
+              <div><dt className="text-ink-soft">Tổng giá bán</dt><dd className="num font-semibold">{formatVnd(money.total)}</dd></div>
+              <div><dt className="text-ink-soft">Thanh toán đã thu (ròng hoàn)</dt><dd className="num font-semibold">{formatVnd(money.paid_direct)}</dd></div>
+              <div><dt className="text-ink-soft">Tiền cọc đã áp vào đơn</dt><dd className="num font-semibold">{formatVnd(money.applied_deposit)}</dd></div>
+              <div><dt className="text-ink-soft">Còn phải thu</dt><dd className="num font-semibold">{money.outstanding === null ? "— (đơn chưa ký)" : formatVnd(money.outstanding)}</dd></div>
+            </dl>
+            {o.status === "confirmed" && (
+              <p className="mt-2 flex flex-wrap gap-3 text-sm">
+                <Link href={`/thu-chi?lap=sale_payment&don=${o.id}`} className="text-petrol hover:underline">+ Thu tiền đơn này</Link>
+                <Link href={`/thu-chi?lap=sale_refund&don=${o.id}`} className="text-petrol hover:underline">Hoàn tiền khách</Link>
+              </p>
+            )}
+            <p className="mt-1 text-xs text-ink-soft">Chỉ tính tiền đã thật sự nhận (phiếu thu). Tiền cọc không phải lợi nhuận; cọc chỉ tính vào đơn khi cọc đã chốt thành đơn bán.</p>
+          </section>
+        )}
 
         {options && (
           <section className="panel p-4">

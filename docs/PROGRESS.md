@@ -152,6 +152,16 @@ sales chưa xem được quyền giảm giá (D33); chưa có mục "Ký gửi" 
 **Đã sửa rủi ro:** tệp đính kèm *nhu cầu* (`demand-files`) trước đây tải qua Server Action; Vercel giới hạn thân yêu cầu ~4,5 MB nên ảnh/video lớn hơn có thể bị từ chối trên bản đang chạy dù cấu hình ghi 20 MB (chưa từng kiểm chứng trên Vercel).
 Nay tệp nhu cầu cũng tải thẳng lên Storage bằng URL ký (không đổi database/policy; bỏ cấu hình `bodySizeLimit`), 3 test unit mới (`tests/unit/attachments.test.ts`). **Chưa thử tải thật qua trình duyệt** (cần thử trên bản xem trước).
 
+## Chặng 5 — lát 4: thu chi (06/10/2026)
+
+- **Tài khoản tiền** + **phiếu thu/chi bất biến** (hủy có lý do, chỉ quản lý) — D61. Loại phiếu: thu cọc, thu thanh toán đơn bán, thu khác; hoàn cọc, hoàn tiền đơn bán, chi phí chung, chi khác — D62.
+- **Tiền cọc thực nhận/hoàn** gắn đặt cọc (không vượt số cọc thỏa thuận); cọc chốt thành đơn bán thì tính vào đã thu của đơn. **Công nợ đơn bán** (view `sales_order_balances`): không thu vượt nợ, hoàn không vượt đã thu, **hủy đơn đã ký bị chặn khi còn thanh toán chưa hoàn** — D63. Chi chỉ khi quỹ đủ tiền, khóa chống hai phiếu cùng lúc — D64.
+- Trang mới `/thu-chi` (tài khoản + số dư, lập phiếu, sổ phiếu lọc theo hướng/tài khoản/ngày/trạng thái, phân trang phía server) và khối "Thu tiền và công nợ" ở chi tiết đơn bán (kế toán/quản lý). Quyền — D65.
+- Migration `20261001001700_cashbook.sql`: **mới áp lên database test cục bộ, CHƯA áp lên Supabase** (chờ anh Kỳ đồng ý). Mục **Tạm** D62–D66.
+- Test: 6 test database (`tests/db/cashbook.test.ts`: quyền/RLS (sales, kỹ thuật, anon không đọc), ngày/hình thức/ngừng dùng/gửi lặp, **hai phiếu chi cùng lúc vượt quỹ → một qua; hai phiếu thu cùng lúc vượt công nợ → một qua**, cọc → đơn bán → công nợ, hoàn tiền/hủy đơn/hoàn cọc, hủy phiếu) chạy 8 lần liên tiếp cùng sales-orders/reservations/quotes 0 lỗi; 5 test unit (`tests/unit/cashbook.test.ts`).
+- Kết quả: typecheck, lint, build đạt; `npm test` 123/123; `npm run test:db` 120/122 (2 test cũ `demands-rls` lỗi do role `root` — hạn chế môi trường đã ghi).
+- Giới hạn: chưa nối với chi phí xe/vốn góp/quyết toán/thu cũ đổi mới (D66); chưa có "tịch thu cọc"; chưa đối chiếu sao kê, báo cáo theo kỳ, xuất Excel; chưa kiểm tra giao diện bằng trình duyệt thật.
+
 ## Chặng 5 — lát 3: đơn bán nhiều xe + hợp đồng bán (06/10/2026)
 
 - **Đơn bán** (DB#####) nhiều dòng xe, giá bán ghi trên hợp đồng; đang soạn → đã ký hợp đồng → đã hủy — D56. Xác nhận cần số hợp đồng + ngày ký — D57. Xe → "đã bán", giữ/cọc của nhu cầu → "đã thành đơn bán" — D59.
@@ -229,6 +239,7 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
 1h. ~~Áp migration 1400~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D46–D49.
+1k. **Áp migration `1700_cashbook.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (thêm 2 bảng, 3 view security invoker, 4 RPC, 6 hàm SECURITY DEFINER hẹp trong schema `private` chỉ trả số tiền). Mục **Tạm** D62–D66, đặc biệt D63: tiền cọc khi khách bỏ cọc (giữ lại làm thu nhập hay hoàn).
 1j. ~~Áp migration 1600~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D56–D59 (đặc biệt D59: có tự đóng nhu cầu khi xác nhận đơn không).
 1i. ~~Áp migration 1500~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D51–D53, D55 (đặc biệt D51 "giá sàn là ngưỡng duy nhất", D52 ai duyệt giá dưới sàn).
 1f. ~~Áp migration 1300~~ — đã xong 05/10/2026. **Đã chốt D39/D41 (05/10/2026):** chi phí chung KHÔNG trừ trước khi chia (giữ quy tắc §7); lãi vay không tính, không trừ. Còn lại: hoa hồng bán xe có trừ trước khi chia không — để chặng 6.

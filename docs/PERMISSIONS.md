@@ -58,6 +58,9 @@ Ký hiệu: ✔ toàn bộ · ◐ một phần (ghi chú) · — không có quy�
 | Đơn bán — xác nhận khi có dòng thấp hơn mức cho phép (kèm lý do) | ✔ | ✔ | — | — | — |
 | Đơn bán — hủy đơn đã xác nhận | ✔ | ✔ | — | — | — |
 | Đơn bán — xem | ✔ | ✔ | ✔ (xem) | ◐ của mình | — |
+| Tài khoản tiền, phiếu thu/chi, số dư, công nợ đơn bán — xem | ✔ | ✔ | ✔ | — | — |
+| Phiếu thu/chi — lập | ✔ | ✔ | ✔ | — | — |
+| Phiếu thu/chi — hủy; tài khoản tiền — lập/sửa/ngừng dùng | ✔ | ✔ | — | — | — |
 | Bên góp vốn, điều khoản chia lợi nhuận, vốn cam kết, khoản cho vay — xem | ✔ | ✔ | ✔ | — | — |
 | Bên góp vốn, điều khoản (lập/duyệt/hủy nháp/xác nhận lại), vốn cam kết, khoản vay, hủy dòng sổ | ✔ | ✔ | — | — | — |
 | Tiền thực nhận, rút vốn, thanh toán khoản vay — ghi | ✔ | ✔ | ✔ | — | — |

@@ -200,7 +200,17 @@ Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c 
 - **Duyệt giá (D58):** dòng thấp hơn mức cho phép → chỉ quản lý/admin xác nhận, kèm lý do. Dòng gắn phiên bản báo giá khách đã chấp nhận (cùng xe, cùng nhu cầu, giá bằng giá báo, mỗi báo giá chỉ một đơn) thì không cần duyệt lại.
 - **Xác nhận (D57, D59):** cần số hợp đồng + ngày ký (không tương lai) và ít nhất một xe; xe → "đã bán"; giữ/cọc của đúng nhu cầu → "đã thành đơn bán"; nhật ký nhu cầu không ghi số tiền. **Hủy:** đơn nháp do người phụ trách/quản lý; đơn đã xác nhận chỉ quản lý; bắt buộc lý do; xe đã bán về "đang bán".
 - **Quyền xem:** sales chỉ thấy đơn của mình; quản lý/kế toán thấy tất cả; kỹ thuật không thấy; không xóa.
-- **Chưa làm:** thu tiền/cọc thực nhận/công nợ (và chặn hủy khi đã nhận tiền), thu cũ đổi mới, bàn giao, quyết toán chia lợi nhuận/phí ký gửi, tự đóng nhu cầu, xuất hợp đồng theo mẫu.
+- **Chưa làm:** thu cũ đổi mới, bàn giao, quyết toán chia lợi nhuận/phí ký gửi, tự đóng nhu cầu, xuất hợp đồng theo mẫu.
+
+## 7k. Thu chi, tiền cọc thực nhận/hoàn và công nợ đơn bán (chặng 5 — lát 4)
+
+- **Tài khoản tiền** (TK###, tiền mặt/ngân hàng): số dư đầu kỳ nhập một lần (khóa khi đã có phiếu); không xóa, chỉ ngừng dùng. Số dư = đầu kỳ + thu − chi (chỉ phiếu đã ghi).
+- **Phiếu** (PT#####/PC#####) = tiền **đã thật sự** vào/ra; ngày không ở tương lai; hình thức khớp loại tài khoản; bất biến; sai thì quản lý hủy có lý do (D61). Chưa nhận tiền/ngân hàng chưa giải ngân → chưa có phiếu.
+- **Loại phiếu (D62):** thu cọc (gắn đặt cọc, tổng không vượt số cọc thỏa thuận), thu thanh toán đơn bán (đơn đã ký), thu khác; chi hoàn cọc, hoàn tiền đơn bán, chi phí chung, chi khác. Thu ghi "ai trả" (khách/ngân hàng giải ngân/khác).
+- **Công nợ đơn bán (D63):** tổng giá − thanh toán ròng hoàn − cọc đã áp. Không thu vượt nợ; hoàn không vượt đã thu; hủy đơn đã ký bị chặn khi còn thanh toán chưa hoàn. Cọc: hoàn khi cọc đã hủy, hoặc đơn dùng cọc đã bị hủy; cọc đang áp vào đơn thì không hoàn trực tiếp.
+- **Chi (D64):** chỉ khi tài khoản đủ tiền thực có; khóa theo tài khoản/đơn/cọc chống hai phiếu cùng lúc. Không hủy phiếu thu nếu làm quỹ âm hoặc đã có phiếu hoàn dựa trên nó.
+- **Quyền (D65):** kế toán/quản lý lập phiếu và xem; chỉ quản lý hủy phiếu và lập tài khoản; sales/kỹ thuật không đọc.
+- **Chưa làm (D66):** nối sổ quỹ với chi phí xe, vốn góp/khoản vay, quyết toán chia lợi nhuận/phí ký gửi, thu cũ đổi mới; "tịch thu cọc"; đối chiếu sao kê; báo cáo thu chi theo kỳ/xuất Excel.
 
 ## 8. Chưa định nghĩa — sẽ bổ sung ở chặng tương ứng
 
