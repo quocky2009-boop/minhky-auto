@@ -223,6 +223,14 @@ Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c 
 - **Quyền (D71):** quản lý ghi; kế toán xem + lập phiếu chi xe cũ; sales/kỹ thuật không đọc.
 - **Chưa làm:** khoản vay lớn hơn giá mua (khách bù), trả lại xe cũ khi hủy hồ sơ, tự điền biên bản/hợp đồng mua xe cũ, quyết toán hiệu quả từng xe (lát quyết toán).
 
+## 7m. Bàn giao xe và hồ sơ (chặng 5 — lát 6)
+
+- **Bàn giao (BN#####)** gắn một dòng xe của đơn bán đã ký; người phụ trách đơn hoặc quản lý lập (D73). Checklist chụp từ danh mục cấu hình lúc lập; mỗi mục có trạng thái, bản gốc, bản scan (chỉ có/không), người giữ (D74).
+- **Điều kiện giao (D75):** đơn đã ký (không miễn được); thanh toán đủ; xe chuẩn bị xong; hồ sơ xe đủ; checklist bắt buộc đạt. Ngoại lệ do quản lý, có lý do, đúng loại, thu hồi được (D76). Giao cần ngày, người nhận + quan hệ, ODO, chìa khóa.
+- **Sau khi giao (D77):** xe "đã giao"; bàn giao bất biến; đơn không hủy được. Hủy bàn giao đang chuẩn bị có lý do; mỗi dòng một bàn giao.
+- **Quyền (D78):** sales/quản lý làm bàn giao đơn của mình; quản lý phê duyệt ngoại lệ và sửa danh mục; kế toán xem; sales chỉ thấy cờ điều kiện. Biên bản in không có số tiền.
+- **Chưa làm:** bắt buộc số ảnh tối thiểu khi giao, xe điện kiểm tra pin lúc giao, nhắc lịch giao, giao một phần/trả xe sau giao (hậu mãi), đối chiếu bản gốc giấy tờ với kho hồ sơ.
+
 ## 8. Chưa định nghĩa — sẽ bổ sung ở chặng tương ứng
 
 Hợp đồng mua, quyết toán chủ xe xe ký gửi (thu hộ, phần showroom, khấu trừ, còn phải trả; định nghĩa chính xác "giá bán" để tính phần trăm — giá ghi trên hợp đồng bán, đã/chưa trừ giảm giá, thuế, lệ phí), việc chi phí nào được trừ trước khi chia lợi nhuận, giữ/cọc xe đồng thời, thu cũ đổi mới đối trừ, hoa hồng, chỉ tiêu báo cáo.

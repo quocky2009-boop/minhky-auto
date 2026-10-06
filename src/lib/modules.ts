@@ -36,7 +36,7 @@ export const MODULES: ModuleDef[] = [
   { key: "prep", label: "Chuẩn bị xe & chi phí", group: "Xe", roles: ["admin", "manager", "technician", "accountant"], status: "planned", phase: 3 },
   { key: "sales", label: "Đơn bán", group: "Giao dịch", href: "/don-ban", roles: [...SELLERS, "accountant"], status: "partial", phase: 5 },
   { key: "tradein", label: "Thu cũ đổi mới", group: "Giao dịch", roles: SELLERS, status: "planned", phase: 5 },
-  { key: "docs", label: "Hồ sơ & bàn giao", group: "Giao dịch", roles: ["admin", "manager", "sales", "accountant"], status: "planned", phase: 5 },
+  { key: "docs", label: "Hồ sơ & bàn giao", group: "Giao dịch", href: "/ban-giao", roles: ["admin", "manager", "sales", "accountant"], status: "partial", phase: 5 },
   { key: "capital", label: "Vốn góp & vay", group: "Tài chính", roles: ["admin", "manager", "accountant"], status: "planned", phase: 4 },
   { key: "cashbook", label: "Thu chi & công nợ", group: "Tài chính", href: "/thu-chi", roles: ["admin", "manager", "accountant"], status: "partial", phase: 5 },
   { key: "reports", label: "Báo cáo", group: "Tài chính", roles: ["admin", "manager", "accountant"], status: "planned", phase: 6 },

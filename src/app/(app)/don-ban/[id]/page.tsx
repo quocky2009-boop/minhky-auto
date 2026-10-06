@@ -11,6 +11,8 @@ import { getOrder, loadOrderOptions } from "../load";
 import { OrderForm } from "../order-form";
 import { OrderActionsPanel } from "./order-actions-panel";
 import { loadTradeIns } from "./trade-in-load";
+import { loadOrderHandovers } from "../../ban-giao/load";
+import { HandoverCreate } from "./handover-create";
 import { TradeInPanel } from "./trade-in-panel";
 import { randomUUID } from "node:crypto";
 
@@ -31,6 +33,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
   const options = o.status === "draft" && mine ? await loadOrderOptions(supabase, o.id) : null;
   const history = o.lines.filter((l) => l.line_status !== "active");
   const finance = canSeeFinance(user.roles);
+  const handovers = o.status === "confirmed" ? await loadOrderHandovers(supabase, o.id) : [];
   const trade = finance ? await loadTradeIns(supabase, o.id, manager) : null;
   const money = finance
     ? ((await supabase.from("sales_order_balances").select("total, paid_direct, applied_deposit, outstanding, trade_in_offset").eq("order_id", o.id).maybeSingle()).data as
@@ -100,6 +103,21 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               </p>
             )}
             <p className="mt-1 text-xs text-ink-soft">Chỉ tính tiền đã thật sự nhận (phiếu thu). Tiền cọc không phải lợi nhuận; cọc chỉ tính vào đơn khi cọc đã chốt thành đơn bán.</p>
+          </section>
+        )}
+
+        {handovers.length > 0 && (
+          <section className="panel p-4">
+            <h2 className="mb-2 font-semibold">Bàn giao xe</h2>
+            <ul className="space-y-2 text-sm">
+              {handovers.map((x) => (
+                <li key={x.line_id} className="flex flex-wrap items-center justify-between gap-2">
+                  <span>{x.label}</span>
+                  {x.handover ? <Link href={`/ban-giao/${x.handover.id}`} className="text-petrol hover:underline">{x.handover.code} · {x.handover.status === "preparing" ? "đang chuẩn bị" : x.handover.status === "delivered" ? "đã giao" : "đã hủy"}</Link>
+                    : mine ? <HandoverCreate lineId={x.line_id} requestId={randomUUID()} /> : <span className="text-ink-soft">Chưa lập bàn giao</span>}
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 
