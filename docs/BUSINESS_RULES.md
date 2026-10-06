@@ -231,6 +231,18 @@ Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c 
 - **Quyền (D78):** sales/quản lý làm bàn giao đơn của mình; quản lý phê duyệt ngoại lệ và sửa danh mục; kế toán xem; sales chỉ thấy cờ điều kiện. Biên bản in không có số tiền.
 - **Chưa làm:** bắt buộc số ảnh tối thiểu khi giao, xe điện kiểm tra pin lúc giao, nhắc lịch giao, giao một phần/trả xe sau giao (hậu mãi), đối chiếu bản gốc giấy tờ với kho hồ sơ.
 
+## 7n. Quyết toán xe (chặng 5 — lát 7)
+
+- **Quy trình (D79):** tạm tính → kiểm tra → phê duyệt → thanh toán; mỗi dòng xe một quyết toán đang hiệu lực; số liệu đầu vào chụp lúc tạm tính.
+- **Xe sở hữu (D80):** P = giá bán − giá mua − chi phí được trừ; C = P × tỷ lệ công ty (nửa lên); R = P − C; lợi nhuận bên i = R × tỷ lệ (phần dư lớn nhất). Hoàn vốn = vốn thực nhận ròng. Dòng của công ty là nội bộ. Ví dụ kiểm: P = 40 tr, 20%, vốn 60/40 → công ty 8 tr, hai bên 19,2 / 12,8 tr.
+- **Hòa vốn/lỗ (D82):** không áp công thức; cần cách xử lý trong điều khoản + quản lý ghi số hoàn vốn.
+- **Xe ký gửi (D83):** trả chủ xe S − F − K (showroom thu tiền) hoặc chủ xe nộp F + K (chủ xe thu tiền); âm thì chủ xe còn nợ.
+- **Điều kiện duyệt (D81):** số liệu không đổi, điều khoản đủ, hết chi phí dự kiến, xử lý hòa vốn/lỗ, **đơn đã thu đủ**.
+- **Chi trả (D85):** phiếu thu/chi theo dòng nghĩa vụ của quyết toán đã duyệt; không vượt phần còn lại; quỹ đủ tiền; hủy phiếu mở lại nghĩa vụ.
+- **Điều chỉnh (D84):** bản đã duyệt không sửa; chi phí muộn → điều chỉnh có lý do (quản lý); số đã chi chuyển sang bản mới; chi vượt nghĩa vụ mới thì không duyệt.
+- **Quyền (D86):** kế toán + quản lý tạm tính/kiểm tra/chi; quản lý/admin duyệt, xử lý hòa vốn/lỗ, điều chỉnh.
+- **Chưa làm (D87):** nối vốn góp thực nhận/khoản vay/chi phí xe vào sổ quỹ; hoa hồng (chặng 6); báo cáo lợi nhuận toàn showroom; bản in quyết toán; chia lỗ tự động.
+
 ## 8. Chưa định nghĩa — sẽ bổ sung ở chặng tương ứng
 
 Hợp đồng mua, quyết toán chủ xe xe ký gửi (thu hộ, phần showroom, khấu trừ, còn phải trả; định nghĩa chính xác "giá bán" để tính phần trăm — giá ghi trên hợp đồng bán, đã/chưa trừ giảm giá, thuế, lệ phí), việc chi phí nào được trừ trước khi chia lợi nhuận, giữ/cọc xe đồng thời, thu cũ đổi mới đối trừ, hoa hồng, chỉ tiêu báo cáo.

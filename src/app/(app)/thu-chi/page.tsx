@@ -37,8 +37,8 @@ export default async function CashbookPage({ searchParams }: { searchParams: Pro
         <section className="panel p-4"><h2 className="mb-2 font-semibold">Lập phiếu thu/chi</h2>
           {accounts.some((a) => a.is_active) ? (
             <details open={!!sp.lap}><summary className="cursor-pointer text-sm font-semibold text-petrol">+ Lập phiếu</summary>
-              <div className="mt-3"><VoucherForm requestId={randomUUID()} today={todayVn()} accounts={accounts} orders={targets.orderOptions} deposits={targets.depositOptions} tradeIns={targets.tradeInOptions}
-                initial={{ purpose: sp.lap, order: sp.don, reservation: sp.coc, tradeIn: sp.tc }} /></div></details>
+              <div className="mt-3"><VoucherForm requestId={randomUUID()} today={todayVn()} accounts={accounts} orders={targets.orderOptions} deposits={targets.depositOptions} tradeIns={targets.tradeInOptions} settlementLines={targets.settlementOptions}
+                initial={{ purpose: sp.lap, order: sp.don, reservation: sp.coc, tradeIn: sp.tc, settlementLine: sp.dl }} /></div></details>
           ) : <p className="text-sm text-ink-soft">Cần ít nhất một tài khoản tiền đang dùng để lập phiếu.</p>}
         </section>
 

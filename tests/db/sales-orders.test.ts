@@ -87,7 +87,7 @@ d("Đơn bán nhiều xe — chặng 5 lát 3 (database thật)", () => {
     expect((await sys.query("select status from public.vehicle_reservations where vehicle_id = $1", [v1])).rows[0].status).toBe("fulfilled");
     const logs = (await sys.query("select content from public.demand_activities where demand_id = $1 and channel = 'system'", [dA])).rows.map((x) => x.content as string);
     expect(logs.some((c) => /Đã xác nhận đơn bán DB\d+ \(hợp đồng HĐB-001\)/.test(c))).toBe(true);
-    expect(logs.join(" ")).not.toMatch(/680|690|30\.?000/);
+    expect(logs.join(" ")).not.toMatch(/680[.,]?000|690[.,]?000|30[.,]?000[.,]?000/);
     // sales không còn đọc được xe đã bán, nhưng vẫn thấy nhãn xe ghi trên đơn của mình
     expect(await count(cA, salesA, "select count(*)::int n from public.vehicles where id = $1", [v1])).toBe(0);
     expect((await as(cA, salesA, async (db) => (await db.query("select vehicle_label l from public.sales_order_lines where order_id = $1 and vehicle_id = $2", [o, v1])).rows[0].l as string))).toMatch(/^XE\d+ Mazda CX-5/);

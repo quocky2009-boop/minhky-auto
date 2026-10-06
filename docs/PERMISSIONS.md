@@ -66,6 +66,8 @@ Ký hiệu: ✔ toàn bộ · ◐ một phần (ghi chú) · — không có quy�
 | Bàn giao — lập, làm checklist, giao xe, hủy (bàn giao của đơn mình phụ trách) | ✔ | ✔ | — | ◐ | — |
 | Bàn giao — xem (sales: chỉ cờ điều kiện, không số tiền) | ✔ | ✔ | ✔ | ◐ của mình | — |
 | Bàn giao — phê duyệt/thu hồi ngoại lệ; sửa danh mục checklist | ✔ | ✔ | — | — | — |
+| Quyết toán — xem, tạm tính, kiểm tra, lập phiếu chi/thu theo nghĩa vụ | ✔ | ✔ | ✔ | — | — |
+| Quyết toán — phê duyệt; ghi xử lý hòa vốn/lỗ; lập điều chỉnh; hủy bản đã duyệt | ✔ | ✔ | — | — | — |
 | Phiếu thu/chi — hủy; tài khoản tiền — lập/sửa/ngừng dùng | ✔ | ✔ | — | — | — |
 | Bên góp vốn, điều khoản chia lợi nhuận, vốn cam kết, khoản cho vay — xem | ✔ | ✔ | ✔ | — | — |
 | Bên góp vốn, điều khoản (lập/duyệt/hủy nháp/xác nhận lại), vốn cam kết, khoản vay, hủy dòng sổ | ✔ | ✔ | — | — | — |

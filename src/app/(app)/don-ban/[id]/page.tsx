@@ -13,6 +13,8 @@ import { OrderActionsPanel } from "./order-actions-panel";
 import { loadTradeIns } from "./trade-in-load";
 import { loadOrderHandovers } from "../../ban-giao/load";
 import { HandoverCreate } from "./handover-create";
+import { loadOrderSettlements } from "../../quyet-toan/load";
+import { SettlementCreate } from "./settlement-create";
 import { TradeInPanel } from "./trade-in-panel";
 import { randomUUID } from "node:crypto";
 
@@ -34,6 +36,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
   const history = o.lines.filter((l) => l.line_status !== "active");
   const finance = canSeeFinance(user.roles);
   const handovers = o.status === "confirmed" ? await loadOrderHandovers(supabase, o.id) : [];
+  const settlements = finance && o.status === "confirmed" ? await loadOrderSettlements(supabase, o.id) : [];
   const trade = finance ? await loadTradeIns(supabase, o.id, manager) : null;
   const money = finance
     ? ((await supabase.from("sales_order_balances").select("total, paid_direct, applied_deposit, outstanding, trade_in_offset").eq("order_id", o.id).maybeSingle()).data as
@@ -118,6 +121,22 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
                 </li>
               ))}
             </ul>
+          </section>
+        )}
+
+        {settlements.length > 0 && (
+          <section className="panel p-4">
+            <h2 className="mb-2 font-semibold">Quyết toán xe</h2>
+            <ul className="space-y-2 text-sm">
+              {settlements.map((x) => (
+                <li key={x.line_id} className="flex flex-wrap items-center justify-between gap-2">
+                  <span>{x.label}</span>
+                  {x.settlement ? <Link href={`/quyet-toan/${x.settlement.id}`} className="text-petrol hover:underline">{x.settlement.code} · {x.settlement.status === "provisional" ? "tạm tính" : x.settlement.status === "checked" ? "đã kiểm tra" : "đã phê duyệt"}</Link>
+                    : <SettlementCreate lineId={x.line_id} requestId={randomUUID()} />}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-xs text-ink-soft">Quyết toán chia lợi nhuận (xe góp vốn) hoặc trả chủ xe (xe ký gửi). Chỉ phê duyệt được khi đơn đã thu đủ tiền.</p>
           </section>
         )}
 

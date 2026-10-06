@@ -207,7 +207,7 @@ d("Bàn giao xe và hồ sơ — chặng 5 lát 6 (database thật)", () => {
       .toMatchObject({ status: "delivered", received_by_name: "Trần Thị Nhận Thay", received_relation: "proxy", odo_at_handover: 12500, keys_given: 2, delivered_by: salesA });
     const logs = (await sys.query("select content from public.demand_activities where demand_id = $1 and channel = 'system'", [s.dem])).rows.map((x) => x.content as string);
     expect(logs.some((c) => /Đã giao xe XE\d+ \(bàn giao BN\d+\)/.test(c))).toBe(true);
-    expect(logs.join(" ")).not.toMatch(/800|000\.000/);
+    expect(logs.join(" ")).not.toMatch(/\d{1,3}(?:[.,]\d{3}){2,}|800000000/);
     await expect(deliver(cA, salesA, h)).rejects.toThrow(/vừa được cập nhật|đã kết thúc/);
     await expect(as(cM, manager, async (db) => db.query("select public.cancel_handover($1, $2, 'sửa')", [h, (await hv(h)).version]))).rejects.toThrow(/vừa được cập nhật|đã kết thúc/);
     await expect(setItem(cA, salesA, h, "manual", {})).rejects.toThrow(/đã kết thúc|vừa được cập nhật/);

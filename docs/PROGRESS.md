@@ -152,6 +152,16 @@ sales chưa xem được quyền giảm giá (D33); chưa có mục "Ký gửi" 
 **Đã sửa rủi ro:** tệp đính kèm *nhu cầu* (`demand-files`) trước đây tải qua Server Action; Vercel giới hạn thân yêu cầu ~4,5 MB nên ảnh/video lớn hơn có thể bị từ chối trên bản đang chạy dù cấu hình ghi 20 MB (chưa từng kiểm chứng trên Vercel).
 Nay tệp nhu cầu cũng tải thẳng lên Storage bằng URL ký (không đổi database/policy; bỏ cấu hình `bodySizeLimit`), 3 test unit mới (`tests/unit/attachments.test.ts`). **Chưa thử tải thật qua trình duyệt** (cần thử trên bản xem trước).
 
+## Chặng 5 — lát 7: quyết toán xe (06/10/2026)
+
+- **Quyết toán (QT#####)** theo từng dòng xe đã bán: tạm tính → kiểm tra → phê duyệt → thanh toán — D79. **Xe sở hữu:** chia lợi nhuận theo điều khoản góp vốn đã duyệt (P, C, R, phần dư lớn nhất) và **hoàn vốn** = vốn thực nhận ròng — D80. **Xe ký gửi:** thu hộ / phí / khấu trừ / trả chủ xe hoặc chủ xe nộp — D83. **Hòa vốn/lỗ** không áp công thức, cần xử lý được duyệt — D82.
+- **Điều kiện duyệt** do database kiểm (số liệu không đổi, điều khoản đủ, hết chi phí dự kiến, đơn đã thu đủ) — D81. **Điều chỉnh** khi có chi phí muộn, không sửa bản đã duyệt, số đã chi chuyển sang — D84. **Chi trả** bằng phiếu thu/chi theo nghĩa vụ, không vượt phần còn lại, quỹ đủ tiền — D85. Quyền — D86.
+- Trang mới `/quyet-toan` (danh sách, chi tiết: các khoản + đã chi/còn lại, điều kiện còn thiếu, kiểm tra/duyệt/hủy/điều chỉnh, xử lý hòa vốn/lỗ), nút "Tạm tính quyết toán" ở chi tiết đơn bán, 4 loại phiếu mới ở `/thu-chi`.
+- Migration `20261001002000_settlements.sql`: **mới áp lên database test cục bộ, CHƯA áp lên Supabase** (chờ anh Kỳ đồng ý). Mục **Tạm** D81, D82, D83, D86, D87.
+- Test: 11 test database (`tests/db/settlement.test.ts`: ví dụ chốt 40 tr/20%/60-40 → 8 tr, 19,2/12,8 tr; làm tròn nhiều ca **khớp công thức TypeScript**; công ty góp vốn không đếm trùng; thiếu giá mua/căn cứ/điều khoản bị từ chối; quy trình và phân quyền; số liệu đổi/chi phí muộn; chi trả không vượt, quỹ không đủ, hủy phiếu mở lại nghĩa vụ; **hai phiếu chi cùng lúc vượt phần còn lại → một qua; hai người cùng duyệt → một thắng**; hòa vốn/lỗ; điều chỉnh có chuyển số đã chi và chặn chi vượt; ký gửi cả hai bên thu tiền; hủy) chạy 6 lần liên tiếp 0 lỗi; 5 test unit mới.
+- Kết quả: typecheck, lint, build đạt; `npm test` 140/140; `npm run test:db` 143/145 (2 test cũ `demands-rls` lỗi do role `root` — hạn chế môi trường đã ghi). Sửa 2 test cũ dễ vỡ (regex bắt nhầm mã chứng từ).
+- Giới hạn: **vốn góp thực nhận/khoản vay/chi phí xe chưa vào sổ quỹ (D87)** → có thể phải nạp quỹ trước khi chi hoàn vốn; chưa có báo cáo lợi nhuận toàn showroom, bản in quyết toán, hoa hồng; chưa kiểm tra giao diện bằng trình duyệt thật.
+
 ## Chặng 5 — lát 6: bàn giao xe và hồ sơ (06/10/2026)
 
 - **Bàn giao (BN#####)** theo từng dòng xe của đơn bán đã ký; **checklist cấu hình được** (14 mục mặc định, D73) với bản gốc / bản scan (chỉ có-không) / người giữ — D74.
@@ -260,6 +270,7 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
 1h. ~~Áp migration 1400~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D46–D49.
+1n. **Áp migration `2000_settlements.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (thêm 2 bảng, 1 view, 6 RPC, thêm cột `settlement_line_id` + 4 loại phiếu cho sổ quỹ, thay `post_voucher` + hàm kiểm tra phiếu; hàm `private` chỉ đọc/trả số). Mục **Tạm** D81–D83, D86, D87 — đặc biệt D81 (duyệt khi đơn chưa thu đủ?) và D87 (nối vốn góp vào sổ quỹ).
 1m. ~~Áp migration 1900~~ — đã áp 06/10/2026. Còn chờ rà **danh mục checklist mặc định** (D73) và điều kiện thanh toán theo cả đơn (D75).
 1l. ~~Áp migration 1800~~ — đã áp 06/10/2026. D70, D71 đã chốt 06/10/2026.
 1k. ~~Áp migration 1700~~ — đã áp 06/10/2026. Còn chờ xác nhận D62–D66, đặc biệt D63: tiền cọc khi khách bỏ cọc (giữ lại làm thu nhập hay hoàn).

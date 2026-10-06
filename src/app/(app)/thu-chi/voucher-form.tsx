@@ -3,11 +3,12 @@
 import { useActionState, useState } from "react";
 import { cashAction } from "./actions";
 import type { ActionState } from "../nhu-cau/actions";
-import type { AccountBalance, DepositOption, OrderOption, TradeInOption } from "./load";
+import type { AccountBalance, DepositOption, OrderOption, SettlementLineOption, TradeInOption } from "./load";
+import { LINE_KIND_LABEL, LINE_PURPOSE } from "@/lib/settlements";
 import { PURPOSE_DIRECTION, PURPOSE_LABEL, PAYER_LABEL, METHOD_LABEL } from "@/lib/cashbook";
 import { formatVnd } from "@/lib/money";
 
-type Props = { requestId: string; today: string; accounts: AccountBalance[]; orders: OrderOption[]; deposits: DepositOption[]; tradeIns: TradeInOption[]; initial?: { purpose?: string; order?: string; reservation?: string; tradeIn?: string } };
+type Props = { requestId: string; today: string; accounts: AccountBalance[]; orders: OrderOption[]; deposits: DepositOption[]; tradeIns: TradeInOption[]; settlementLines: SettlementLineOption[]; initial?: { purpose?: string; order?: string; reservation?: string; tradeIn?: string; settlementLine?: string } };
 
 /** Lập phiếu thu/chi. Phiếu = tiền ĐÃ vào/ra tài khoản; luật tiền do database kiểm tra lại. */
 export function VoucherForm(p: Props) {
@@ -19,7 +20,8 @@ export function VoucherForm(p: Props) {
   const needOrder = purpose === "sale_payment" || purpose === "sale_refund";
   const needDep = purpose === "sale_deposit" || purpose === "deposit_refund";
   const needTi = purpose === "tradein_payout" || purpose === "tradein_loan_payoff";
-  const free = !needOrder && !needDep && !needTi;
+  const needSl = Object.values(LINE_PURPOSE).includes(purpose);
+  const free = !needOrder && !needDep && !needTi && !needSl;
   const accounts = p.accounts.filter((a) => a.is_active);
   return (
     <form action={action} className="grid gap-3 md:grid-cols-3">
@@ -39,6 +41,11 @@ export function VoucherForm(p: Props) {
         <label className="md:col-span-2"><span className="label">Đặt cọc *</span>
           <select name="reservation_id" defaultValue={p.initial?.reservation ?? ""} className="field"><option value="">— Chọn đặt cọc —</option>
             {p.deposits.map((r) => <option key={r.id} value={r.id}>{r.code} · cọc thỏa thuận {formatVnd(r.deposit_amount)} · đã thu (ròng) {formatVnd(r.net_deposit)} · {r.status === "active" ? "đang hiệu lực" : r.status === "fulfilled" ? "đã thành đơn bán" : r.status === "cancelled" ? "đã hủy" : r.status}</option>)}</select><Err k="reservation_id" /></label>
+      )}
+      {needSl && (
+        <label className="md:col-span-2"><span className="label">Nghĩa vụ của quyết toán đã duyệt *</span>
+          <select name="settlement_line_id" defaultValue={p.initial?.settlementLine ?? ""} className="field"><option value="">— Chọn khoản —</option>
+            {p.settlementLines.filter((l) => LINE_PURPOSE[l.line_kind] === purpose).map((l) => <option key={l.id} value={l.id}>{l.code} · {LINE_KIND_LABEL[l.line_kind]} · {l.label} · còn {formatVnd(l.remaining)}</option>)}</select><Err k="settlement_line_id" /></label>
       )}
       {needTi && (
         <label className="md:col-span-2"><span className="label">Hồ sơ thu cũ đổi mới *</span>
