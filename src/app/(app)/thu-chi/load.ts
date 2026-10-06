@@ -10,6 +10,7 @@ export type VoucherRow = {
   account: { code: string; name: string } | null; order: { id: string; code: string } | null; reservation: { code: string } | null; creator: { full_name: string } | null;
 };
 export type OrderOption = { id: string; code: string; customer: string; status: string; total: string; paid: string; outstanding: string | null };
+export type TradeInOption = { id: string; code: string; customer_remaining: string; bank_remaining: string; loan_payoff: string };
 export type DepositOption = { id: string; code: string; status: string; deposit_amount: string; net_deposit: string; customer: string };
 
 export async function loadAccounts(supabase: SupabaseClient) {
@@ -41,9 +42,10 @@ export async function listVouchers(supabase: SupabaseClient, page: number, pageS
 
 /** Đơn bán đã ký (còn nợ hoặc đã có thanh toán) và đặt cọc có tiền cọc — để chọn khi lập phiếu. */
 export async function loadVoucherTargets(supabase: SupabaseClient) {
-  const [orders, deps] = await Promise.all([
+  const [orders, deps, tis] = await Promise.all([
     supabase.from("sales_order_balances").select("order_id, code, status, total, paid_direct, outstanding").eq("status", "confirmed").order("code", { ascending: false }).limit(200),
     supabase.from("reservation_deposit_balances").select("reservation_id, code, status, deposit_amount, net_deposit").order("code", { ascending: false }).limit(200),
+    supabase.from("trade_in_balances").select("trade_in_id, code, loan_payoff_amount, customer_remaining, bank_remaining").eq("status", "confirmed").order("code", { ascending: false }).limit(200),
   ]);
   const orderIds = ((orders.data ?? []) as { order_id: string }[]).map((o) => o.order_id);
   const names = orderIds.length ? await supabase.from("sales_orders").select("id, customer:customers(full_name)").in("id", orderIds) : { data: [] };
@@ -54,5 +56,8 @@ export async function loadVoucherTargets(supabase: SupabaseClient) {
   const depositOptions = ((deps.data ?? []) as { reservation_id: string; code: string; status: string; deposit_amount: unknown; net_deposit: unknown }[]).map((r) => ({
     id: r.reservation_id, code: r.code, status: r.status, deposit_amount: String(r.deposit_amount), net_deposit: String(r.net_deposit), customer: "",
   })) as DepositOption[];
-  return { orderOptions, depositOptions };
+  const tradeInOptions = ((tis.data ?? []) as { trade_in_id: string; code: string; loan_payoff_amount: unknown; customer_remaining: unknown; bank_remaining: unknown }[]).map((t) => ({
+    id: t.trade_in_id, code: t.code, loan_payoff: String(t.loan_payoff_amount), customer_remaining: String(t.customer_remaining), bank_remaining: String(t.bank_remaining),
+  })) as TradeInOption[];
+  return { orderOptions, depositOptions, tradeInOptions };
 }

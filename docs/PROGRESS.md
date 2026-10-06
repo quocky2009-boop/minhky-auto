@@ -152,12 +152,23 @@ sales chưa xem được quyền giảm giá (D33); chưa có mục "Ký gửi" 
 **Đã sửa rủi ro:** tệp đính kèm *nhu cầu* (`demand-files`) trước đây tải qua Server Action; Vercel giới hạn thân yêu cầu ~4,5 MB nên ảnh/video lớn hơn có thể bị từ chối trên bản đang chạy dù cấu hình ghi 20 MB (chưa từng kiểm chứng trên Vercel).
 Nay tệp nhu cầu cũng tải thẳng lên Storage bằng URL ký (không đổi database/policy; bỏ cấu hình `bodySizeLimit`), 3 test unit mới (`tests/unit/attachments.test.ts`). **Chưa thử tải thật qua trình duyệt** (cần thử trên bản xem trước).
 
+## Chặng 5 — lát 5: thu cũ đổi mới (06/10/2026)
+
+- **Hồ sơ thu cũ (TC#####)** liên kết đơn bán và xe cũ nhập kho của khách; hai giao dịch giữ giá trị đầy đủ — D67. **Đối trừ (DT#####)** là chứng từ riêng, không phải tiền thật, chỉ lấy từ phần của khách — D68.
+- **Xe cũ còn vay:** tách trả ngân hàng / phần khách / đối trừ, không khấu trừ hai lần; tiền còn phải trả = mua − đối trừ − đã chi — D69. Phiếu chi mới: chi cho khách, trả ngân hàng — D72.
+- **Hủy:** đơn còn đối trừ không hủy được; hồ sơ còn đối trừ/đã chi tiền không hủy được — D70. Quyền — D71.
+- Giao diện: khối "Thu cũ đổi mới" ở chi tiết đơn bán (kế toán xem, quản lý ghi) + 2 loại phiếu chi trong `/thu-chi`; công nợ đơn bán hiện thêm "đã đối trừ".
+- Migration `20261001001800_trade_in.sql`: **mới áp lên database test cục bộ, CHƯA áp lên Supabase** (chờ anh Kỳ đồng ý). Đồng thời sửa lỗi của 1700 (tên đối tượng tự điền bị trống với kế toán). Mục **Tạm** D69–D71.
+- Test: 6 test database (`tests/db/trade-in.test.ts`: quyền/RLS, điều kiện lập hồ sơ, luồng 800 tr bán / 200 tr xe cũ vay 50 tr đầy đủ, đối trừ không đổi quỹ, không khấu trừ hai lần, hủy, **hai đối trừ cùng lúc / đối trừ cùng thu tiền cùng lúc → một qua**) chạy 8 lần liên tiếp cùng 4 bộ test trước 0 lỗi; 7 test unit mới.
+- Kết quả: typecheck, lint, build đạt; `npm test` 129/129; `npm run test:db` 126/128 (2 test cũ `demands-rls` lỗi do role `root` — hạn chế môi trường đã ghi).
+- Giới hạn: chưa hỗ trợ khoản vay lớn hơn giá mua; chưa có luồng trả xe cũ khi hủy hồ sơ; chưa có biên bản/hợp đồng mua xe cũ; chưa quyết toán hiệu quả từng xe; chưa kiểm tra giao diện bằng trình duyệt thật.
+
 ## Chặng 5 — lát 4: thu chi (06/10/2026)
 
 - **Tài khoản tiền** + **phiếu thu/chi bất biến** (hủy có lý do, chỉ quản lý) — D61. Loại phiếu: thu cọc, thu thanh toán đơn bán, thu khác; hoàn cọc, hoàn tiền đơn bán, chi phí chung, chi khác — D62.
 - **Tiền cọc thực nhận/hoàn** gắn đặt cọc (không vượt số cọc thỏa thuận); cọc chốt thành đơn bán thì tính vào đã thu của đơn. **Công nợ đơn bán** (view `sales_order_balances`): không thu vượt nợ, hoàn không vượt đã thu, **hủy đơn đã ký bị chặn khi còn thanh toán chưa hoàn** — D63. Chi chỉ khi quỹ đủ tiền, khóa chống hai phiếu cùng lúc — D64.
 - Trang mới `/thu-chi` (tài khoản + số dư, lập phiếu, sổ phiếu lọc theo hướng/tài khoản/ngày/trạng thái, phân trang phía server) và khối "Thu tiền và công nợ" ở chi tiết đơn bán (kế toán/quản lý). Quyền — D65.
-- Migration `20261001001700_cashbook.sql`: **mới áp lên database test cục bộ, CHƯA áp lên Supabase** (chờ anh Kỳ đồng ý). Mục **Tạm** D62–D66.
+- Migration `20261001001700_cashbook.sql`: **đã áp lên Supabase `minhky-auto` ngày 06/10/2026** (anh Kỳ đồng ý). Kiểm tra sau áp: 0 bảng public thiếu RLS; `money_accounts` và `cash_vouchers` bật RLS với 6 policy, 6 trigger; 3 view đều `security_invoker`; `anon` không có quyền bảng/view/RPC (cả hàm `private`); không ai có DELETE/TRUNCATE; Advisor không thêm cảnh báo; 0 phiếu, 1 tài khoản admin. Chưa chạy kịch bản hành vi trực tiếp trên Supabase (chưa có dữ liệu; đã kiểm bằng test cục bộ). Mục **Tạm** D62–D66.
 - Test: 6 test database (`tests/db/cashbook.test.ts`: quyền/RLS (sales, kỹ thuật, anon không đọc), ngày/hình thức/ngừng dùng/gửi lặp, **hai phiếu chi cùng lúc vượt quỹ → một qua; hai phiếu thu cùng lúc vượt công nợ → một qua**, cọc → đơn bán → công nợ, hoàn tiền/hủy đơn/hoàn cọc, hủy phiếu) chạy 8 lần liên tiếp cùng sales-orders/reservations/quotes 0 lỗi; 5 test unit (`tests/unit/cashbook.test.ts`).
 - Kết quả: typecheck, lint, build đạt; `npm test` 123/123; `npm run test:db` 120/122 (2 test cũ `demands-rls` lỗi do role `root` — hạn chế môi trường đã ghi).
 - Giới hạn: chưa nối với chi phí xe/vốn góp/quyết toán/thu cũ đổi mới (D66); chưa có "tịch thu cọc"; chưa đối chiếu sao kê, báo cáo theo kỳ, xuất Excel; chưa kiểm tra giao diện bằng trình duyệt thật.
@@ -239,7 +250,8 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
 1h. ~~Áp migration 1400~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D46–D49.
-1k. **Áp migration `1700_cashbook.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (thêm 2 bảng, 3 view security invoker, 4 RPC, 6 hàm SECURITY DEFINER hẹp trong schema `private` chỉ trả số tiền). Mục **Tạm** D62–D66, đặc biệt D63: tiền cọc khi khách bỏ cọc (giữ lại làm thu nhập hay hoàn).
+1l. **Áp migration `1800_trade_in.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (thêm 2 bảng, 1 view, 6 RPC, thay `post_voucher` + hàm kiểm tra phiếu + hàm chặn hủy đơn, thêm cột `trade_in_id` và 2 loại phiếu chi, thêm hàm SECURITY DEFINER hẹp trả số/tên khách). Mục **Tạm** D67–D72.
+1k. ~~Áp migration 1700~~ — đã áp 06/10/2026. Còn chờ xác nhận D62–D66, đặc biệt D63: tiền cọc khi khách bỏ cọc (giữ lại làm thu nhập hay hoàn).
 1j. ~~Áp migration 1600~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D56–D59 (đặc biệt D59: có tự đóng nhu cầu khi xác nhận đơn không).
 1i. ~~Áp migration 1500~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D51–D53, D55 (đặc biệt D51 "giá sàn là ngưỡng duy nhất", D52 ai duyệt giá dưới sàn).
 1f. ~~Áp migration 1300~~ — đã xong 05/10/2026. **Đã chốt D39/D41 (05/10/2026):** chi phí chung KHÔNG trừ trước khi chia (giữ quy tắc §7); lãi vay không tính, không trừ. Còn lại: hoa hồng bán xe có trừ trước khi chia không — để chặng 6.

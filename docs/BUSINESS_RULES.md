@@ -212,6 +212,17 @@ Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c 
 - **Quyền (D65):** kế toán/quản lý lập phiếu và xem; chỉ quản lý hủy phiếu và lập tài khoản; sales/kỹ thuật không đọc.
 - **Chưa làm (D66):** nối sổ quỹ với chi phí xe, vốn góp/khoản vay, quyết toán chia lợi nhuận/phí ký gửi, thu cũ đổi mới; "tịch thu cọc"; đối chiếu sao kê; báo cáo thu chi theo kỳ/xuất Excel.
 
+## 7l. Thu cũ đổi mới (chặng 5 — lát 5)
+
+- **Hồ sơ thu cũ (TC#####)** liên kết đơn bán (chưa hủy) với một xe cũ của khách đã nhập kho (nguồn "thu cũ đổi mới", showroom sở hữu, nhu cầu bán của xe cùng khách với đơn, đã có giá mua). Mỗi xe cũ một hồ sơ chưa hủy. Giá trị mua lấy từ giá mua của xe. Nháp → xác nhận → hủy (D67).
+- **Hai giao dịch giữ giá trị đầy đủ:** giá bán dòng đơn và giá mua xe cũ không đổi vì đối trừ.
+- **Xe cũ còn vay (D69):** P = L (trả ngân hàng) + C (phần khách). Đối trừ và chi cho khách chỉ từ C; L chỉ chi cho ngân hàng (tối đa L). Không khấu trừ hai lần.
+- **Đối trừ (D68):** chứng từ riêng do quản lý xác nhận (DT#####), hủy có lý do, không đổi số dư tài khoản; giảm công nợ đơn và số phải trả cho xe cũ cùng số tiền; không vượt C còn lại hay công nợ đơn.
+- **Tiền còn phải trả cho xe cũ** = P − đối trừ − đã chi cho khách − đã trả ngân hàng. **Công nợ đơn bán** = tổng giá − thanh toán − cọc đã áp − đối trừ.
+- **Hủy (D70):** đơn đã ký còn đối trừ không hủy được; hồ sơ còn đối trừ hoặc đã chi tiền không hủy được; hủy đơn không tự hủy hồ sơ mua xe cũ.
+- **Quyền (D71):** quản lý ghi; kế toán xem + lập phiếu chi xe cũ; sales/kỹ thuật không đọc.
+- **Chưa làm:** khoản vay lớn hơn giá mua (khách bù), trả lại xe cũ khi hủy hồ sơ, tự điền biên bản/hợp đồng mua xe cũ, quyết toán hiệu quả từng xe (lát quyết toán).
+
 ## 8. Chưa định nghĩa — sẽ bổ sung ở chặng tương ứng
 
 Hợp đồng mua, quyết toán chủ xe xe ký gửi (thu hộ, phần showroom, khấu trừ, còn phải trả; định nghĩa chính xác "giá bán" để tính phần trăm — giá ghi trên hợp đồng bán, đã/chưa trừ giảm giá, thuế, lệ phí), việc chi phí nào được trừ trước khi chia lợi nhuận, giữ/cọc xe đồng thời, thu cũ đổi mới đối trừ, hoa hồng, chỉ tiêu báo cáo.

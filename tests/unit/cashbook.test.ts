@@ -24,6 +24,14 @@ describe("Thu chi — đọc form phiếu", () => {
     expect(parseVoucherForm(fd({ ...base, purpose: "deposit_refund" }), NOW).ok).toBe(false);
     expect(parseVoucherForm(fd({ ...base, purpose: "sale_deposit", reservation_id: AID }), NOW).ok).toBe(true);
   });
+  it("chi xe cũ (thu cũ đổi mới): hướng 'chi', bắt buộc chọn hồ sơ thu cũ, không bắt buộc ghi người nhận (mặc định tên khách/ngân hàng)", () => {
+    const TID = "44444444-4444-4444-8444-444444444444";
+    const ok = parseVoucherForm(fd({ ...base, purpose: "tradein_payout", trade_in_id: TID }), NOW);
+    expect(ok.ok && ok.payload).toMatchObject({ direction: "out", purpose: "tradein_payout", trade_in_id: TID, payer_kind: "" });
+    expect(parseVoucherForm(fd({ ...base, purpose: "tradein_loan_payoff", trade_in_id: TID, order_id: OID }), NOW).ok && true).toBe(true);
+    const none = parseVoucherForm(fd({ ...base, purpose: "tradein_loan_payoff" }), NOW);
+    expect(!none.ok && none.fieldErrors.trade_in_id).toBeTruthy();
+  });
   it("thu/chi khác bắt buộc ghi người nộp/nhận; ngày không ở tương lai; tiền > 0; phiên nhập hỏng bị từ chối", () => {
     const noName = parseVoucherForm(fd({ ...base, purpose: "general_expense" }), NOW);
     expect(!noName.ok && noName.fieldErrors.counterparty).toMatch(/người nhận/);

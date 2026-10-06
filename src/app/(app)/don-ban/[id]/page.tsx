@@ -10,6 +10,9 @@ import { PageHeader } from "@/components/ui";
 import { getOrder, loadOrderOptions } from "../load";
 import { OrderForm } from "../order-form";
 import { OrderActionsPanel } from "./order-actions-panel";
+import { loadTradeIns } from "./trade-in-load";
+import { TradeInPanel } from "./trade-in-panel";
+import { randomUUID } from "node:crypto";
 
 export const metadata = { title: "Chi tiết đơn bán" };
 
@@ -28,9 +31,10 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
   const options = o.status === "draft" && mine ? await loadOrderOptions(supabase, o.id) : null;
   const history = o.lines.filter((l) => l.line_status !== "active");
   const finance = canSeeFinance(user.roles);
+  const trade = finance ? await loadTradeIns(supabase, o.id, manager) : null;
   const money = finance
-    ? ((await supabase.from("sales_order_balances").select("total, paid_direct, applied_deposit, outstanding").eq("order_id", o.id).maybeSingle()).data as
-        { total: unknown; paid_direct: unknown; applied_deposit: unknown; outstanding: unknown } | null)
+    ? ((await supabase.from("sales_order_balances").select("total, paid_direct, applied_deposit, outstanding, trade_in_offset").eq("order_id", o.id).maybeSingle()).data as
+        { total: unknown; paid_direct: unknown; applied_deposit: unknown; outstanding: unknown; trade_in_offset: unknown } | null)
     : null;
 
   return (
@@ -86,6 +90,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               <div><dt className="text-ink-soft">Tổng giá bán</dt><dd className="num font-semibold">{formatVnd(money.total)}</dd></div>
               <div><dt className="text-ink-soft">Thanh toán đã thu (ròng hoàn)</dt><dd className="num font-semibold">{formatVnd(money.paid_direct)}</dd></div>
               <div><dt className="text-ink-soft">Tiền cọc đã áp vào đơn</dt><dd className="num font-semibold">{formatVnd(money.applied_deposit)}</dd></div>
+              {Number(money.trade_in_offset) > 0 && <div><dt className="text-ink-soft">Đã đối trừ thu cũ đổi mới</dt><dd className="num font-semibold">{formatVnd(money.trade_in_offset)}</dd></div>}
               <div><dt className="text-ink-soft">Còn phải thu</dt><dd className="num font-semibold">{money.outstanding === null ? "— (đơn chưa ký)" : formatVnd(money.outstanding)}</dd></div>
             </dl>
             {o.status === "confirmed" && (
@@ -95,6 +100,14 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               </p>
             )}
             <p className="mt-1 text-xs text-ink-soft">Chỉ tính tiền đã thật sự nhận (phiếu thu). Tiền cọc không phải lợi nhuận; cọc chỉ tính vào đơn khi cọc đã chốt thành đơn bán.</p>
+          </section>
+        )}
+
+        {trade && (
+          <section className="panel p-4">
+            <h2 className="mb-2 font-semibold">Thu cũ đổi mới</h2>
+            <TradeInPanel orderId={o.id} orderStatus={o.status} manager={manager} list={trade.list} options={trade.options}
+              requestIds={{ create: randomUUID(), offset: randomUUID() }} />
           </section>
         )}
 

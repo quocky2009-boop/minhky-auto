@@ -3,11 +3,11 @@
 import { useActionState, useState } from "react";
 import { cashAction } from "./actions";
 import type { ActionState } from "../nhu-cau/actions";
-import type { AccountBalance, DepositOption, OrderOption } from "./load";
+import type { AccountBalance, DepositOption, OrderOption, TradeInOption } from "./load";
 import { PURPOSE_DIRECTION, PURPOSE_LABEL, PAYER_LABEL, METHOD_LABEL } from "@/lib/cashbook";
 import { formatVnd } from "@/lib/money";
 
-type Props = { requestId: string; today: string; accounts: AccountBalance[]; orders: OrderOption[]; deposits: DepositOption[]; initial?: { purpose?: string; order?: string; reservation?: string } };
+type Props = { requestId: string; today: string; accounts: AccountBalance[]; orders: OrderOption[]; deposits: DepositOption[]; tradeIns: TradeInOption[]; initial?: { purpose?: string; order?: string; reservation?: string; tradeIn?: string } };
 
 /** Lập phiếu thu/chi. Phiếu = tiền ĐÃ vào/ra tài khoản; luật tiền do database kiểm tra lại. */
 export function VoucherForm(p: Props) {
@@ -18,7 +18,8 @@ export function VoucherForm(p: Props) {
   const dir = PURPOSE_DIRECTION[purpose];
   const needOrder = purpose === "sale_payment" || purpose === "sale_refund";
   const needDep = purpose === "sale_deposit" || purpose === "deposit_refund";
-  const free = !needOrder && !needDep;
+  const needTi = purpose === "tradein_payout" || purpose === "tradein_loan_payoff";
+  const free = !needOrder && !needDep && !needTi;
   const accounts = p.accounts.filter((a) => a.is_active);
   return (
     <form action={action} className="grid gap-3 md:grid-cols-3">
@@ -38,6 +39,11 @@ export function VoucherForm(p: Props) {
         <label className="md:col-span-2"><span className="label">Đặt cọc *</span>
           <select name="reservation_id" defaultValue={p.initial?.reservation ?? ""} className="field"><option value="">— Chọn đặt cọc —</option>
             {p.deposits.map((r) => <option key={r.id} value={r.id}>{r.code} · cọc thỏa thuận {formatVnd(r.deposit_amount)} · đã thu (ròng) {formatVnd(r.net_deposit)} · {r.status === "active" ? "đang hiệu lực" : r.status === "fulfilled" ? "đã thành đơn bán" : r.status === "cancelled" ? "đã hủy" : r.status}</option>)}</select><Err k="reservation_id" /></label>
+      )}
+      {needTi && (
+        <label className="md:col-span-2"><span className="label">Hồ sơ thu cũ đổi mới *</span>
+          <select name="trade_in_id" defaultValue={p.initial?.tradeIn ?? ""} className="field"><option value="">— Chọn hồ sơ —</option>
+            {p.tradeIns.map((t) => <option key={t.id} value={t.id}>{t.code} · {purpose === "tradein_payout" ? `còn chi được cho khách ${formatVnd(t.customer_remaining)}` : `còn trả ngân hàng ${formatVnd(t.bank_remaining)}`}</option>)}</select><Err k="trade_in_id" /></label>
       )}
       <label><span className="label">Tài khoản tiền *</span>
         <select name="account_id" defaultValue="" className="field"><option value="">— Chọn tài khoản —</option>

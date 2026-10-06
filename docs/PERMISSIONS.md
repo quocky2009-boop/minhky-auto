@@ -60,6 +60,9 @@ Ký hiệu: ✔ toàn bộ · ◐ một phần (ghi chú) · — không có quy�
 | Đơn bán — xem | ✔ | ✔ | ✔ (xem) | ◐ của mình | — |
 | Tài khoản tiền, phiếu thu/chi, số dư, công nợ đơn bán — xem | ✔ | ✔ | ✔ | — | — |
 | Phiếu thu/chi — lập | ✔ | ✔ | ✔ | — | — |
+| Thu cũ đổi mới — xem hồ sơ, đối trừ, số liệu | ✔ | ✔ | ✔ | — | — |
+| Thu cũ đổi mới — lập/xác nhận/hủy hồ sơ; xác nhận/hủy đối trừ | ✔ | ✔ | — | — | — |
+| Phiếu chi xe cũ (chi cho khách, trả ngân hàng) — lập | ✔ | ✔ | ✔ | — | — |
 | Phiếu thu/chi — hủy; tài khoản tiền — lập/sửa/ngừng dùng | ✔ | ✔ | — | — | — |
 | Bên góp vốn, điều khoản chia lợi nhuận, vốn cam kết, khoản cho vay — xem | ✔ | ✔ | ✔ | — | — |
 | Bên góp vốn, điều khoản (lập/duyệt/hủy nháp/xác nhận lại), vốn cam kết, khoản vay, hủy dòng sổ | ✔ | ✔ | — | — | — |

@@ -9,9 +9,10 @@ import type { FormInput, ParseResult } from "@/lib/costs";
 export const PURPOSE_LABEL: Record<string, string> = {
   sale_deposit: "Thu tiền cọc", sale_payment: "Thu tiền đơn bán", other_income: "Thu khác",
   deposit_refund: "Hoàn tiền cọc", sale_refund: "Hoàn tiền đơn bán", general_expense: "Chi phí chung", other_expense: "Chi khác",
+  tradein_payout: "Chi cho khách (mua xe cũ)", tradein_loan_payoff: "Trả ngân hàng (xe cũ còn vay)",
 };
 export const PURPOSE_DIRECTION: Record<string, "in" | "out"> = {
-  sale_deposit: "in", sale_payment: "in", other_income: "in", deposit_refund: "out", sale_refund: "out", general_expense: "out", other_expense: "out",
+  sale_deposit: "in", sale_payment: "in", other_income: "in", deposit_refund: "out", sale_refund: "out", general_expense: "out", other_expense: "out", tradein_payout: "out", tradein_loan_payoff: "out",
 };
 export const DIRECTION_LABEL: Record<string, string> = { in: "Thu", out: "Chi" };
 export const METHOD_LABEL: Record<string, string> = { cash: "Tiền mặt", bank_transfer: "Chuyển khoản" };
@@ -47,10 +48,11 @@ export function parseVoucherForm(fd: FormInput, now = new Date()): ParseResult {
   const date = s("occurred_on");
   if (!DATE.test(date)) errs.occurred_on = "Nhập ngày tiền thực sự vào/ra";
   else if (date > todayVn(now)) errs.occurred_on = "Ngày không được ở tương lai. Chưa nhận/chưa chi tiền thì chưa lập phiếu";
-  const orderId = s("order_id"), resId = s("reservation_id");
+  const orderId = s("order_id"), resId = s("reservation_id"), tiId = s("trade_in_id");
   if (purpose === "sale_payment" || purpose === "sale_refund") { if (!UUID.test(orderId)) errs.order_id = "Chọn đơn bán"; }
   if (purpose === "sale_deposit" || purpose === "deposit_refund") { if (!UUID.test(resId)) errs.reservation_id = "Chọn đặt cọc"; }
-  const linked = ["sale_deposit", "deposit_refund", "sale_payment", "sale_refund"].includes(purpose);
+  if (purpose === "tradein_payout" || purpose === "tradein_loan_payoff") { if (!UUID.test(tiId)) errs.trade_in_id = "Chọn hồ sơ thu cũ đổi mới"; }
+  const linked = ["sale_deposit", "deposit_refund", "sale_payment", "sale_refund", "tradein_payout", "tradein_loan_payoff"].includes(purpose);
   const counterparty = s("counterparty");
   if (!linked && direction && !counterparty) errs.counterparty = direction === "in" ? "Ghi người nộp tiền" : "Ghi người nhận tiền";
   let payer = s("payer_kind");
@@ -61,6 +63,7 @@ export function parseVoucherForm(fd: FormInput, now = new Date()): ParseResult {
     reference: s("reference"), note: s("note"),
     ...(orderId && (purpose === "sale_payment" || purpose === "sale_refund") ? { order_id: orderId } : {}),
     ...(resId && (purpose === "sale_deposit" || purpose === "deposit_refund") ? { reservation_id: resId } : {}),
+    ...(tiId && (purpose === "tradein_payout" || purpose === "tradein_loan_payoff") ? { trade_in_id: tiId } : {}),
   } };
 }
 
