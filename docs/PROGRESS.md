@@ -158,7 +158,7 @@ Nay tệp nhu cầu cũng tải thẳng lên Storage bằng URL ký (không đ�
 - **Giữ xe** nhập hạn (không mặc định), gia hạn, nhả (lý do); hết hạn **nhả lười** (khi có người giữ/cọc hoặc quản lý bấm) — D46. **Đặt cọc** ghi số tiền thỏa thuận (chưa phải đã thu), chỉ quản lý hủy có lý do — D47. **Chuyển giữ → cọc** trong một giao dịch.
 - Gắn nhu cầu MUA của khách; sales chỉ giữ cho nhu cầu mình phụ trách và chỉ thấy bản của mình; sales khác chỉ thấy "xe đang bị giữ/cọc + người phụ trách + hạn" — D48. Nhật ký hệ thống ghi vào nhu cầu (không ghi số tiền). Xe ký gửi cần hợp đồng hiệu lực.
 - Khối "Giữ xe và đặt cọc" ở trang chi tiết xe (sales, quản lý; kế toán xem). Không xóa giữ/cọc.
-- Migration `20261001001400_vehicle_reservations.sql`: **mới áp lên database test cục bộ, CHƯA áp lên Supabase** (chờ anh Kỳ đồng ý).
+- Migration `20261001001400_vehicle_reservations.sql`: **đã áp lên Supabase `minhky-auto` ngày 06/10/2026** (anh Kỳ đồng ý). Kiểm tra sau áp: 0 bảng public thiếu RLS; `vehicle_reservations` bật RLS, 3 policy, 4 trigger; `anon` không có quyền bảng/RPC; `authenticated` không có DELETE/TRUNCATE; 0 dòng dữ liệu, 1 tài khoản admin. Advisor: thêm 1 WARN có chủ đích (`public_reservation_info` SECURITY DEFINER, chỉ trả loại/người phụ trách/hạn, không lộ khách/tiền). Chưa chạy kịch bản hành vi trực tiếp trên Supabase (cần dữ liệu xe/nhu cầu; hành vi đã kiểm bằng `tests/db/reservations.test.ts` trên DB cục bộ, 12 test, đồng thời thật).
 - Test: 12 test database (`tests/db/reservations.test.ts`: quyền và RLS, **độc quyền đồng thời thật**, gửi lặp song song, điều kiện giữ/cọc, nhả/gia hạn/hết hạn/chuyển/hủy cọc, tin tức tối thiểu cho sales khác, xe ký gửi) + 6 test unit (`tests/unit/reservations.test.ts`).
 - Giới hạn: chưa ghi nhận tiền cọc thực nhận/hoàn (thu chi), chưa đổi trạng thái nhu cầu (D49), chưa nhắc sales trước hạn giữ, chưa kiểm tra bằng trình duyệt thật.
 
@@ -208,7 +208,7 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
-1h. **Áp migration `1400_vehicle_reservations.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (thêm bảng giữ/cọc, trigger đồng bộ trạng thái xe, hàm `public_reservation_info`). Các mục **Tạm** D46–D49.
+1h. ~~Áp migration 1400~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D46–D49.
 1f. ~~Áp migration 1300~~ — đã xong 05/10/2026. **Đã chốt D39/D41 (05/10/2026):** chi phí chung KHÔNG trừ trước khi chia (giữ quy tắc §7); lãi vay không tính, không trừ. Còn lại: hoa hồng bán xe có trừ trước khi chia không — để chặng 6.
 1g. **Bảo mật — 4 hàm `valuation_agent_*` (không do phiên này tạo, thuộc 3 migration `appraisal_ai_*`/`valuation_agent_*` ngoài repo) đang cho `anon` (chưa đăng nhập) gọi được** dù là SECURITY DEFINER và có ghi dữ liệu (`save_comparables`, `save_decision`, `save_new_car_evidence`, `fail_run`); có tham số `p_token` nên có thể đã tự kiểm tra token, nhưng chưa được rà. Cần chủ dự án xác nhận ai tạo, đưa mã vào repo và rà quyền (CLAUDE.md §11).
 1e. ~~Áp migration 1200~~ — đã xong 05/10/2026. Cần thử tải ảnh thật trên giao diện (Preview/production) rồi mới coi là nghiệm thu.
