@@ -157,7 +157,7 @@ Nay tệp nhu cầu cũng tải thẳng lên Storage bằng URL ký (không đ�
 - **Bàn giao (BN#####)** theo từng dòng xe của đơn bán đã ký; **checklist cấu hình được** (14 mục mặc định, D73) với bản gốc / bản scan (chỉ có-không) / người giữ — D74.
 - **Điều kiện giao xe do database kiểm**: đơn đã ký, thanh toán đủ, xe chuẩn bị xong, hồ sơ xe đủ, checklist bắt buộc đạt — D75; **phê duyệt ngoại lệ** của quản lý (lý do, đúng loại, thu hồi được) — D76. Giao: xe → "đã giao"; đơn có bàn giao không hủy được — D77.
 - Trang mới `/ban-giao` (danh sách, chi tiết với điều kiện/checklist/ngoại lệ/giao xe/hủy, **biên bản in** không có số tiền) và nút "Lập bàn giao" ở chi tiết đơn bán. Quyền — D78.
-- Migration `20261001001900_handover.sql`: **mới áp lên database test cục bộ, CHƯA áp lên Supabase** (chờ anh Kỳ đồng ý). Mục **Tạm** D73, D75, D76, D78.
+- Migration `20261001001900_handover.sql`: **đã áp lên Supabase `minhky-auto` ngày 06/10/2026** (anh Kỳ đồng ý). Kiểm tra sau áp: 0 bảng public thiếu RLS; 4 bảng bàn giao bật RLS với 12 policy, 11 trigger; 14 mục danh mục mặc định (6 bắt buộc); `anon` không có quyền bảng/RPC (cả hàm `private`); không ai có DELETE/TRUNCATE; hàm chặn hủy đơn đã cập nhật; Advisor không thêm cảnh báo; 0 bàn giao, 1 tài khoản admin. Chưa chạy kịch bản hành vi trực tiếp trên Supabase (chưa có dữ liệu). Mục **Tạm** D73, D75, D76, D78.
 - Test: 6 test database (`tests/db/handover.test.ts`: quyền/RLS, lập bàn giao + **hai người lập cùng dòng cùng lúc → một thắng**, checklist + sửa đồng thời, từng điều kiện giao xe và ngoại lệ, giao xe/bất biến, hủy bàn giao/đơn) chạy 6 lần liên tiếp cùng 5 bộ test trước 0 lỗi; 6 test unit mới.
 - Kết quả: typecheck, lint, build đạt; `npm test` 135/135; `npm run test:db` 132/134 (2 test cũ `demands-rls` lỗi do role `root` — hạn chế môi trường đã ghi).
 - Giới hạn: chưa bắt buộc số ảnh tối thiểu; chưa kiểm pin xe điện lúc giao; chưa nhắc lịch giao; chưa kiểm tra giao diện bằng trình duyệt thật.
@@ -260,7 +260,7 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
 1h. ~~Áp migration 1400~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D46–D49.
-1m. **Áp migration `1900_handover.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (thêm 4 bảng + 14 dòng danh mục mặc định, 9 RPC, 1 trigger SECURITY DEFINER đồng bộ xe → đã giao, 2 hàm `private` trả cờ/boolean, thay hàm chặn hủy đơn). Mục **Tạm** D73, D75, D76, D78 — đặc biệt rà **danh mục checklist mặc định** và điều kiện thanh toán theo cả đơn.
+1m. ~~Áp migration 1900~~ — đã áp 06/10/2026. Còn chờ rà **danh mục checklist mặc định** (D73) và điều kiện thanh toán theo cả đơn (D75).
 1l. ~~Áp migration 1800~~ — đã áp 06/10/2026. D70, D71 đã chốt 06/10/2026.
 1k. ~~Áp migration 1700~~ — đã áp 06/10/2026. Còn chờ xác nhận D62–D66, đặc biệt D63: tiền cọc khi khách bỏ cọc (giữ lại làm thu nhập hay hoàn).
 1j. ~~Áp migration 1600~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D56–D59 (đặc biệt D59: có tự đóng nhu cầu khi xác nhận đơn không).
