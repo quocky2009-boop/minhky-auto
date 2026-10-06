@@ -152,6 +152,16 @@ sales chưa xem được quyền giảm giá (D33); chưa có mục "Ký gửi" 
 **Đã sửa rủi ro:** tệp đính kèm *nhu cầu* (`demand-files`) trước đây tải qua Server Action; Vercel giới hạn thân yêu cầu ~4,5 MB nên ảnh/video lớn hơn có thể bị từ chối trên bản đang chạy dù cấu hình ghi 20 MB (chưa từng kiểm chứng trên Vercel).
 Nay tệp nhu cầu cũng tải thẳng lên Storage bằng URL ký (không đổi database/policy; bỏ cấu hình `bodySizeLimit`), 3 test unit mới (`tests/unit/attachments.test.ts`). **Chưa thử tải thật qua trình duyệt** (cần thử trên bản xem trước).
 
+## Chặng 5 — lát 2: báo giá có phiên bản + duyệt giảm giá (06/10/2026)
+
+- **Báo giá** (BG#####) của xe cho nhu cầu mua; **phiên bản bất biến** (giá, ưu đãi, hạn hiệu lực bắt buộc nhập); sửa giá = phiên bản mới — D50.
+- **Duyệt giảm giá do database quyết định**, sales không đọc giá sàn: dưới giá sàn / chưa có giá sàn (xe sở hữu) hoặc vượt quyền giảm giá trong thỏa thuận ký gửi đã ký → chờ quản lý duyệt, bắt buộc lý do — D51, D52. Chấp nhận báo giá chỉ cho bản đã phát hành và còn hạn; chưa đổi trạng thái xe/tạo đơn — D54.
+- Khối "Báo giá" ở trang chi tiết xe (sales/quản lý lập và xử lý, kế toán xem). Không xóa báo giá/phiên bản.
+- Migration `20261001001500_vehicle_quotes.sql`: **mới áp lên database test cục bộ, CHƯA áp lên Supabase** (chờ anh Kỳ đồng ý). Mục **Tạm** D51–D53, D55.
+- Test: 7 test database (`tests/db/quotes.test.ts`: quyền/RLS và sales không đọc giá sàn, dưới giá sàn/thiếu giá sàn, duyệt/từ chối, phiên bản bất biến + gửi lặp, **sửa đồng thời cùng phiên bản và hai báo giá mở cùng lúc → một thắng**, hết hạn/hủy, xe đang giữ cho khách khác, xe ký gửi theo quyền giảm giá 1%/số tiền/không) chạy 10 lần liên tiếp 0 lỗi; 4 test unit (`tests/unit/quotes.test.ts`).
+- Kết quả kiểm tra: `npm run typecheck`, `npm run lint`, `npm run build` đạt; `npm test` 114/114; `npm run test:db` 107/109 (2 test cũ của `demands-rls` lỗi do chạy dưới role `root` — hạn chế môi trường đã ghi ở trên, không liên quan báo giá).
+- Giới hạn: chưa kiểm tra giao diện bằng trình duyệt thật; chưa nhắc báo giá sắp hết hạn; chưa tính giá trị ưu đãi; chưa có đơn bán/hợp đồng bán.
+
 ## Chặng 5 — lát 1: giữ xe và đặt cọc độc quyền (05/10/2026)
 
 - **Độc quyền:** một xe một giữ/cọc hiệu lực (unique index); hai người cùng lúc → một người thắng, người kia nhận lỗi rõ ràng. Trạng thái xe (đang giữ/đã cọc/đang bán) do trigger đồng bộ — D45.
@@ -209,8 +219,9 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
 1h. ~~Áp migration 1400~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D46–D49.
+1i. **Áp migration `1500_vehicle_quotes.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (thêm 2 bảng báo giá, 5 RPC, 2 hàm SECURITY DEFINER hẹp chỉ trả cờ đúng/sai trong schema `private`). Các mục **Tạm** D51–D53, D55; đặc biệt D51: "giá sàn là ngưỡng duy nhất" và D52: ai duyệt giá dưới sàn.
 1f. ~~Áp migration 1300~~ — đã xong 05/10/2026. **Đã chốt D39/D41 (05/10/2026):** chi phí chung KHÔNG trừ trước khi chia (giữ quy tắc §7); lãi vay không tính, không trừ. Còn lại: hoa hồng bán xe có trừ trước khi chia không — để chặng 6.
-1g. **Bảo mật — 4 hàm `valuation_agent_*` (không do phiên này tạo, thuộc 3 migration `appraisal_ai_*`/`valuation_agent_*` ngoài repo) đang cho `anon` (chưa đăng nhập) gọi được** dù là SECURITY DEFINER và có ghi dữ liệu (`save_comparables`, `save_decision`, `save_new_car_evidence`, `fail_run`); có tham số `p_token` nên có thể đã tự kiểm tra token, nhưng chưa được rà. Cần chủ dự án xác nhận ai tạo, đưa mã vào repo và rà quyền (CLAUDE.md §11).
+1g. **Bảo mật — 4 hàm `valuation_agent_*` (không do phiên này tạo, thuộc 3 migration `appraisal_ai_*`/`valuation_agent_*` ngoài repo) đang cho `anon` (chưa đăng nhập) gọi được** dù là SECURITY DEFINER và có ghi dữ liệu (`save_comparables`, `save_decision`, `save_new_car_evidence`, `fail_run`); có tham số `p_token` nên có thể đã tự kiểm tra token, nhưng chưa được rà. Cần chủ dự án xác nhận ai tạo, đưa mã vào repo và rà quyền (CLAUDE.md §11). **Cập nhật 06/10/2026:** Supabase hiện có thêm migration ngoài repo `valuation_agent_disable_public_rpc_v1` và Advisor không còn cảnh báo `anon` cho các hàm này — việc đưa mã vào repo vẫn còn mở.
 1e. ~~Áp migration 1200~~ — đã xong 05/10/2026. Cần thử tải ảnh thật trên giao diện (Preview/production) rồi mới coi là nghiệm thu.
 1d. **Supabase có 3 migration không có trong repo:** `appraisal_ai_valuation_tables_v1`, `_security_v1`, `_views_v1` (áp 05/10/2026 07:58, tạo các bảng `appraisal_ai_*`). Không do phiên làm việc này tạo. Cần đưa mã nguồn vào repo (CLAUDE.md §13: không để mã lệch database) và xác nhận phạm vi — CLAUDE.md §14 ghi chưa mở rộng sang "AI định giá" khi chưa được yêu cầu.
 1c. Xác nhận định nghĩa "giá bán" để tính phí % (D30) và các mục **Tạm** D32, D33, D35.

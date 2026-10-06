@@ -180,7 +180,17 @@ Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c 
 - **Chuyển giữ → cọc** trong một giao dịch (xe không bao giờ "trống" ở giữa); bản giữ thành "đã chuyển", giá chốt kế thừa.
 - **Trạng thái xe** (đang giữ / đã cọc / đang bán) do trigger đồng bộ theo giữ/cọc — không đặt tay. Mọi giữ/cọc ghi nhật ký hệ thống vào nhu cầu (không ghi số tiền); không xóa giữ/cọc.
 - **Quyền xem:** sales chỉ thấy giữ/cọc của mình; quản lý/kế toán thấy tất cả. Sales khác chỉ biết "xe đang được giữ/đã cọc" + người phụ trách + hạn giữ (không lộ khách, số tiền, giá chốt).
-- **Chưa làm:** báo giá có phiên bản, duyệt giảm giá, đơn bán nhiều xe, hợp đồng bán, thu chi (tiền cọc thực nhận/hoàn), thu cũ đổi mới, bàn giao, quyết toán; chưa tự đổi trạng thái nhu cầu sang "Đã cọc".
+- **Chưa làm:** đơn bán nhiều xe, hợp đồng bán, thu chi (tiền cọc thực nhận/hoàn), thu cũ đổi mới, bàn giao, quyết toán; chưa tự đổi trạng thái nhu cầu sang "Đã cọc".
+
+## 7i. Báo giá có phiên bản và duyệt giảm giá (chặng 5 — lát 2)
+
+- **Báo giá** của một xe cho một nhu cầu MUA (khách lấy từ nhu cầu); mã BG#####; mỗi (nhu cầu, xe) chỉ một báo giá đang mở. Xe phải đang bán (sẵn bán/đang giữ/đã cọc), không đang giữ/cọc cho khách khác (D55).
+- **Phiên bản bất biến:** giá báo, ưu đãi (ghi nguyên văn, không tính tiền), hạn hiệu lực (bắt buộc nhập, tương lai), ghi chú. Giá niêm yết lấy từ hệ thống lúc lập. Sửa = lập phiên bản mới: bản đã phát hành → "đã thay thế"; bản chờ duyệt → "đã hủy"; bản bị từ chối giữ nguyên (D50).
+- **Cần duyệt (database quyết định, D51):** xe sở hữu: giá báo < giá sàn hoặc chưa có giá sàn. Xe ký gửi: mức giảm so với giá chào trong thỏa thuận đã ký vượt quyền giảm giá (không / số tiền / %), hoặc chưa có thỏa thuận đã ký. Giá cao hơn giá chào/giá sàn, hoặc đúng bằng ngưỡng, không cần duyệt.
+- **Duyệt:** quản lý/admin; duyệt hoặc từ chối đều phải ghi lý do; người duyệt và giờ duyệt được lưu; đã quyết thì không đổi (D52). Phiên bản chờ duyệt hoặc bị từ chối **không** chấp nhận được và không được báo cho khách.
+- **Khách chấp nhận:** chỉ phiên bản đã phát hành và còn hạn; báo giá chuyển "khách đã chấp nhận". Chưa phải đơn bán/giữ/cọc/thu tiền (D54). Hủy báo giá phải có lý do; các phiên bản giữ lại; hủy xong lập lại được.
+- **Quyền xem:** sales chỉ thấy báo giá của mình (và cờ "cần duyệt", không thấy giá sàn — D53); quản lý/kế toán thấy tất cả; kỹ thuật không thấy. Không xóa.
+- **Chưa làm:** đơn bán nhiều xe, hợp đồng bán, thu chi, thu cũ đổi mới, bàn giao, quyết toán; tính giá trị ưu đãi; nhắc báo giá sắp hết hạn.
 
 ## 8. Chưa định nghĩa — sẽ bổ sung ở chặng tương ứng
 

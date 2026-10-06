@@ -20,6 +20,10 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
   vehicle_reservations_one_active: "Xe vừa được người khác giữ hoặc đặt cọc. Không thể giữ/cọc thêm.",
   reservations_hold_shape: "Giữ xe phải có hạn giữ; đặt cọc phải có số tiền cọc (và không có cả hai kiểu cùng lúc).",
   vehicle_reservations_deposit_amount_check: "Số tiền cọc phải lớn hơn 0.",
+  quotes_one_open: "Đã có báo giá đang mở cho khách và xe này. Lập phiên bản mới thay vì báo giá mới.",
+  quote_versions_reject_reason: "Từ chối phiên bản báo giá phải ghi lý do.",
+  quote_versions_approved_complete: "Giá báo thấp hơn mức cho phép phải có người duyệt và lý do duyệt.",
+  quote_versions_offered_price_check: "Giá báo phải lớn hơn 0.",
   consignment_one_open_per_vehicle: "Xe này đã có hợp đồng ký gửi đang soạn hoặc đang hiệu lực.",
 };
 

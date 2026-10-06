@@ -20,6 +20,8 @@ import { CapitalPanel } from "./capital-panel";
 import { toVnd } from "@/lib/money";
 import { loadReservations } from "./reservation-load";
 import { ReservationPanel } from "./reservation-panel";
+import { loadQuotes } from "./quote-load";
+import { QuotePanel } from "./quote-panel";
 import { randomUUID } from "node:crypto";
 
 export const metadata = { title: "Chi tiết xe" };
@@ -46,12 +48,13 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
   const isConsignment = v.business_type === "consignment";
   const canSellRole = user.roles.some((r) => r === "admin" || r === "manager" || r === "sales");
   const showReservations = canSellRole || finance;
-  const [files, costData, consignment, capital, reservations] = await Promise.all([
+  const [files, costData, consignment, capital, reservations, quotes] = await Promise.all([
     loadVehicleFiles(supabase, v.id),
     finance ? loadCosts(supabase, v.id) : Promise.resolve(null),
     finance && isConsignment ? loadConsignment(supabase, v.id) : Promise.resolve(null),
     finance && !isConsignment ? loadCapital(supabase, v.id) : Promise.resolve(null),
     showReservations ? loadReservations(supabase, v.id, canSellRole && v.sale_status === "available") : Promise.resolve(null),
+    showReservations ? loadQuotes(supabase, v.id, canSellRole && ["available", "held", "deposited"].includes(v.sale_status)) : Promise.resolve(null),
   ]);
   const title = [v.make, v.model, v.variant, v.year_made].filter(Boolean).join(" ");
   const cycles = ((history ?? []) as { id: string; code: string; sale_status: string; business_type: string; intake_date: string | null; depth: number }[]).filter((h) => h.depth > 0);
@@ -128,6 +131,14 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
           <ReservationPanel vehicleId={v.id} saleStatus={v.sale_status} canSell={canSellRole} manager={manager} finance={finance} userId={user.id}
             reservations={reservations.reservations} publicInfo={reservations.publicInfo} demandOptions={reservations.demandOptions}
             requestIds={{ reserve: randomUUID(), convert: randomUUID() }} />
+        </section>
+      )}
+      {quotes && (
+        <section className="panel p-4">
+          <h2 className="mb-3 font-semibold">Báo giá</h2>
+          <QuotePanel vehicleId={v.id} saleStatus={v.sale_status} canSell={canSellRole} manager={manager} finance={finance} userId={user.id}
+            quotes={quotes.quotes} demandOptions={quotes.demandOptions}
+            requestIds={{ create: randomUUID(), createVersion: randomUUID(), revise: randomUUID() }} />
         </section>
       )}
       <section className="panel p-4">

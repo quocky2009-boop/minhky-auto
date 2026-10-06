@@ -51,6 +51,9 @@ Ký hiệu: ✔ toàn bộ · ◐ một phần (ghi chú) · — không có quy�
 | Giữ xe / đặt cọc — tạo, gia hạn, nhả, chuyển giữ → cọc | ✔ | ✔ | — | ◐ nhu cầu mình phụ trách | — |
 | Giữ xe / đặt cọc — xem chi tiết (khách, tiền cọc) | ✔ | ✔ | ✔ (xem) | ◐ của mình | — |
 | Đặt cọc — hủy | ✔ | ✔ | — | — | — |
+| Báo giá — lập, sửa giá (phiên bản mới), khách chấp nhận, hủy | ✔ | ✔ | — | ◐ nhu cầu mình phụ trách | — |
+| Báo giá — xem | ✔ | ✔ | ✔ (xem) | ◐ của mình (chỉ cờ "cần duyệt", không giá sàn) | — |
+| Báo giá — duyệt / từ chối giá thấp hơn mức cho phép | ✔ | ✔ | — | — | — |
 | Bên góp vốn, điều khoản chia lợi nhuận, vốn cam kết, khoản cho vay — xem | ✔ | ✔ | ✔ | — | — |
 | Bên góp vốn, điều khoản (lập/duyệt/hủy nháp/xác nhận lại), vốn cam kết, khoản vay, hủy dòng sổ | ✔ | ✔ | — | — | — |
 | Tiền thực nhận, rút vốn, thanh toán khoản vay — ghi | ✔ | ✔ | ✔ | — | — |
