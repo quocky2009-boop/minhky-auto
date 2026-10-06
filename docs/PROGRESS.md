@@ -158,7 +158,7 @@ Nay tệp nhu cầu cũng tải thẳng lên Storage bằng URL ký (không đ�
 - **Xe cũ còn vay:** tách trả ngân hàng / phần khách / đối trừ, không khấu trừ hai lần; tiền còn phải trả = mua − đối trừ − đã chi — D69. Phiếu chi mới: chi cho khách, trả ngân hàng — D72.
 - **Hủy:** đơn còn đối trừ không hủy được; hồ sơ còn đối trừ/đã chi tiền không hủy được — D70. Quyền — D71.
 - Giao diện: khối "Thu cũ đổi mới" ở chi tiết đơn bán (kế toán xem, quản lý ghi) + 2 loại phiếu chi trong `/thu-chi`; công nợ đơn bán hiện thêm "đã đối trừ".
-- Migration `20261001001800_trade_in.sql`: **mới áp lên database test cục bộ, CHƯA áp lên Supabase** (chờ anh Kỳ đồng ý). Đồng thời sửa lỗi của 1700 (tên đối tượng tự điền bị trống với kế toán). Mục **Tạm** D69–D71.
+- Migration `20261001001800_trade_in.sql`: **đã áp lên Supabase `minhky-auto` ngày 06/10/2026** (anh Kỳ đồng ý). Kiểm tra sau áp: 0 bảng public thiếu RLS; `trade_ins` và `trade_in_offsets` bật RLS với 6 policy, 6 trigger; 2 view `security_invoker`; `anon` không có quyền bảng/view/RPC (cả hàm `private`); không ai có DELETE/TRUNCATE; hàm kiểm tra phiếu đã cập nhật; Advisor không thêm cảnh báo; 0 hồ sơ, 1 tài khoản admin. Chưa chạy kịch bản hành vi trực tiếp trên Supabase (chưa có dữ liệu). Đồng thời sửa lỗi của 1700 (tên đối tượng tự điền bị trống với kế toán). Mục **Tạm** D69–D71.
 - Test: 6 test database (`tests/db/trade-in.test.ts`: quyền/RLS, điều kiện lập hồ sơ, luồng 800 tr bán / 200 tr xe cũ vay 50 tr đầy đủ, đối trừ không đổi quỹ, không khấu trừ hai lần, hủy, **hai đối trừ cùng lúc / đối trừ cùng thu tiền cùng lúc → một qua**) chạy 8 lần liên tiếp cùng 4 bộ test trước 0 lỗi; 7 test unit mới.
 - Kết quả: typecheck, lint, build đạt; `npm test` 129/129; `npm run test:db` 126/128 (2 test cũ `demands-rls` lỗi do role `root` — hạn chế môi trường đã ghi).
 - Giới hạn: chưa hỗ trợ khoản vay lớn hơn giá mua; chưa có luồng trả xe cũ khi hủy hồ sơ; chưa có biên bản/hợp đồng mua xe cũ; chưa quyết toán hiệu quả từng xe; chưa kiểm tra giao diện bằng trình duyệt thật.
@@ -250,7 +250,7 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
 1h. ~~Áp migration 1400~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D46–D49.
-1l. **Áp migration `1800_trade_in.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (thêm 2 bảng, 1 view, 6 RPC, thay `post_voucher` + hàm kiểm tra phiếu + hàm chặn hủy đơn, thêm cột `trade_in_id` và 2 loại phiếu chi, thêm hàm SECURITY DEFINER hẹp trả số/tên khách). Mục **Tạm** D67–D72.
+1l. ~~Áp migration 1800~~ — đã áp 06/10/2026. Còn chờ xác nhận D70 (xe cũ khi hủy hồ sơ) và D71 (sales có thấy cờ đổi xe cũ).
 1k. ~~Áp migration 1700~~ — đã áp 06/10/2026. Còn chờ xác nhận D62–D66, đặc biệt D63: tiền cọc khi khách bỏ cọc (giữ lại làm thu nhập hay hoàn).
 1j. ~~Áp migration 1600~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D56–D59 (đặc biệt D59: có tự đóng nhu cầu khi xác nhận đơn không).
 1i. ~~Áp migration 1500~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D51–D53, D55 (đặc biệt D51 "giá sàn là ngưỡng duy nhất", D52 ai duyệt giá dưới sàn).
