@@ -190,7 +190,17 @@ Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c 
 - **Duyệt:** quản lý/admin; duyệt hoặc từ chối đều phải ghi lý do; người duyệt và giờ duyệt được lưu; đã quyết thì không đổi (D52). Phiên bản chờ duyệt hoặc bị từ chối **không** chấp nhận được và không được báo cho khách.
 - **Khách chấp nhận:** chỉ phiên bản đã phát hành và còn hạn; báo giá chuyển "khách đã chấp nhận". Chưa phải đơn bán/giữ/cọc/thu tiền (D54). Hủy báo giá phải có lý do; các phiên bản giữ lại; hủy xong lập lại được.
 - **Quyền xem:** sales chỉ thấy báo giá của mình (và cờ "cần duyệt", không thấy giá sàn — D53); quản lý/kế toán thấy tất cả; kỹ thuật không thấy. Không xóa.
-- **Chưa làm:** đơn bán nhiều xe, hợp đồng bán, thu chi, thu cũ đổi mới, bàn giao, quyết toán; tính giá trị ưu đãi; nhắc báo giá sắp hết hạn.
+- **Chưa làm:** thu chi, thu cũ đổi mới, bàn giao, quyết toán; tính giá trị ưu đãi; nhắc báo giá sắp hết hạn.
+
+## 7j. Đơn bán nhiều xe và hợp đồng bán (chặng 5 — lát 3)
+
+- **Đơn bán** (mã DB#####) của một khách (qua nhu cầu mua còn mở), nhiều **dòng xe**; mỗi dòng có **giá bán ghi trên hợp đồng** (VND nguyên, tổng bằng BigInt). Giá bán KHÔNG phải tiền đã thu; cọc/thanh toán/công nợ ở lát thu chi.
+- **Trạng thái:** đang soạn → đã ký hợp đồng (xác nhận) → đã hủy. Đơn nháp sửa được (thay danh sách xe; dòng cũ "đã bỏ" vẫn lưu); đơn đã xác nhận không sửa hợp đồng/dòng (D56).
+- **Độc quyền:** một xe chỉ nằm trong một dòng đơn hiệu lực (kể cả đơn nháp); hai người lập cùng lúc → một đơn thắng, đơn thua không để lại dòng nào. Xe phải đang bán (sẵn bán/giữ/cọc), không giữ/cọc cho khách khác; xe ký gửi cần hợp đồng ký gửi hiệu lực.
+- **Duyệt giá (D58):** dòng thấp hơn mức cho phép → chỉ quản lý/admin xác nhận, kèm lý do. Dòng gắn phiên bản báo giá khách đã chấp nhận (cùng xe, cùng nhu cầu, giá bằng giá báo, mỗi báo giá chỉ một đơn) thì không cần duyệt lại.
+- **Xác nhận (D57, D59):** cần số hợp đồng + ngày ký (không tương lai) và ít nhất một xe; xe → "đã bán"; giữ/cọc của đúng nhu cầu → "đã thành đơn bán"; nhật ký nhu cầu không ghi số tiền. **Hủy:** đơn nháp do người phụ trách/quản lý; đơn đã xác nhận chỉ quản lý; bắt buộc lý do; xe đã bán về "đang bán".
+- **Quyền xem:** sales chỉ thấy đơn của mình; quản lý/kế toán thấy tất cả; kỹ thuật không thấy; không xóa.
+- **Chưa làm:** thu tiền/cọc thực nhận/công nợ (và chặn hủy khi đã nhận tiền), thu cũ đổi mới, bàn giao, quyết toán chia lợi nhuận/phí ký gửi, tự đóng nhu cầu, xuất hợp đồng theo mẫu.
 
 ## 8. Chưa định nghĩa — sẽ bổ sung ở chặng tương ứng
 

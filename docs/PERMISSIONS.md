@@ -54,6 +54,10 @@ Ký hiệu: ✔ toàn bộ · ◐ một phần (ghi chú) · — không có quy�
 | Báo giá — lập, sửa giá (phiên bản mới), khách chấp nhận, hủy | ✔ | ✔ | — | ◐ nhu cầu mình phụ trách | — |
 | Báo giá — xem | ✔ | ✔ | ✔ (xem) | ◐ của mình (chỉ cờ "cần duyệt", không giá sàn) | — |
 | Báo giá — duyệt / từ chối giá thấp hơn mức cho phép | ✔ | ✔ | — | — | — |
+| Đơn bán — lập, sửa nháp, xác nhận (giá đạt mức cho phép), hủy nháp | ✔ | ✔ | — | ◐ nhu cầu/đơn mình phụ trách | — |
+| Đơn bán — xác nhận khi có dòng thấp hơn mức cho phép (kèm lý do) | ✔ | ✔ | — | — | — |
+| Đơn bán — hủy đơn đã xác nhận | ✔ | ✔ | — | — | — |
+| Đơn bán — xem | ✔ | ✔ | ✔ (xem) | ◐ của mình | — |
 | Bên góp vốn, điều khoản chia lợi nhuận, vốn cam kết, khoản cho vay — xem | ✔ | ✔ | ✔ | — | — |
 | Bên góp vốn, điều khoản (lập/duyệt/hủy nháp/xác nhận lại), vốn cam kết, khoản vay, hủy dòng sổ | ✔ | ✔ | — | — | — |
 | Tiền thực nhận, rút vốn, thanh toán khoản vay — ghi | ✔ | ✔ | ✔ | — | — |

@@ -152,6 +152,16 @@ sales chưa xem được quyền giảm giá (D33); chưa có mục "Ký gửi" 
 **Đã sửa rủi ro:** tệp đính kèm *nhu cầu* (`demand-files`) trước đây tải qua Server Action; Vercel giới hạn thân yêu cầu ~4,5 MB nên ảnh/video lớn hơn có thể bị từ chối trên bản đang chạy dù cấu hình ghi 20 MB (chưa từng kiểm chứng trên Vercel).
 Nay tệp nhu cầu cũng tải thẳng lên Storage bằng URL ký (không đổi database/policy; bỏ cấu hình `bodySizeLimit`), 3 test unit mới (`tests/unit/attachments.test.ts`). **Chưa thử tải thật qua trình duyệt** (cần thử trên bản xem trước).
 
+## Chặng 5 — lát 3: đơn bán nhiều xe + hợp đồng bán (06/10/2026)
+
+- **Đơn bán** (DB#####) nhiều dòng xe, giá bán ghi trên hợp đồng; đang soạn → đã ký hợp đồng → đã hủy — D56. Xác nhận cần số hợp đồng + ngày ký — D57. Xe → "đã bán", giữ/cọc của nhu cầu → "đã thành đơn bán" — D59.
+- **Độc quyền một xe một dòng đơn hiệu lực** (unique index), thử đồng thời thật. Giá thấp hơn mức cho phép → chỉ quản lý xác nhận kèm lý do; dòng theo báo giá đã chấp nhận thì không duyệt lại — D58.
+- Trang mới `/don-ban` (danh sách có phân trang phía server, lập đơn nhiều xe, chi tiết, sửa nháp, xác nhận, hủy); menu "Đơn bán" (sales, quản lý, kế toán xem). Không xóa đơn/dòng.
+- Migration `20261001001600_sales_orders.sql`: **mới áp lên database test cục bộ, CHƯA áp lên Supabase** (chờ anh Kỳ đồng ý). Có sửa hàm `vehicle_reservations_guard` (chỉ nhánh "đã thành đơn bán": cho phép khi có đơn bán đã xác nhận cho đúng xe+nhu cầu). Mục **Tạm** D56–D59.
+- Test: 7 test database (`tests/db/sales-orders.test.ts`: quyền/RLS và nhãn xe sau khi bán, xác nhận/hủy/chốt cọc, **hai đơn cùng xe đồng thời → một thắng**, giá dưới mức cho phép/báo giá đã chấp nhận, điều kiện xe/nhu cầu, sửa nháp + sửa đồng thời, xe ký gửi) — chạy 10 lần liên tiếp cùng reservations/quotes 0 lỗi; 4 test unit (`tests/unit/sales-orders.test.ts`).
+- Kết quả: typecheck, lint, build đạt; `npm test` 118/118; `npm run test:db` 114/116 (2 test cũ `demands-rls` lỗi do role `root` — hạn chế môi trường đã ghi).
+- Giới hạn: chưa thu tiền/cọc thực nhận/công nợ (lát sau phải chặn hủy đơn khi đã nhận tiền); chưa xuất hợp đồng theo mẫu; chưa tự đóng nhu cầu; chưa kiểm tra giao diện bằng trình duyệt thật.
+
 ## Chặng 5 — lát 2: báo giá có phiên bản + duyệt giảm giá (06/10/2026)
 
 - **Báo giá** (BG#####) của xe cho nhu cầu mua; **phiên bản bất biến** (giá, ưu đãi, hạn hiệu lực bắt buộc nhập); sửa giá = phiên bản mới — D50.
@@ -219,6 +229,7 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
 1h. ~~Áp migration 1400~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D46–D49.
+1j. **Áp migration `1600_sales_orders.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (thêm 2 bảng đơn bán, 4 RPC, 1 trigger SECURITY DEFINER đồng bộ, sửa nhánh "đã thành đơn bán" của guard giữ/cọc). Các mục **Tạm** D56–D59 (đặc biệt D59: có tự đóng nhu cầu khi xác nhận đơn không).
 1i. ~~Áp migration 1500~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D51–D53, D55 (đặc biệt D51 "giá sàn là ngưỡng duy nhất", D52 ai duyệt giá dưới sàn).
 1f. ~~Áp migration 1300~~ — đã xong 05/10/2026. **Đã chốt D39/D41 (05/10/2026):** chi phí chung KHÔNG trừ trước khi chia (giữ quy tắc §7); lãi vay không tính, không trừ. Còn lại: hoa hồng bán xe có trừ trước khi chia không — để chặng 6.
 1g. **Bảo mật — 4 hàm `valuation_agent_*` (không do phiên này tạo, thuộc 3 migration `appraisal_ai_*`/`valuation_agent_*` ngoài repo) đang cho `anon` (chưa đăng nhập) gọi được** dù là SECURITY DEFINER và có ghi dữ liệu (`save_comparables`, `save_decision`, `save_new_car_evidence`, `fail_run`); có tham số `p_token` nên có thể đã tự kiểm tra token, nhưng chưa được rà. Cần chủ dự án xác nhận ai tạo, đưa mã vào repo và rà quyền (CLAUDE.md §11). **Cập nhật 06/10/2026:** Supabase hiện có thêm migration ngoài repo `valuation_agent_disable_public_rpc_v1` và Advisor không còn cảnh báo `anon` cho các hàm này — việc đưa mã vào repo vẫn còn mở.
