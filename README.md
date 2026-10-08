@@ -54,4 +54,5 @@ Quyền được thực thi ở database (RLS + hàm kiểm tra vai trò từ b�
 không dựa vào `user_metadata`. Giá vốn/giá sàn nằm ở bảng riêng mà sales không đọc được. Tệp đính kèm nằm trong bucket riêng tư,
 chỉ mở qua đường dẫn có hạn 10 phút. Chi tiết: [`docs/PERMISSIONS.md`](docs/PERMISSIONS.md).
 
-Nghiệm thu 08/10/2026: xem `docs/ACCEPTANCE.md` (test database 170/170, rà bảo mật toàn schema, việc Chủ tịch cần làm để nghiệm thu đầu-cuối).
+Nghiệm thu 08/10/2026: xem `docs/ACCEPTANCE.md` (test database 171/171, rà bảo mật toàn schema, việc Chủ tịch cần làm để nghiệm thu đầu-cuối).
+Migration do công cụ ngoài tạo trên Supabase đã được xuất vào repository: `docs/EXTERNAL_MIGRATIONS.md`.

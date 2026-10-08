@@ -9,8 +9,8 @@ Không tuyên bố "hoàn tất" cho phần chỉ có giao diện/mã mà chưa 
 |---|---|
 | `npm run typecheck`, `npm run lint`, `npm run build` | đạt |
 | `npm test` (unit) | 21 file, 158 test đạt |
-| `npm run test:db` (database PostgreSQL thật cục bộ, chạy bằng role `postgres`) | 19 file, **170/170 đạt** (gồm test đồng thời thật ở database) |
-| Áp migration lên Supabase `minhky-auto` | migrations 1400 → 2600 đã áp, mỗi lần kiểm RLS/quyền/advisor |
+| `npm run test:db` (database PostgreSQL thật cục bộ, chạy bằng role `postgres`) | 19 file, **171/171 đạt** (gồm test đồng thời thật ở database) |
+| Áp migration lên Supabase `minhky-auto` | migrations 1400 → 4200 đã áp (14 migration 2700–4000 là bản xuất từ Supabase, không áp lại), mỗi lần kiểm RLS/quyền/advisor |
 
 ## 2. Bảng đối chiếu §12 (14 mục)
 
@@ -36,9 +36,9 @@ Không tuyên bố "hoàn tất" cho phần chỉ có giao diện/mã mà chưa 
 Test `tests/db/security-baseline.test.ts` chạy cùng các truy vấn trên database cục bộ; cùng truy vấn đã chạy trên Supabase thật:
 
 - Mọi bảng public bật RLS; `anon` không có quyền bảng/view/hàm nào.
-- **Đã sửa (migration 2500):** 16 view còn quyền ghi mặc định → chỉ còn SELECT; mọi view `security_invoker`.
-- **Đã sửa (migration 2600):** các bảng chặng 1–4 còn quyền `TRUNCATE` (bỏ qua RLS) và `DELETE` cho người đăng nhập → quản lý có thể xóa thẳng xe/giá mua/thẩm định qua Data API. Nay `TRUNCATE` không ai có; `DELETE` chỉ còn 6 bảng liên kết/cấu hình mà ứng dụng thật sự xóa (`user_roles`, `demand_shares`, `saved_filters`, `demand_vehicle_options`, `appraisal_items`, `vehicle_capital_shares`).
-- Hàm `SECURITY DEFINER` công khai: 7 hàm của ứng dụng đã rà (trả dữ liệu hẹp, tự kiểm quyền; cảnh báo Advisor tương ứng là có chủ đích) + 6 hàm `valuation_agent_*` **không nằm trong repository** (xem mục 5).
+- **Đã sửa (migration 4100, trước đây đánh số 2500):** 16 view còn quyền ghi mặc định → chỉ còn SELECT; mọi view `security_invoker`.
+- **Đã sửa (migration 4200, trước đây đánh số 2600):** các bảng chặng 1–4 còn quyền `TRUNCATE` (bỏ qua RLS) và `DELETE` cho người đăng nhập → quản lý có thể xóa thẳng xe/giá mua/thẩm định qua Data API. Nay `TRUNCATE` không ai có; `DELETE` chỉ còn 6 bảng liên kết/cấu hình mà ứng dụng thật sự xóa (`user_roles`, `demand_shares`, `saved_filters`, `demand_vehicle_options`, `appraisal_items`, `vehicle_capital_shares`).
+- Hàm `SECURITY DEFINER` công khai: 7 hàm của ứng dụng đã rà (trả dữ liệu hẹp, tự kiểm quyền; cảnh báo Advisor tương ứng là có chủ đích) + 6 hàm `valuation_agent_*` (đã xuất vào repository, `docs/EXTERNAL_MIGRATIONS.md`; không ai ngoài chủ hàm/`service_role` gọi được).
 - Cảnh báo còn lại của Advisor: "Leaked password protection" tắt → **Chủ tịch bật trong Supabase Dashboard** (Authentication → Providers/Password security), việc này không làm được từ mã.
 
 ## 4. Việc Chủ tịch cần làm để nghiệm thu đầu-cuối (tôi không làm thay được: cần tài khoản thật và thiết bị)
@@ -60,7 +60,7 @@ Mỗi bước thực hiện trên **điện thoại và máy tính**; ghi kết 
 
 ## 5. Còn tồn đọng cần quyết định
 
-- **Lệch giữa Supabase và repository:** Supabase có 13 migration không có trong repository (`appraisal_ai_*`, `valuation_agent_*`, `mk_auto_acquisition_policy_v1_governance`, `appraisal_ai_map_policy_arithmetic_guards_v1`), do công cụ/phiên khác tạo (một migration mới nhất ngày 08/10). Chưa rà nội dung vì không thuộc phạm vi được giao và có thể ghi vào bảng của ứng dụng. **Đề nghị:** Chủ tịch cho biết nguồn; nếu muốn giữ thì xuất SQL vào repository để lịch sử migration đầy đủ, nếu không dùng thì gỡ có kiểm soát. Không coi hệ thống đã nghiệm thu "chỉ tạo từ repository" khi chưa giải quyết việc này.
+- **Lệch giữa Supabase và repository: ĐÃ XỬ LÝ (09/10/2026).** 14 migration ngoài repository (`appraisal_ai_*`, `valuation_agent_*`, chính sách thu mua) đã xuất nguyên văn vào `supabase/migrations/2700–4000`, khớp từng ký tự với Supabase, dựng lại database cục bộ đạt 171/171 test. Chi tiết, lưu ý bảo mật (băm token đã che, đề nghị đổi token) và quy tắc từ nay: `docs/EXTERNAL_MIGRATIONS.md`.
 - **Các quyết định còn "Tạm"** trong `docs/DECISIONS.md` (cột cuối): D46–D49, D51–D53, D55–D59, D62–D66, D73, D75, D76, D78 (kèm danh mục checklist bàn giao mặc định), D82, D89, D90, D96, D97. Chủ tịch xem và xác nhận hoặc sửa.
 - **Chưa làm có chủ đích (CLAUDE.md §14):** cổng người góp vốn, app native, đọc nhóm Zalo, AI trích xuất/định giá trong ứng dụng, kết nối ngân hàng/kế toán, thuế TNCN trên hoa hồng.
 - **Repository đang công khai** (DEPLOYMENT.md §6): lộ cấu trúc dữ liệu và quy tắc nghiệp vụ (không lộ dữ liệu). Cân nhắc chuyển Private.

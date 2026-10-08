@@ -1,6 +1,6 @@
 # Triển khai, cấu hình và sao lưu
 
-> Trạng thái 08/10/2026: project Supabase `minhky-auto` (tổ chức "Minh Kỳ Auto", ap-southeast-1) **đã áp migrations đến `20261001002600`** (thứ tự theo tên file; Supabase gán số phiên bản riêng nên tên hiển thị trong `list_migrations` khác tiền tố), mỗi lần đều kiểm RLS/quyền/Advisor; repo GitHub `quocky2009-boop/minhky-auto`; dự án Vercel `minhky-auto.vercel.app`. **Chưa nghiệm thu đăng nhập đầu-cuối bằng tài khoản thật** (xem `docs/ACCEPTANCE.md`). Supabase còn migration không thuộc repository (ACCEPTANCE.md §5).
+> Trạng thái 08/10/2026: project Supabase `minhky-auto` (tổ chức "Minh Kỳ Auto", ap-southeast-1) **đã áp migrations đến `20261001004200`** (thứ tự theo tên file; Supabase gán số phiên bản riêng nên tên hiển thị trong `list_migrations` khác tiền tố), mỗi lần đều kiểm RLS/quyền/Advisor; repo GitHub `quocky2009-boop/minhky-auto`; dự án Vercel `minhky-auto.vercel.app`. **Chưa nghiệm thu đăng nhập đầu-cuối bằng tài khoản thật** (xem `docs/ACCEPTANCE.md`). Các migration do công cụ ngoài tạo đã được xuất vào repository (`docs/EXTERNAL_MIGRATIONS.md`).
 > Bản thử nghiệm và bản chạy thật hiện dùng chung một project — **không nạp dữ liệu demo vào project này nếu sắp nhập khách thật**; muốn có staging riêng cần tạo project thứ hai.
 
 ## 1. Môi trường

@@ -1,5 +1,5 @@
 -- =====================================================================
--- MINH KỲ AUTO — 2500 Nghiệm thu: view chỉ để đọc
+-- MINH KỲ AUTO — 4100 Nghiệm thu (trước đây đánh số 2500; đổi số để chạy SAU các migration xuất từ Supabase, đúng thứ tự trên production): view chỉ để đọc
 --
 -- Supabase cấp mặc định đầy đủ quyền (INSERT/UPDATE/DELETE/TRUNCATE) trên view mới cho vai trò đăng nhập. Các view của ứng dụng đều chỉ đọc
 -- (security invoker, có join/gom nhóm nên không tự ghi xuyên được vào bảng gốc), nhưng thu hồi quyền ghi để không còn dựa vào cấu trúc view:

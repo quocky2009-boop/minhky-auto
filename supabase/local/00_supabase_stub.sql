@@ -8,6 +8,7 @@ do $$ begin
 end $$;
 
 create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;   -- như Supabase: extensions.digest() dùng bởi hàm xác thực agent định giá
 create schema if not exists auth;
 create schema if not exists storage;
 grant usage on schema auth, storage, extensions, public to anon, authenticated, service_role;

@@ -1,6 +1,6 @@
 # Tiến độ
 
-Cập nhật: 08/10/2026 · Chặng hiện tại: **chặng 6 xong về mã + test + áp Supabase (migrations đến 2600) · đang NGHIỆM THU** · Tiếp theo: Chủ tịch nghiệm thu đầu-cuối bằng tài khoản thật (xem `docs/ACCEPTANCE.md`); quyết các mục "Tạm"; giải quyết lệch migration giữa Supabase và repository.
+Cập nhật: 08/10/2026 · Chặng hiện tại: **chặng 6 xong về mã + test + áp Supabase (migrations đến 4200 (gồm 14 migration xuất từ Supabase: 2700–4000)) · đang NGHIỆM THU** · Tiếp theo: Chủ tịch nghiệm thu đầu-cuối bằng tài khoản thật (xem `docs/ACCEPTANCE.md`); quyết các mục "Tạm"; giải quyết lệch migration giữa Supabase và repository.
 
 ## Tổng quan theo chặng (CLAUDE.md §14)
 
@@ -13,7 +13,7 @@ Cập nhật: 08/10/2026 · Chặng hiện tại: **chặng 6 xong về mã + te
 | 5 | Bán, thu chi, thu cũ đổi mới, bàn giao | **Xong về mã + test + đã áp Supabase:** giữ xe/cọc, báo giá, đơn bán, thu chi, thu cũ đổi mới, bàn giao, quyết toán |
 | 6 | Dashboard, báo cáo, hậu mãi, hoa hồng, nghiệm thu | **Xong về mã + test + đã áp Supabase:** dashboard + báo cáo + CSV (2200), hậu mãi + lịch chăm sóc 7/30/90 (2300), hoa hồng (2400), nghiệm thu bảo mật (2500, 2600). **Nghiệm thu đầu-cuối chưa xong** — xem `docs/ACCEPTANCE.md` |
 
-Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth → database. Phần database/quyền/báo cáo đã được kiểm bằng test database thật (170/170) và áp lên Supabase; **phần giao diện với tài khoản thật chưa được nghiệm thu đầu-cuối** (cần Chủ tịch, xem `docs/ACCEPTANCE.md`).
+Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth → database. Phần database/quyền/báo cáo đã được kiểm bằng test database thật (171/171) và áp lên Supabase; **phần giao diện với tài khoản thật chưa được nghiệm thu đầu-cuối** (cần Chủ tịch, xem `docs/ACCEPTANCE.md`).
 
 ## Chặng 1 — đã có
 
@@ -273,7 +273,8 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
 1h. ~~Áp migration 1400~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D46–D49.
-1s. Nghiệm thu: migrations 2500 (view chỉ đọc) và 2600 (thu hồi DELETE/TRUNCATE còn sót) đã áp 08/10/2026; test `security-baseline` bảo vệ lâu dài.
+1t. ~~Migration ngoài repository~~ — đã xuất 14 migration vào repo (2700–4000), khớp Supabase, dựng lại cục bộ đạt 171/171; xem `docs/EXTERNAL_MIGRATIONS.md`.
+1s. Nghiệm thu: migrations 4100 (view chỉ đọc; trước đây đánh số 2500) và 4200 (thu hồi DELETE/TRUNCATE còn sót; trước đây 2600) đã áp 08/10/2026; test `security-baseline` bảo vệ lâu dài.
 1r. ~~Áp migration 2400~~ — đã áp 08/10/2026 (0 bảng thiếu RLS, 8 policy, anon không quyền, 4 trigger, không INSERT trực tiếp vào khoản hoa hồng, 0 khoản seed). Trước đây cần anh Kỳ đồng ý: — cần anh Kỳ đồng ý (3 bảng mới, 1 view, 7 RPC, 1 trigger trên `sales_orders`, thay `account_flow` và `report_results_totals`). Mục **Tạm** D96, D97.
 1q. ~~Áp migration 2300~~ — đã áp 08/10/2026 (0 bảng thiếu RLS, 8 policy, anon không quyền, không DELETE/TRUNCATE, 5 trigger; advisor chỉ thêm `list_staff` có chủ đích: SECURITY DEFINER, tự kiểm quản lý). D92, D94 đã chốt.
 1p. ~~Áp migration 2200~~ — đã áp 08/10/2026 (0 bảng thiếu RLS, 2 view security invoker, anon không quyền, advisor không đổi); trước đây cần anh Kỳ đồng ý (chỉ thêm 2 view + 2 RPC đọc, không đổi bảng/dữ liệu). Mục **Tạm** D89, D90.

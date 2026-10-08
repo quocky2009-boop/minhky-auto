@@ -1,5 +1,5 @@
 -- =====================================================================
--- MINH KỲ AUTO — 2600 Nghiệm thu: thu hồi quyền XÓA/TRUNCATE còn sót trên các bảng cũ (chặng 1–4)
+-- MINH KỲ AUTO — 4200 Nghiệm thu (trước đây đánh số 2600; đổi số vì cùng lý do với 4100): thu hồi quyền XÓA/TRUNCATE còn sót trên các bảng cũ (chặng 1–4)
 --
 -- CLAUDE.md §10–§11: không xóa âm thầm; dùng điều chỉnh/đảo/lưu trữ có lịch sử. Rà toàn schema khi nghiệm thu phát hiện các bảng tạo ở chặng đầu vẫn giữ
 -- quyền DELETE/TRUNCATE mặc định của Supabase cho vai trò đăng nhập: TRUNCATE bỏ qua RLS; DELETE chỉ còn bị chính sách `*_write` (quản lý) giới hạn nên quản lý có thể
