@@ -1,20 +1,19 @@
 # Tiến độ
 
-Cập nhật: 05/10/2026 · Chặng hiện tại: **chặng 3 gần xong (còn giao diện danh mục) · chặng 4 lát 1 (vốn góp, điều khoản chia lợi nhuận, cho vay) có mã + test, CHƯA áp lên Supabase** · Tiếp theo: áp migration 1300 sau khi anh Kỳ duyệt, rồi quyết toán (cần chặng 5); quyết toán ký gửi ở chặng 5
+Cập nhật: 08/10/2026 · Chặng hiện tại: **chặng 6 xong về mã + test + áp Supabase (migrations đến 2600) · đang NGHIỆM THU** · Tiếp theo: Chủ tịch nghiệm thu đầu-cuối bằng tài khoản thật (xem `docs/ACCEPTANCE.md`); quyết các mục "Tạm"; giải quyết lệch migration giữa Supabase và repository.
 
 ## Tổng quan theo chặng (CLAUDE.md §14)
 
 | Chặng | Nội dung | Trạng thái |
 |---|---|---|
-| 1 | Nền tảng, Auth, schema, quyền, Storage | **Có mã + test database.** Chưa chạy trên Supabase thật |
-| 2 | Khách → nhu cầu → lọc → chăm sóc → ghép xe | **Có mã + test database + build.** Chưa kiểm tra trên trình duyệt với tài khoản thật |
-| 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Đang làm — lát 1, 2, 3 xong:** kho xe, vòng sở hữu theo VIN, nhập kho; thẩm định + duyệt mua; chi phí chuẩn bị xe (dự kiến / đã xác nhận / đã thanh toán). **Lát 4 (có mã + test, đã áp lên Supabase):** hợp đồng ký gửi. **Còn:** giao diện quản lý địa điểm/mẫu checklist, kỹ thuật viên tự nhập kết quả kiểm tra |
-| 4 | Vốn góp/vay, công thức, quyết toán | **Đang làm — lát 1 xong (có mã + test, đã áp lên Supabase):** bên góp vốn, điều khoản chia lợi nhuận theo xe có phiên bản, sổ vốn góp, cho vay tách riêng, ước tính chia. **Còn:** quyết toán (tạm tính → kiểm tra → phê duyệt → thanh toán), hoàn vốn/chia thực chi, chi phí muộn có điều chỉnh, xử lý hòa vốn/lỗ được duyệt — cần giao dịch bán (chặng 5) |
-| 5 | Bán, thu chi, thu cũ đổi mới, bàn giao | **Đang làm — lát 1 xong (có mã + test, chưa áp lên Supabase):** giữ xe/đặt cọc độc quyền. **Còn:** báo giá có phiên bản + duyệt giảm giá, đơn bán (nhiều xe, dòng chi tiết), hợp đồng bán, thu chi (tài khoản tiền, phiếu, phân bổ, công nợ), thu cũ đổi mới đối trừ, bàn giao/hồ sơ, quyết toán chia lợi nhuận và ký gửi |
-| 6 | Dashboard, báo cáo, hậu mãi, hoa hồng, nghiệm thu | Chưa làm |
+| 1 | Nền tảng, Auth, schema, quyền, Storage | **Xong về mã + test database + đã áp Supabase.** Chưa nghiệm thu đăng nhập đầu-cuối bằng tài khoản thật |
+| 2 | Khách → nhu cầu → lọc → chăm sóc → ghép xe | **Xong về mã + test database + build.** Chưa nghiệm thu trên trình duyệt với tài khoản thật |
+| 3 | Kho, thu mua/thẩm định, chi phí, ký gửi | **Xong về mã + test + đã áp Supabase** (kho, vòng sở hữu theo VIN, thẩm định, chi phí, ký gửi, tệp xe) |
+| 4 | Vốn góp/vay, công thức, quyết toán | **Xong về mã + test + đã áp Supabase:** vốn góp, điều khoản chia lợi nhuận, cho vay, quyết toán (lát 7 chặng 5), nối sổ quỹ (D88) |
+| 5 | Bán, thu chi, thu cũ đổi mới, bàn giao | **Xong về mã + test + đã áp Supabase:** giữ xe/cọc, báo giá, đơn bán, thu chi, thu cũ đổi mới, bàn giao, quyết toán |
+| 6 | Dashboard, báo cáo, hậu mãi, hoa hồng, nghiệm thu | **Xong về mã + test + đã áp Supabase:** dashboard + báo cáo + CSV (2200), hậu mãi + lịch chăm sóc 7/30/90 (2300), hoa hồng (2400), nghiệm thu bảo mật (2500, 2600). **Nghiệm thu đầu-cuối chưa xong** — xem `docs/ACCEPTANCE.md` |
 
-Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth → database. Vì chưa có project Supabase, chặng 1–2 hiện ở mức
-**đã kiểm chứng logic và database, chưa nghiệm thu đầu-cuối**.
+Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth → database. Phần database/quyền/báo cáo đã được kiểm bằng test database thật (170/170) và áp lên Supabase; **phần giao diện với tài khoản thật chưa được nghiệm thu đầu-cuối** (cần Chủ tịch, xem `docs/ACCEPTANCE.md`).
 
 ## Chặng 1 — đã có
 
@@ -157,7 +156,7 @@ Nay tệp nhu cầu cũng tải thẳng lên Storage bằng URL ký (không đ�
 - **Quyết toán (QT#####)** theo từng dòng xe đã bán: tạm tính → kiểm tra → phê duyệt → thanh toán — D79. **Xe sở hữu:** chia lợi nhuận theo điều khoản góp vốn đã duyệt (P, C, R, phần dư lớn nhất) và **hoàn vốn** = vốn thực nhận ròng — D80. **Xe ký gửi:** thu hộ / phí / khấu trừ / trả chủ xe hoặc chủ xe nộp — D83. **Hòa vốn/lỗ** không áp công thức, cần xử lý được duyệt — D82.
 - **Điều kiện duyệt** do database kiểm (số liệu không đổi, điều khoản đủ, hết chi phí dự kiến, đơn đã thu đủ) — D81. **Điều chỉnh** khi có chi phí muộn, không sửa bản đã duyệt, số đã chi chuyển sang — D84. **Chi trả** bằng phiếu thu/chi theo nghĩa vụ, không vượt phần còn lại, quỹ đủ tiền — D85. Quyền — D86.
 - Trang mới `/quyet-toan` (danh sách, chi tiết: các khoản + đã chi/còn lại, điều kiện còn thiếu, kiểm tra/duyệt/hủy/điều chỉnh, xử lý hòa vốn/lỗ), nút "Tạm tính quyết toán" ở chi tiết đơn bán, 4 loại phiếu mới ở `/thu-chi`.
-- Chặng 6 lát 10 — hoa hồng (migration `20261001002400_commissions.sql`, D95–D97): **mới áp lên database test cục bộ, CHƯA áp lên Supabase**. Test: `commission.test.ts` 7 test database (quy tắc, xe mới theo hãng/model, xe cũ theo VIN, khoản hoa hồng, chi trả vào sổ quỹ + song song, đơn hủy, báo cáo), `commissions.test.ts` 8 test unit; `npm test` 158/158; `test:db` 163/165 (2 lỗi cũ `demands-rls` do role root); typecheck/lint/build đạt. Giao diện `/hoa-hong`, chi tiết, `/hoa-hong/quy-tac`, báo cáo có dòng hoa hồng và chi phí sau bán; chưa kiểm bằng trình duyệt thật. Đây là lát cuối của chặng 6.
+- Chặng 6 lát 10 — hoa hồng (migration `20261001002400_commissions.sql`, D95–D97): **đã áp lên Supabase 08/10/2026**. Test: `commission.test.ts` 7 test database (quy tắc, xe mới theo hãng/model, xe cũ theo VIN, khoản hoa hồng, chi trả vào sổ quỹ + song song, đơn hủy, báo cáo), `commissions.test.ts` 8 test unit; `npm test` 158/158; `test:db` 163/165 (2 lỗi cũ `demands-rls` do role root); typecheck/lint/build đạt. Giao diện `/hoa-hong`, chi tiết, `/hoa-hong/quy-tac`, báo cáo có dòng hoa hồng và chi phí sau bán; chưa kiểm bằng trình duyệt thật. Đây là lát cuối của chặng 6.
 - Chặng 6 lát 9 — hậu mãi (migration `20261001002300_aftersales.sql`, D92–D94): **đã áp lên Supabase 08/10/2026**. Test: 4 test mới trong `settlement.test.ts` (nhóm HẬU MÃI: cam kết, gợi ý bảo hành, chuyển trạng thái, chi phí sau bán là chi phí chung: không đổi quyết toán, vào báo cáo toàn showroom) + lịch chăm sóc 7/30/90 trong `handover.test.ts`, `aftersales.test.ts` 9 test unit; `npm test` 153/153; `test:db` 156/158 (2 lỗi cũ `demands-rls` do role root); typecheck/lint/build đạt. Giao diện `/hau-mai`, chi tiết phiếu, khối hậu mãi trong chi tiết đơn bán, thẻ ở Tổng quan; chưa kiểm bằng trình duyệt thật. Còn của chặng 6: hoa hồng (đã có chính sách, đang làm).
 - Chặng 6 lát 8 — dashboard lãnh đạo + báo cáo (migration `20261001002200_reports.sql`, D89–D91): **đã áp lên Supabase 08/10/2026**. Test: 2 test mới trong `settlement.test.ts` (kết quả xe, tồn kho, quyền), `reports.test.ts` 6 test unit; `npm test` 147/147; `test:db` 152/154 (2 lỗi cũ `demands-rls` do role root); typecheck/lint/build đạt. Giao diện `/tong-quan` (khối tài chính) và `/bao-cao` (kết quả xe, tồn kho, xuất CSV); chưa kiểm bằng trình duyệt thật. Còn của chặng 6: hậu mãi, hoa hồng (cần chính sách).
 - Migration `20261001002100_cashbook_capital_link.sql` (D88): **đã áp lên Supabase 08/10/2026**. Test: `cashbook-link.test.ts` 7/7 (vốn nhận/rút, vay, trả vay, chi phí xe vào số dư; bắt buộc tài khoản; công ty không gắn; thiếu tiền; hủy không làm quỹ âm; chi song song một thắng), sửa test cũ gắn tài khoản; `npm test` 141/141; `test:db` 150/152 (2 lỗi cũ `demands-rls` do chạy role root); typecheck/lint/build đạt. Giao diện: chọn tài khoản ở form nhận/rút vốn, vay, trả vay, thanh toán chi phí (chưa kiểm bằng trình duyệt thật).
@@ -274,7 +273,8 @@ Phát hiện qua kiểm tra thật: hàm tạo sau câu REVOKE ở migration 010
 1. ~~Push lên GitHub~~ — đã xong: GitHub `main` ở `ab22682` (05/10/2026), phiên làm việc này đã push được nhánh `claude/dreamy-bell-c45ozd`. Lát 4 được đẩy lên nhánh `claude/dreamy-bell-c45ozd` (không phải `main`) để anh Kỳ xem trước khi gộp.
 1b. ~~Áp migration 1100~~ — đã xong 05/10/2026.
 1h. ~~Áp migration 1400~~ — đã áp 06/10/2026. Còn chờ xác nhận các mục **Tạm** D46–D49.
-1r. **Áp migration `2400_commissions.sql` lên Supabase `minhky-auto`?** — cần anh Kỳ đồng ý (3 bảng mới, 1 view, 7 RPC, 1 trigger trên `sales_orders`, thay `account_flow` và `report_results_totals`). Mục **Tạm** D96, D97.
+1s. Nghiệm thu: migrations 2500 (view chỉ đọc) và 2600 (thu hồi DELETE/TRUNCATE còn sót) đã áp 08/10/2026; test `security-baseline` bảo vệ lâu dài.
+1r. ~~Áp migration 2400~~ — đã áp 08/10/2026 (0 bảng thiếu RLS, 8 policy, anon không quyền, 4 trigger, không INSERT trực tiếp vào khoản hoa hồng, 0 khoản seed). Trước đây cần anh Kỳ đồng ý: — cần anh Kỳ đồng ý (3 bảng mới, 1 view, 7 RPC, 1 trigger trên `sales_orders`, thay `account_flow` và `report_results_totals`). Mục **Tạm** D96, D97.
 1q. ~~Áp migration 2300~~ — đã áp 08/10/2026 (0 bảng thiếu RLS, 8 policy, anon không quyền, không DELETE/TRUNCATE, 5 trigger; advisor chỉ thêm `list_staff` có chủ đích: SECURITY DEFINER, tự kiểm quản lý). D92, D94 đã chốt.
 1p. ~~Áp migration 2200~~ — đã áp 08/10/2026 (0 bảng thiếu RLS, 2 view security invoker, anon không quyền, advisor không đổi); trước đây cần anh Kỳ đồng ý (chỉ thêm 2 view + 2 RPC đọc, không đổi bảng/dữ liệu). Mục **Tạm** D89, D90.
 1o. ~~Áp migration 2100~~ — đã áp 08/10/2026 (0 bảng thiếu RLS, 4 trigger, 4 cột account_id, anon không quyền, advisor không đổi); trước đây cần anh Kỳ đồng ý (thêm cột `account_id` vào 4 bảng sổ vốn/vay/chi phí, 4 trigger, đổi cách tính số dư, thay 4 RPC; hàm `private` chỉ trả số). Chi tiết D88.

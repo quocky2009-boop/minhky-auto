@@ -1,6 +1,6 @@
 # Triển khai, cấu hình và sao lưu
 
-> Trạng thái 01/10/2026: project Supabase `minhky-auto` (tổ chức "Minh Kỳ Auto", ap-southeast-1) **đã áp migrations 0100–0900 và kiểm tra**; đã gán admin cho tài khoản chủ; repo GitHub `quocky2009-boop/minhky-auto` (công khai); đã tạo dự án Vercel tại `minhky-auto.vercel.app` (chưa kiểm tra đăng nhập thực tế).
+> Trạng thái 08/10/2026: project Supabase `minhky-auto` (tổ chức "Minh Kỳ Auto", ap-southeast-1) **đã áp migrations đến `20261001002600`** (thứ tự theo tên file; Supabase gán số phiên bản riêng nên tên hiển thị trong `list_migrations` khác tiền tố), mỗi lần đều kiểm RLS/quyền/Advisor; repo GitHub `quocky2009-boop/minhky-auto`; dự án Vercel `minhky-auto.vercel.app`. **Chưa nghiệm thu đăng nhập đầu-cuối bằng tài khoản thật** (xem `docs/ACCEPTANCE.md`). Supabase còn migration không thuộc repository (ACCEPTANCE.md §5).
 > Bản thử nghiệm và bản chạy thật hiện dùng chung một project — **không nạp dữ liệu demo vào project này nếu sắp nhập khách thật**; muốn có staging riêng cần tạo project thứ hai.
 
 ## 1. Môi trường
@@ -44,8 +44,9 @@ Biến môi trường (mẫu trong `.env.example`):
 - **Database:** gói Supabase trả phí có sao lưu hằng ngày (Pro: 7 ngày; PITR là tùy chọn trả thêm). Gói Free **không** có sao lưu
   tự động phù hợp cho dữ liệu kinh doanh → production nên dùng gói trả phí. Ngoài ra nên xuất định kỳ ra nơi khác:
   `supabase db dump --linked -f backup_$(date +%F).sql` (schema + dữ liệu) và lưu ngoài Supabase (ổ công ty/Google Drive có mã hóa).
-- **Storage:** sao lưu của Supabase **không gồm tệp trong Storage**. Cần định kỳ tải bucket `demand-files` ra nơi khác
+- **Storage:** sao lưu của Supabase **không gồm tệp trong Storage**. Cần định kỳ tải các bucket riêng tư (`demand-files` và bucket tệp xe) ra nơi khác
   (Supabase CLI `supabase storage cp -r ss:///demand-files ./backup-files --experimental` hoặc script dùng secret key chạy trên máy chủ công ty).
+- **Đã diễn tập (08/10/2026, database cục bộ PostgreSQL 16):** `pg_dump -Fc` rồi `pg_restore --no-owner` vào database mới: số xe, đơn bán, quyết toán, hoa hồng, phiếu thu/chi, phiếu hậu mãi, nhật ký kiểm toán và **tổng số dư tài khoản (1.030.838.341.000)** khớp hệt bản gốc. Quy trình tương tự dùng được với `supabase db dump`; **chưa diễn tập trên hạ tầng Supabase thật** (cần Chủ tịch/gói trả phí).
 - **Diễn tập khôi phục** (ít nhất mỗi quý): khôi phục bản dump vào project staging, kiểm tra số khách/nhu cầu/tệp khớp, ghi kết quả vào `docs/PROGRESS.md`.
 - Lệnh và đường dẫn trên cần kiểm tra lại với phiên bản Supabase CLI và gói dịch vụ thực tế khi thiết lập — chưa được chạy thử trên hạ tầng thật.
 
@@ -56,6 +57,8 @@ Biến môi trường (mẫu trong `.env.example`):
 - Tạo nhu cầu từ điện thoại; bấm Lưu hai lần không sinh trùng.
 - Tải tệp lên một nhu cầu; đường dẫn tệp hết hạn sau 10 phút; người ngoài quyền không mở được.
 - Supabase Dashboard → Advisors (Security, Performance) không có cảnh báo mức ERROR.
+- Sau MỖI migration: chạy lại truy vấn của `tests/db/security-baseline.test.ts` trên project (RLS, anon, TRUNCATE/DELETE, view chỉ SELECT, hàm SECURITY DEFINER), và dùng `npm run test:db` bằng role `postgres` trên database cục bộ trước khi áp.
+- Bật "Leaked password protection" (Authentication) — Advisor đang cảnh báo.
 
 ## 6. Repository công khai — lưu ý
 
