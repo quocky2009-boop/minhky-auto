@@ -205,6 +205,11 @@ d("Bàn giao xe và hồ sơ — chặng 5 lát 6 (database thật)", () => {
     await deliver(cA, salesA, h, { received_relation: "proxy", received_by_name: "Trần Thị Nhận Thay" });
     expect((await sys.query("select status, received_by_name, received_relation, odo_at_handover, keys_given, delivered_by from public.handovers where id = $1", [h])).rows[0])
       .toMatchObject({ status: "delivered", received_by_name: "Trần Thị Nhận Thay", received_relation: "proxy", odo_at_handover: 12500, keys_given: 2, delivered_by: salesA });
+    // D92: giao xe tự mở 3 phiếu nhắc chăm sóc hạn sau 7 / 30 / 90 ngày kể từ ngày giao, giao cho sales phụ trách; mỗi mốc một phiếu
+    const care = (await sys.query("select auto_key, kind, status, assigned_to, (next_due - $2::date)::int d from public.aftersales_cases where order_line_id = $1 order by next_due", [s.lines[0].id, TODAY])).rows;
+    expect(care.map((x) => [x.auto_key, x.d, x.kind, x.status])).toEqual([["care_7", 7, "care_call", "open"], ["care_30", 30, "care_call", "open"], ["care_90", 90, "care_call", "open"]]);
+    expect(care.every((x) => x.assigned_to === salesA)).toBe(true);
+    expect(await as(cA, salesA, async (db) => Number((await db.query("select count(*) n from public.aftersales_cases where order_line_id = $1", [s.lines[0].id])).rows[0].n))).toBe(3);
     const logs = (await sys.query("select content from public.demand_activities where demand_id = $1 and channel = 'system'", [s.dem])).rows.map((x) => x.content as string);
     expect(logs.some((c) => /Đã giao xe XE\d+ \(bàn giao BN\d+\)/.test(c))).toBe(true);
     expect(logs.join(" ")).not.toMatch(/\d{1,3}(?:[.,]\d{3}){2,}|800000000/);

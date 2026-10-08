@@ -44,6 +44,9 @@ export function CostsPanel({ vehicleId, businessType, costs, summary, manager, a
         <Cell label="Đã thanh toán" value={money(summary?.paid_showroom)} sub={consignment && paidOwner !== null ? `Phần chủ xe: ${formatVnd(summary?.paid_owner)}` : undefined} />
         <Cell label="Còn phải trả" value={dueShowroom === null ? "Chưa có" : formatVnd(dueShowroom)} sub={consignment && dueOwner !== null ? `Phần chủ xe: ${formatVnd(dueOwner)}` : undefined} />
       </div>
+      {summary && (toVnd(summary.aftersales_confirmed) !== 0n || summary.aftersales_open_lines > 0) && (
+        <p className="text-sm">Chi phí sau bán (hậu mãi, chi phí chung của showroom, không tính vào giá vốn hay quyết toán xe): đã xác nhận <b>{formatVnd(summary.aftersales_confirmed)}</b>, đã thanh toán {formatVnd(summary.aftersales_paid)}{summary.aftersales_open_lines > 0 ? `, còn ${summary.aftersales_open_lines} khoản dự kiến chưa xác nhận` : ""}.</p>
+      )}
       <p className="text-xs text-ink-soft">
         Ba con số tách riêng, không cộng dồn: <b>dự kiến</b> là kế hoạch, <b>đã xác nhận</b> là số thực tế đã nghiệm thu, <b>đã thanh toán</b> là tiền đã chi. Khoản đã xác nhận không còn tính vào “dự kiến”.
         {consignment

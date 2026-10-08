@@ -9,9 +9,11 @@
 --    BẮT BUỘC có việc tiếp theo + hạn (cùng nguyên tắc nhu cầu); xử lý xong cần ghi kết quả; hủy cần lý do. Có thể gắn cam kết/bảo hành: database tính GỢI Ý
 --    "trong / ngoài / chưa rõ (thiếu km)" theo ngày tiếp nhận và km — quản lý vẫn là người quyết định, không tự động từ chối hay chấp nhận.
 --  * aftersales_events: nhật ký liên hệ/xử lý, không sửa/xóa.
---  * Chi phí sau bán: vehicle_costs thêm loại 'after_sales' BẮT BUỘC gắn một phiếu hậu mãi cùng xe → chi phí quay về đúng xe; dùng đúng quy trình dự kiến →
---    xác nhận → thanh toán. Vì nằm trong số liệu đầu vào của quyết toán nên chi phí sau bán làm quyết toán đã duyệt trở thành "lỗi thời" → lập ĐIỀU CHỈNH
---    có lưu vết (không sửa âm thầm). Phiếu không thể xử lý xong khi còn chi phí dự kiến chưa xác nhận; không hủy khi còn chi phí chưa đảo.
+--  * Chi phí sau bán (D94, Chủ tịch chốt 08/10/2026): vehicle_costs thêm loại 'after_sales' BẮT BUỘC gắn một phiếu hậu mãi cùng xe → chi phí quay về đúng xe để
+--    theo dõi; dùng đúng quy trình dự kiến → xác nhận → thanh toán. Đây là CHI PHÍ CHUNG CỦA SHOWROOM: luôn do showroom chịu, KHÔNG nằm trong số liệu quyết toán
+--    xe (không trừ vào lợi nhuận chia, không làm quyết toán lỗi thời), nhưng vào báo cáo toàn showroom. Phiếu không xử lý xong khi còn chi phí dự kiến chưa xác nhận.
+--  * Lịch chăm sóc tự động (D92, Chủ tịch chốt 08/10/2026): khi xe được GIAO, tự mở 3 phiếu "nhắc chăm sóc" hạn sau 7, 30 và 90 ngày kể từ ngày giao, giao cho
+--    sales phụ trách đơn; mỗi mốc chỉ tạo một lần (unique). Lỗi khi tạo lịch không chặn việc giao xe.
 --  * Quyền: quản lý ghi/hủy cam kết, đổi người phụ trách; sales tạo phiếu cho đơn của mình (tự phụ trách); người phụ trách cập nhật; kế toán đọc.
 --    Kỹ thuật chỉ thấy phiếu được giao cho mình. Sales không thấy chi phí/giá vốn (chi phí vẫn ở bảng chi phí xe của tài chính).
 -- =====================================================================
@@ -87,6 +89,9 @@ create table public.aftersales_cases (
 create index aftersales_cases_assigned_idx on public.aftersales_cases (assigned_to, next_due) where status in ('open', 'in_progress');
 create index aftersales_cases_vehicle_idx on public.aftersales_cases (vehicle_id);
 create index aftersales_cases_due_idx on public.aftersales_cases (next_due) where status in ('open', 'in_progress');
+-- Phiếu nhắc chăm sóc tự động theo mốc (care_7 / care_30 / care_90): mỗi mốc một phiếu cho mỗi dòng xe.
+alter table public.aftersales_cases add column auto_key text;
+create unique index aftersales_cases_auto_once on public.aftersales_cases (order_line_id, auto_key) where auto_key is not null;
 
 create table public.aftersales_events (
   id uuid primary key default gen_random_uuid(),
@@ -224,9 +229,9 @@ begin
   end if;
 
   if (new.code, new.order_line_id, new.order_id, new.vehicle_id, new.customer_id, new.owner_id, new.kind, new.title, new.description, new.received_on, new.odo_at_case,
-      new.commitment_id, new.coverage, new.created_by, new.created_at)
+      new.commitment_id, new.coverage, new.auto_key, new.created_by, new.created_at)
      is distinct from (old.code, old.order_line_id, old.order_id, old.vehicle_id, old.customer_id, old.owner_id, old.kind, old.title, old.description, old.received_on, old.odo_at_case,
-      old.commitment_id, old.coverage, old.created_by, old.created_at) then
+      old.commitment_id, old.coverage, old.auto_key, old.created_by, old.created_at) then
     raise exception 'Không sửa nội dung phiếu hậu mãi đã tiếp nhận. Ghi thêm vào nhật ký.' using errcode = '22023';
   end if;
   if old.status in ('cancelled') then
@@ -323,6 +328,9 @@ begin
       if new.aftersales_case_id is null then
         raise exception 'Chi phí sau bán phải gắn một phiếu hậu mãi (để chi phí quay về đúng xe).' using errcode = '22023';
       end if;
+      if new.borne_by <> 'showroom' then
+        raise exception 'Chi phí sau bán là chi phí chung của showroom, không do chủ xe chịu.' using errcode = '22023';
+      end if;
       select * into c from public.aftersales_cases x where x.id = new.aftersales_case_id;
       if c.id is null or c.vehicle_id <> new.vehicle_id then
         raise exception 'Phiếu hậu mãi không tồn tại hoặc không thuộc xe này.' using errcode = '22023';
@@ -341,6 +349,163 @@ begin
   return new;
 end $$;
 create trigger vehicle_costs_zaftersales before insert or update on public.vehicle_costs for each row execute function private.vehicle_costs_aftersales();
+
+-- ---------------------------------------------------------------------
+-- D94: chi phí sau bán KHÔNG nằm trong tính toán xe (quyết toán, tóm tắt chi phí, kết quả từng xe); vào báo cáo toàn showroom.
+-- ---------------------------------------------------------------------
+create or replace function private.settlement_inputs(p_line uuid)
+returns jsonb language plpgsql stable set search_path = '' as $$
+declare l public.sales_order_lines; v public.vehicles; t public.vehicle_capital_terms; ct public.consignment_terms; k public.consignment_contracts;
+        v_price numeric; v_confirmed numeric; v_confirmed_n integer; v_open integer; v_shares jsonb; v_reconfirm boolean;
+begin
+  select * into l from public.sales_order_lines x where x.id = p_line;
+  if l.id is null then
+    raise exception 'Không tìm thấy dòng xe của đơn bán hoặc anh/chị không có quyền.' using errcode = '22023';
+  end if;
+  select * into v from public.vehicles x where x.id = l.vehicle_id;
+  if v.business_type = 'owned' then
+    select * into t from public.vehicle_capital_terms x where x.vehicle_id = v.id and x.status = 'approved';
+    if t.id is null then
+      raise exception 'Xe chưa có điều khoản chia lợi nhuận được duyệt: chưa tạm tính quyết toán được.' using errcode = '22023';
+    end if;
+    select f.purchase_price into v_price from public.vehicle_financials f where f.vehicle_id = v.id;
+    select coalesce(sum(c.confirmed_amount) filter (where c.status = 'confirmed'), 0), count(*) filter (where c.status = 'confirmed')::integer, count(*) filter (where c.status = 'estimated')::integer
+      into v_confirmed, v_confirmed_n, v_open from public.vehicle_costs c where c.vehicle_id = v.id and c.borne_by = 'showroom' and c.category <> 'after_sales';
+    select coalesce(s.needs_reconfirm, false) into v_reconfirm from public.vehicle_capital_status s where s.vehicle_id = v.id;
+    select coalesce(jsonb_agg(jsonb_build_object('party_id', sh.party_id, 'name', p.name, 'kind', p.kind, 'ratio', sh.ratio_percent::text,
+             'net_received', coalesce(sm.net_received, 0)::text) order by p.code, sh.party_id), '[]'::jsonb)
+      into v_shares
+      from public.vehicle_capital_shares sh join public.capital_parties p on p.id = sh.party_id
+      left join public.vehicle_capital_summary sm on sm.vehicle_id = v.id and sm.party_id = sh.party_id
+      where sh.terms_id = t.id;
+    return jsonb_build_object('kind', 'owned', 'sale_price', l.sale_price::text, 'purchase_price', v_price::text, 'terms_id', t.id, 'company_rate', t.company_rate::text,
+      'cost_basis', t.cost_basis, 'loss_policy_set', length(btrim(coalesce(t.loss_policy, ''))) > 0, 'needs_reconfirm', coalesce(v_reconfirm, false),
+      'shares', v_shares, 'costs_confirmed', v_confirmed::text, 'confirmed_lines', v_confirmed_n, 'open_lines', v_open);
+  elsif v.business_type = 'consignment' then
+    select * into k from public.consignment_contracts c where c.vehicle_id = v.id and c.status = 'active';
+    if k.id is null then
+      raise exception 'Xe ký gửi chưa có hợp đồng ký gửi hiệu lực: chưa tạm tính quyết toán được.' using errcode = '22023';
+    end if;
+    select x.* into ct from public.consignment_terms x where x.contract_id = k.id and x.signed_on is not null order by x.version_no desc limit 1;
+    if ct.id is null then
+      raise exception 'Xe ký gửi chưa có thỏa thuận đã ký: chưa tạm tính quyết toán được.' using errcode = '22023';
+    end if;
+    select coalesce(sum(c.confirmed_amount) filter (where c.status = 'confirmed'), 0), count(*) filter (where c.status = 'confirmed')::integer, count(*) filter (where c.status = 'estimated')::integer
+      into v_confirmed, v_confirmed_n, v_open from public.vehicle_costs c where c.vehicle_id = v.id and c.borne_by = 'owner' and c.category <> 'after_sales';
+    return jsonb_build_object('kind', 'consignment', 'sale_price', l.sale_price::text, 'terms_id', ct.id, 'fee_type', ct.fee_type, 'fee_fixed', ct.fee_fixed_amount::text,
+      'fee_percent', ct.fee_percent::text, 'collector', ct.payment_collector, 'owner_name', k.owner_name, 'costs_confirmed', v_confirmed::text,
+      'confirmed_lines', v_confirmed_n, 'open_lines', v_open);
+  end if;
+  raise exception 'Loại xe không hỗ trợ quyết toán.' using errcode = '22023';
+end $$;
+
+-- Tóm tắt chi phí xe: bỏ chi phí sau bán khỏi các cột cũ; thêm 3 cột riêng cho chi phí sau bán ở cuối.
+create or replace view public.vehicle_cost_summary with (security_invoker = true) as
+select
+  c.vehicle_id,
+  count(*) filter (where c.status <> 'void' and c.category <> 'after_sales') as line_count,
+  count(*) filter (where c.status = 'estimated' and c.category <> 'after_sales') as open_lines,
+  count(*) filter (where c.status = 'estimated' and c.estimated_amount is null and c.category <> 'after_sales') as open_lines_no_estimate,
+  sum(c.estimated_amount) filter (where c.status = 'estimated' and c.borne_by = 'showroom' and c.category <> 'after_sales') as estimated_showroom,
+  sum(c.estimated_amount) filter (where c.status = 'estimated' and c.borne_by = 'owner' and c.category <> 'after_sales') as estimated_owner,
+  sum(c.confirmed_amount) filter (where c.status = 'confirmed' and c.borne_by = 'showroom' and c.category <> 'after_sales') as confirmed_showroom,
+  sum(c.confirmed_amount) filter (where c.status = 'confirmed' and c.borne_by = 'owner' and c.category <> 'after_sales') as confirmed_owner,
+  sum(pp.paid) filter (where c.status = 'confirmed' and c.borne_by = 'showroom' and c.category <> 'after_sales') as paid_showroom,
+  sum(pp.paid) filter (where c.status = 'confirmed' and c.borne_by = 'owner' and c.category <> 'after_sales') as paid_owner,
+  coalesce(sum(c.confirmed_amount) filter (where c.status = 'confirmed' and c.category = 'after_sales'), 0) as aftersales_confirmed,
+  count(*) filter (where c.status = 'estimated' and c.category = 'after_sales') as aftersales_open_lines,
+  coalesce(sum(pp.paid) filter (where c.status = 'confirmed' and c.category = 'after_sales'), 0) as aftersales_paid
+from public.vehicle_costs c
+left join lateral (select sum(p.amount) as paid from public.vehicle_cost_payments p where p.cost_id = c.id and p.status = 'posted') pp on true
+group by c.vehicle_id;
+
+-- Kết quả từng xe: thêm cột chi phí sau bán (chi phí chung, không trừ vào kết quả xe) ở cuối.
+create or replace view public.report_vehicle_results with (security_invoker = true) as
+select l.id as line_id, o.id as order_id, o.code as order_code,
+       (o.confirmed_at at time zone 'Asia/Ho_Chi_Minh')::date as sold_on,
+       v.id as vehicle_id, v.code as vehicle_code, l.vehicle_label, v.business_type,
+       l.sale_price, f.purchase_price,
+       case when v.business_type = 'owned' and f.purchase_price is not null then l.sale_price - f.purchase_price end as gross_profit,
+       case when v.business_type = 'owned' then coalesce(cs.confirmed_showroom, 0) else coalesce(cs.confirmed_owner, 0) end as costs_confirmed,
+       coalesce(cs.open_lines, 0) as open_cost_lines,
+       case when v.business_type = 'owned' and f.purchase_price is not null then l.sale_price - f.purchase_price - coalesce(cs.confirmed_showroom, 0) end as result_after_costs,
+       st.id as settlement_id, st.code as settlement_code, st.status as settlement_status,
+       st.distributable, st.company_operating, st.fee_amount,
+       coalesce(cs.aftersales_confirmed, 0) as aftersales_cost
+from public.sales_order_lines l
+join public.sales_orders o on o.id = l.order_id and o.status = 'confirmed' and l.line_status = 'active'
+join public.vehicles v on v.id = l.vehicle_id
+left join public.vehicle_financials f on f.vehicle_id = v.id
+left join public.vehicle_cost_summary cs on cs.vehicle_id = v.id
+left join lateral (select s.id, s.code, s.status, s.distributable, s.company_operating, s.fee_amount
+                   from public.settlements s where s.order_line_id = l.id and s.status = 'approved' limit 1) st on true
+where private.can_see_finance();
+
+-- Tổng kết quả theo kỳ: chi phí sau bán đã xác nhận trong kỳ (theo ngày xác nhận) là chi phí chung → trừ ở kết quả toàn showroom.
+create or replace function public.report_results_totals(p_from date, p_to date)
+returns jsonb language sql stable security invoker set search_path = '' as $$
+  with r as (select * from public.report_vehicle_results where sold_on between p_from and p_to),
+  g as (select
+      coalesce(sum(v.amount) filter (where v.purpose = 'general_expense'), 0) as general_expense,
+      coalesce(sum(v.amount) filter (where v.purpose = 'other_expense'), 0) as other_expense,
+      coalesce(sum(v.amount) filter (where v.purpose = 'other_income'), 0) as other_income
+    from public.cash_vouchers v where v.status = 'posted' and v.occurred_on between p_from and p_to
+      and v.purpose in ('general_expense', 'other_expense', 'other_income')),
+  a as (select coalesce(sum(c.confirmed_amount), 0) as aftersales_cost from public.vehicle_costs c
+        where c.category = 'after_sales' and c.status = 'confirmed' and (c.confirmed_at at time zone 'Asia/Ho_Chi_Minh')::date between p_from and p_to)
+  select case when not private.can_see_finance() then '{}'::jsonb else jsonb_build_object(
+    'lines', (select count(*) from r),
+    'owned_lines', (select count(*) from r where business_type = 'owned'),
+    'consignment_lines', (select count(*) from r where business_type = 'consignment'),
+    'sale_total_owned', (select coalesce(sum(sale_price), 0)::text from r where business_type = 'owned'),
+    'gross_profit', (select coalesce(sum(gross_profit), 0)::text from r where business_type = 'owned'),
+    'gross_unknown', (select count(*) from r where business_type = 'owned' and gross_profit is null),
+    'result_after_costs', (select coalesce(sum(result_after_costs), 0)::text from r where business_type = 'owned'),
+    'open_cost_lines', (select coalesce(sum(open_cost_lines), 0) from r),
+    'distributable', (select coalesce(sum(distributable), 0)::text from r where business_type = 'owned' and settlement_id is not null),
+    'company_operating', (select coalesce(sum(company_operating), 0)::text from r where business_type = 'owned' and settlement_id is not null),
+    'owned_unsettled', (select count(*) from r where business_type = 'owned' and settlement_id is null),
+    'consignment_fee', (select coalesce(sum(fee_amount), 0)::text from r where business_type = 'consignment' and settlement_id is not null),
+    'consignment_unsettled', (select count(*) from r where business_type = 'consignment' and settlement_id is null),
+    'general_expense', (select general_expense::text from g),
+    'other_expense', (select other_expense::text from g),
+    'other_income', (select other_income::text from g),
+    'aftersales_cost', (select aftersales_cost::text from a),
+    'showroom_result', (select (coalesce((select sum(result_after_costs) from r where business_type = 'owned'), 0)
+                               + coalesce((select sum(fee_amount) from r where business_type = 'consignment' and settlement_id is not null), 0)
+                               - g.general_expense - g.other_expense + g.other_income - a.aftersales_cost)::text from g, a)
+  ) end
+$$;
+
+-- ---------------------------------------------------------------------
+-- D92: lịch chăm sóc tự động sau khi giao xe (7, 30, 90 ngày). Chạy bằng quyền người giao xe (RLS + luật phiếu áp dụng); lỗi không chặn giao xe.
+-- ---------------------------------------------------------------------
+create or replace function private.handovers_schedule_care()
+returns trigger language plpgsql set search_path = '' as $$
+declare d integer; v_id uuid; v_assignee uuid; v_base date;
+begin
+  if tg_op <> 'UPDATE' or new.status <> 'delivered' or old.status = 'delivered' then return new; end if;
+  v_base := coalesce(new.delivered_on, (now() at time zone 'Asia/Ho_Chi_Minh')::date);
+  v_assignee := case when exists (select 1 from public.profiles p where p.id = new.owner_id and p.is_active) then new.owner_id else (select auth.uid()) end;
+  foreach d in array array[7, 30, 90] loop
+    begin
+      insert into public.aftersales_cases (order_line_id, order_id, vehicle_id, customer_id, owner_id, kind, title, description, assigned_to, next_action, next_due, auto_key)
+      values (new.order_line_id, new.order_id, new.vehicle_id, new.customer_id, new.owner_id, 'care_call', 'Chăm sóc sau giao xe ' || d || ' ngày',
+              'Phiếu tự động theo lịch chăm sóc sau khi giao xe (mốc ' || d || ' ngày).', v_assignee,
+              'Gọi hỏi thăm khách, kiểm tra tình trạng xe sau ' || d || ' ngày', v_base + d, 'care_' || d)
+      on conflict (order_line_id, auto_key) where auto_key is not null do nothing
+      returning id into v_id;
+      if v_id is not null then
+        insert into public.aftersales_events (case_id, kind, content) values (v_id, 'status', 'Tự động tạo theo lịch chăm sóc sau giao xe (' || d || ' ngày)');
+      end if;
+      v_id := null;
+    exception when others then
+      raise warning 'Không tạo được phiếu chăm sóc tự động mốc % ngày: %', d, sqlerrm;
+    end;
+  end loop;
+  return new;
+end $$;
+create trigger handovers_zcare after update on public.handovers for each row execute function private.handovers_schedule_care();
 
 -- ---------------------------------------------------------------------
 -- RLS

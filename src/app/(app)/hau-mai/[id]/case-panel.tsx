@@ -44,7 +44,7 @@ export function CasePanel({ c, events, costs, staff, manager, canEdit, finance, 
       {finance && (
         <section className="panel p-4">
           <h2 className="mb-1 font-semibold">Chi phí sau bán của phiếu</h2>
-          <p className="mb-2 text-xs text-ink-soft">Chi phí quay về đúng xe. Dùng đúng quy trình: dự kiến → xác nhận số thực tế → thanh toán (ở trang xe). Chi phí phát sinh sau khi quyết toán đã duyệt làm quyết toán “lỗi thời” → quản lý lập điều chỉnh.</p>
+          <p className="mb-2 text-xs text-ink-soft">Chi phí quay về đúng xe để theo dõi. Đây là chi phí chung của showroom: không trừ vào lợi nhuận chia hay quyết toán của xe, nhưng tính vào kết quả toàn showroom. Quy trình: dự kiến → xác nhận số thực tế → thanh toán (ở trang xe).</p>
           {costs.length === 0 ? <p className="text-sm text-ink-soft">Chưa có chi phí sau bán.</p> : (
             <ul className="space-y-1 text-sm">
               {costs.map((x) => <li key={x.id}>{x.code} · {x.description} · <span className="text-ink-soft">{COST_STATUS_LABEL[x.status]}</span> · {x.status === "confirmed" ? formatVnd(x.confirmed_amount) : toVnd(x.estimated_amount) === null ? "chưa có dự toán" : `dự kiến ${formatVnd(x.estimated_amount)}`}</li>)}
@@ -53,13 +53,10 @@ export function CasePanel({ c, events, costs, staff, manager, canEdit, finance, 
           {c.status !== "cancelled" && (
             <form action={action} className="mt-3 grid gap-3 md:grid-cols-4">
               <input type="hidden" name="intent" value="cost" /><input type="hidden" name="case_id" value={c.id} /><input type="hidden" name="vehicle_id" value={c.vehicle_id} />
-              <input type="hidden" name="business_type" value={c.vehicle?.business_type ?? ""} /><input type="hidden" name="request_id" value={costRequestId} />
+              <input type="hidden" name="request_id" value={costRequestId} />
               <label className="md:col-span-2"><span className="label">Nội dung chi phí *</span><input name="description" className="field" placeholder="Thay giảm xóc theo bảo hành" /><Err k="description" /></label>
               <label><span className="label">Dự toán</span><input name="estimated_amount" className="field" placeholder="3tr" /><Err k="estimated_amount" /></label>
               <label><span className="label">Đơn vị thực hiện</span><input name="vendor" className="field" /></label>
-              {c.vehicle?.business_type === "consignment" && (
-                <label><span className="label">Bên chịu *</span><select name="borne_by" defaultValue="" className="field"><option value="">— Chọn —</option><option value="showroom">Showroom chịu</option><option value="owner">Chủ xe chịu</option></select><Err k="borne_by" /></label>
-              )}
               <div className="md:col-span-4"><button className="btn btn-primary" disabled={pending}>Ghi chi phí sau bán</button></div>
             </form>
           )}

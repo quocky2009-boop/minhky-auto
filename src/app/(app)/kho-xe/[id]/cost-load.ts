@@ -10,6 +10,7 @@ export type CostLine = {
 export type CostSummary = {
   line_count: number; open_lines: number; open_lines_no_estimate: number; estimated_showroom: unknown; estimated_owner: unknown;
   confirmed_showroom: unknown; confirmed_owner: unknown; paid_showroom: unknown; paid_owner: unknown;
+  aftersales_confirmed: unknown; aftersales_open_lines: number; aftersales_paid: unknown;
 } | null;
 
 export async function loadCosts(supabase: SupabaseClient, vehicleId: string) {

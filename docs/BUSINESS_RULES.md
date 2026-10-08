@@ -270,6 +270,7 @@ Hợp đồng mua, quyết toán chủ xe xe ký gửi (thu hộ, phần showroo
 - **Cam kết/bảo hành** gắn dòng xe của đơn bán đã ký; quản lý ghi; không sửa (hủy có lý do). Bảo hành có hạn ngày và/hoặc giới hạn km.
 - **Phiếu hậu mãi**: phản ánh, yêu cầu bảo hành, yêu cầu dịch vụ, nhắc chăm sóc. Luôn có người phụ trách; đang xử lý phải có việc tiếp theo + hạn; đóng cần kết quả; hủy cần lý do; mở lại chỉ quản lý và phải có việc mới. Nhật ký không sửa.
 - **Gợi ý bảo hành** theo ngày tiếp nhận và km; thiếu km khi có giới hạn km → "chưa rõ". Quản lý quyết định.
-- **Chi phí sau bán** gắn đúng phiếu và đúng xe; vào chi phí đã xác nhận của xe và báo cáo kết quả; làm quyết toán đã duyệt lỗi thời → điều chỉnh có lưu vết, không sửa âm thầm.
+- **Chi phí sau bán** gắn đúng phiếu và đúng xe (theo dõi), luôn do showroom chịu và là **chi phí chung của showroom**: không trừ vào lợi nhuận chia/quyết toán/kết quả từng xe, nhưng trừ ở kết quả toàn showroom.
+- **Lịch chăm sóc tự động:** khi giao xe, tự mở 3 phiếu nhắc chăm sóc hạn sau 7, 30, 90 ngày kể từ ngày giao, giao cho sales phụ trách đơn.
 - **Nhắc việc:** danh sách `/hau-mai` (quá hạn, hôm nay, đang xử lý, của tôi) và thẻ ở Tổng quan.
 

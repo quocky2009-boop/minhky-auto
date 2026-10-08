@@ -621,23 +621,30 @@ d("Quyết toán xe — chặng 5 lát 7 (database thật)", () => {
     await expect(sys.query("update public.aftersales_cases set title = 'Sửa lén' where id = $1", [c1])).rejects.toThrow(/Không sửa nội dung phiếu/);
   });
 
-  it("HẬU MÃI — chi phí sau bán làm quyết toán đã duyệt LỖI THỜI → điều chỉnh có lưu vết; chi phí quay về đúng xe và vào báo cáo kết quả", async () => {
+  it("HẬU MÃI — chi phí sau bán là CHI PHÍ CHUNG của showroom (D94): không đổi quyết toán đã duyệt, không trừ vào lợi nhuận chia hay kết quả xe; vào báo cáo toàn showroom; luôn do showroom chịu", async () => {
+    const totals = async () => (await as(cM, manager, async (db) => (await db.query("select public.report_results_totals($1::date, $1::date) r", [TODAY])).rows[0].r)) as Record<string, string | number>;
+    const t0 = await totals();
     const x = await approvedOwned(600, 650, [{ name: "Bên M", ratio: "100", paid: 100 }], { costs: 0 });   // P = 50 tr, công ty 20% = 10 tr, bên M 40 tr
-    expect((await settle(x.s))).toMatchObject({ p: M(50), c: M(10), status: "approved" });
-    expect(await as(cK, accountant, async (db) => (await db.query("select public.settlement_is_stale($1) r", [x.s])).rows[0].r)).toBe(false);
+    expect(await settle(x.s)).toMatchObject({ p: M(50), c: M(10), status: "approved" });
     const hm = await openCase(salesA, x.line);
     const cost1 = await afterCost(accountant, x.v, hm, "5000000");
-    // chi phí dự kiến chưa xác nhận đã làm số liệu đầu vào đổi → quyết toán đã duyệt bị đánh dấu lỗi thời
-    expect(await as(cK, accountant, async (db) => (await db.query("select public.settlement_is_stale($1) r", [x.s])).rows[0].r)).toBe(true);
+    // dự kiến hay đã xác nhận, quyết toán đã duyệt KHÔNG lỗi thời và vẫn không có điều kiện còn thiếu
+    expect(await as(cK, accountant, async (db) => (await db.query("select public.settlement_is_stale($1) r", [x.s])).rows[0].r)).toBe(false);
     await confirmCost(cost1, "5000000");
-    const r = await revise(cM, manager, x.s, "Chi phí bảo hành sau bán");
-    expect(await settle(r)).toMatchObject({ p: M(45), c: M(9), k: M(5), status: "provisional" });   // P giảm đúng 5 tr chi phí sau bán
-    await check(cK, accountant, r);
-    await approve(cM, manager, r);
-    expect((await sver(x.s)).status).toBe("superseded");
-    // báo cáo: chi phí sau bán nằm trong chi phí xác nhận của đúng xe
-    const row = (await as(cM, manager, (db) => db.query("select costs_confirmed::text k, result_after_costs::text a, distributable::text p from public.report_vehicle_results where line_id = $1", [x.line]))).rows[0];
-    expect(row).toEqual({ k: M(5), a: M(45), p: M(45) });
-    expect((await sys.query("select category, aftersales_case_id from public.vehicle_costs where id = $1", [cost1])).rows[0]).toEqual({ category: "after_sales", aftersales_case_id: hm });
+    expect(await as(cK, accountant, async (db) => (await db.query("select public.settlement_is_stale($1) r", [x.s])).rows[0].r)).toBe(false);
+    expect(await settle(x.s)).toMatchObject({ p: M(50), c: M(10), status: "approved" });
+    // chi phí sau bán luôn do showroom chịu
+    await expect(afterCost(accountant, x.v, hm, "1000000", { borne_by: "owner" })).rejects.toThrow(/chi phí chung của showroom|Xe showroom sở hữu/);
+    // báo cáo xe: không trừ vào chi phí/kết quả của xe; có cột chi phí sau bán riêng
+    const row = (await as(cM, manager, (db) => db.query("select costs_confirmed::text k, result_after_costs::text a, distributable::text p, aftersales_cost::text h from public.report_vehicle_results where line_id = $1", [x.line]))).rows[0];
+    expect(row).toEqual({ k: "0", a: M(50), p: M(50), h: M(5) });
+    // tóm tắt chi phí của xe: bỏ chi phí sau bán khỏi các cột cũ, có cột riêng
+    const sum = (await as(cM, manager, (db) => db.query("select line_count::int n, coalesce(confirmed_showroom, 0)::text c, aftersales_confirmed::text h from public.vehicle_cost_summary where vehicle_id = $1", [x.v]))).rows[0];
+    expect(sum).toEqual({ n: 1, c: "0", h: M(5) });                       // 1 = khoản chi phí 0 đồng của xe; chi phí sau bán không đếm
+    // báo cáo toàn showroom: trừ chi phí sau bán đã xác nhận trong kỳ
+    const t1 = await totals();
+    expect(BigInt(String(t1.aftersales_cost)) - BigInt(String(t0.aftersales_cost))).toBe(BigInt(M(5)));
+    expect(BigInt(String(t1.showroom_result)) - BigInt(String(t0.showroom_result))).toBe(BigInt(M(50)) - BigInt(M(5))); // +50 (sau chi phí) − 5 (chi phí sau bán)
+    expect((await sys.query("select category, borne_by, aftersales_case_id from public.vehicle_costs where id = $1", [cost1])).rows[0]).toEqual({ category: "after_sales", borne_by: "showroom", aftersales_case_id: hm });
   });
 });

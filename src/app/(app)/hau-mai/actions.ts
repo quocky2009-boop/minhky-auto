@@ -61,7 +61,8 @@ export async function aftersalesAction(_prev: ActionState, fd: FormData): Promis
     const copy = new FormData();
     for (const [k, v] of fd.entries()) copy.set(k, v);
     copy.set("category", "after_sales");
-    const p = parseCostCreate(copy, String(fd.get("business_type") ?? "") === "consignment" ? "consignment" : "owned");
+    copy.set("borne_by", "showroom");                       // chi phí chung của showroom (D94), kể cả xe ký gửi
+    const p = parseCostCreate(copy, "consignment");
     if (!p.ok) return { ok: false, message: p.error, fieldErrors: p.fieldErrors };
     const { error } = await supabase.rpc("create_vehicle_cost", { p: { ...p.payload, vehicle_id: vehicleId, aftersales_case_id: caseId } });
     if (error) return { ok: false, message: friendlyError(error) };
