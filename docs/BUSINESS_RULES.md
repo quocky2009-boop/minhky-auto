@@ -256,3 +256,12 @@ Hợp đồng mua, quyết toán chủ xe xe ký gửi (thu hộ, phần showroo
 - Dòng cũ chưa có tài khoản không tính vào số dư (database thật hiện chưa có dữ liệu).
 - Hệ quả cho quyết toán: chi hoàn vốn/chia lợi nhuận dựa trên số dư phản ánh cả tiền góp thực nhận.
 
+## 7p. Dashboard và báo cáo kết quả (chặng 6 — lát 8, D89–D91)
+
+- **Chỉ đọc**, tổng hợp ở database (view + RPC security invoker); chỉ quản lý/kế toán/admin có dữ liệu, sales/kỹ thuật nhận rỗng.
+- **Tồn kho:** xe đã nhập kho và chưa bán xong; sở hữu và ký gửi tách riêng; vốn hàng tồn sở hữu = giá mua + chi phí xác nhận do showroom chịu; thiếu giá mua đếm riêng. Nguồn xe chưa nhập kho đếm riêng.
+- **Vốn theo nguồn:** vốn góp ngoài (ròng) và dư nợ vay trên xe tồn sở hữu; tiền thực có = tổng số dư tài khoản đang hoạt động (đã gồm vốn góp/vay/chi phí xe — D88).
+- **Công nợ:** đơn bán đã ký còn phải thu; còn phải thu từ chủ xe; còn phải chi theo quyết toán đã duyệt; còn phải trả thu cũ đổi mới.
+- **Kết quả xe theo kỳ ký hợp đồng:** lãi gộp = giá bán − giá mua; sau chi phí = lãi gộp − chi phí đã xác nhận do showroom chịu; P và C từ quyết toán đã duyệt; xe ký gửi: showroom hưởng phí ký gửi (giá bán là thu hộ). Toàn showroom (tạm tính) = sau chi phí + phí ký gửi đã quyết toán − chi phí chung/chi khác + thu khác. **Không cộng P/C thành doanh thu mới.**
+- Mỗi dòng truy ngược được: đơn bán → xe → quyết toán. Cảnh báo khi còn xe thiếu giá mua, chi phí chưa xác nhận, chưa quyết toán.
+

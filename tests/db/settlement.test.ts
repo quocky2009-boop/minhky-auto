@@ -375,6 +375,9 @@ d("Quyết toán xe — chặng 5 lát 7 (database thật)", () => {
     expect(l1.find((x) => x.kind === "owner_payout")?.label).toBe("Nguyễn Văn Chủ");
     await check(cK, accountant, s1);
     await approve(cM, manager, s1);
+    // báo cáo: xe ký gửi — showroom hưởng phí (không phải giá bán), chi phí là phần chủ xe chịu, không có lãi gộp
+    const rr = (await as(cM, manager, (db) => db.query("select business_type, gross_profit, costs_confirmed::text k, fee_amount::text f, settlement_status from public.report_vehicle_results where line_id = $1", [so1.line]))).rows[0];
+    expect(rr).toEqual({ business_type: "consignment", gross_profit: null, k: M(5), f: "19500000", settlement_status: "approved" });
     const op = await lineOf(s1, "owner_payout");
     await pay(s1, acct, "settle_owner_payout", op, "600000000");
     await expect(pay(s1, acct, "settle_owner_payout", op, "25500001")).rejects.toThrow(/vượt phần còn lại/);
@@ -447,5 +450,65 @@ d("Quyết toán xe — chặng 5 lát 7 (database thật)", () => {
     const draft = await call(cA, salesA, "select public.create_sales_order($1::jsonb) r", [JSON.stringify({ request_id: uuid(), demand_id: dem, lines: [{ vehicle_id: car.v, sale_price: M(700) }] })]);
     const dl = (await sys.query("select id from public.sales_order_lines where order_id = $1", [draft])).rows[0].id as string;
     await expect(create(cK, accountant, dl)).rejects.toThrow(/đơn bán đã ký hợp đồng/);
+  });
+  it("BÁO CÁO: lãi gộp → sau chi phí → lợi nhuận phân chia → phần công ty; thiếu quyết toán/giá mua không coi là 0; dashboard tồn/công nợ; chỉ tài chính đọc", async () => {
+    const totals = async () => (await as(cM, manager, async (db) => (await db.query("select public.report_results_totals($1::date, $2::date) r", [TODAY, TODAY])).rows[0].r)) as Record<string, string | number>;
+    const dash = async () => (await as(cM, manager, async (db) => (await db.query("select public.report_dashboard() r")).rows[0].r)) as { inventory: { owned: { count: number; capital_tied: string } }; payables: { settlement_out: string }; receivables: { orders_outstanding: string }; settlements: { unsettled_sold: number } };
+    const t0 = await totals(), d0 = await dash();
+    // Xe 1: mua 600, chi phí 10, bán 640, quyết toán đã duyệt: P = 30, C = 20% = 6
+    const x = await approvedOwned(600, 640, [{ name: "Bên A", ratio: "60", paid: 100 }, { name: "Bên B", ratio: "40", paid: 50 }], { costs: 10 });
+    const row = (await as(cM, manager, (db) => db.query(
+      "select gross_profit::text g, result_after_costs::text a, distributable::text p, company_operating::text c, settlement_status st from public.report_vehicle_results where line_id = $1", [x.line]))).rows[0];
+    expect(row).toEqual({ g: M(40), a: M(30), p: M(30), c: M(6), st: "approved" });
+    // Xe 2: mua 500, bán 520, KHÔNG quyết toán, chưa thu tiền
+    const y = await ownedCar(500, [{ name: "Bên C", ratio: "100", paid: 20 }]);
+    await cost(y.v, "0");
+    const so2 = await sellOrder(y.v, 520);
+    const row2 = (await as(cM, manager, (db) => db.query("select gross_profit::text g, distributable p, settlement_id sid from public.report_vehicle_results where line_id = $1", [so2.line]))).rows[0];
+    expect(row2).toEqual({ g: M(20), p: null, sid: null });
+    const t1 = await totals();
+    const delta = (k: string) => BigInt(String(t1[k])) - BigInt(String(t0[k]));
+    expect(delta("gross_profit")).toBe(BigInt(M(60)));                // 40 + 20
+    expect(delta("result_after_costs")).toBe(BigInt(M(50)));          // 30 + 20
+    expect(delta("distributable")).toBe(BigInt(M(30)));               // chỉ xe đã quyết toán
+    expect(delta("company_operating")).toBe(BigInt(M(6)));
+    expect(Number(t1.owned_unsettled) - Number(t0.owned_unsettled)).toBe(1);
+    expect(Number(t1.gross_unknown) - Number(t0.gross_unknown)).toBe(0);
+    // Dashboard: xe 2 đã bán nên không còn trong tồn; đơn xe 2 chưa thu → công nợ tăng 520; quyết toán xe 1 còn phải chi
+    const d1 = await dash();
+    expect(BigInt(d1.receivables.orders_outstanding) - BigInt(d0.receivables.orders_outstanding)).toBe(BigInt(M(520)));
+    expect(BigInt(d1.payables.settlement_out) - BigInt(d0.payables.settlement_out)).toBeGreaterThan(0n);
+    expect(d1.settlements.unsettled_sold - d0.settlements.unsettled_sold).toBe(1);
+    // quyền: kế toán đọc được; sales/kỹ thuật nhận rỗng; anon bị chặn
+    expect(await as(cK, accountant, async (db) => (await db.query("select public.report_dashboard() r")).rows[0].r)).toHaveProperty("inventory");
+    expect(await as(cA, salesA, async (db) => (await db.query("select public.report_dashboard() r")).rows[0].r)).toEqual({});
+    expect(await as(cA, salesA, async (db) => (await db.query("select public.report_results_totals($1::date, $1::date) r", [TODAY])).rows[0].r)).toEqual({});
+    expect(await as(cA, salesA, async (db) => Number((await db.query("select count(*) n from public.report_vehicle_results")).rows[0].n))).toBe(0);
+    expect(await as(cA, salesA, async (db) => Number((await db.query("select count(*) n from public.report_inventory")).rows[0].n))).toBe(0);
+    await expect(as(cA, null, (db) => db.query("select public.report_dashboard()"))).rejects.toThrow(/permission denied/);
+    void d0.inventory;
+  });
+  it("TỒN KHO: xe sở hữu tính vốn = giá mua + chi phí xác nhận; thiếu giá mua không coi là 0; xe chưa nhập kho không là tồn; tuổi tồn theo nhóm", async () => {
+    const inv = async () => (await as(cM, manager, async (db) => (await db.query("select public.report_dashboard() r")).rows[0].r)) as {
+      inventory: { owned: { count: number; capital_tied: string; cost_unknown: number; age_91_plus: number }; not_yet_in_stock: number }; capital_sources: { external_capital: string } };
+    const d0 = await inv();
+    const old = new Date(Date.now() + 7 * 3_600_000 - 100 * 86_400_000).toISOString().slice(0, 10);
+    const car = await ownedCar(800, [{ name: "Bên D", ratio: "100", paid: 300 }]);
+    await cost(car.v, M(20));
+    const dNo = await inv();                                                    // chưa có ngày nhập kho → chưa là tồn
+    expect(dNo.inventory.owned.count).toBe(d0.inventory.owned.count);
+    expect(dNo.inventory.not_yet_in_stock - d0.inventory.not_yet_in_stock).toBe(1);   // đếm riêng là nguồn xe chưa nhập kho
+    await vehicleUpdate(car.v, { intake_date: old });
+    const d1 = await inv();
+    expect(d1.inventory.owned.count - d0.inventory.owned.count).toBe(1);
+    expect(d1.inventory.not_yet_in_stock).toBe(d0.inventory.not_yet_in_stock);
+    expect(BigInt(d1.inventory.owned.capital_tied) - BigInt(d0.inventory.owned.capital_tied)).toBe(BigInt(M(820)));
+    expect(d1.inventory.owned.age_91_plus - d0.inventory.owned.age_91_plus).toBe(1);
+    expect(BigInt(d1.capital_sources.external_capital) - BigInt(d0.capital_sources.external_capital)).toBe(BigInt(M(300)));
+    // thiếu giá mua: không cộng vào vốn, đếm riêng
+    await as(cM, manager, async (db) => db.query("update public.vehicle_financials set purchase_price = null where vehicle_id = $1", [car.v]));
+    const d2 = await inv();
+    expect(d2.inventory.owned.cost_unknown - d1.inventory.owned.cost_unknown).toBe(1);
+    expect(BigInt(d2.inventory.owned.capital_tied)).toBe(BigInt(d0.inventory.owned.capital_tied));
   });
 });

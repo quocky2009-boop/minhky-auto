@@ -26,7 +26,7 @@ export type ModuleDef = {
 };
 
 export const MODULES: ModuleDef[] = [
-  { key: "overview", label: "Tổng quan", group: "Điều hành", href: "/tong-quan", roles: ALL, status: "partial", phase: 6 },
+  { key: "overview", label: "Tổng quan", group: "Điều hành", href: "/tong-quan", roles: ALL, status: "ready", phase: 6 },
   { key: "today", label: "Việc hôm nay", group: "Khách & nhu cầu", href: "/viec-hom-nay", roles: SELLERS, status: "ready" },
   { key: "demands", label: "Nhu cầu mua/bán", group: "Khách & nhu cầu", href: "/nhu-cau", roles: SELLERS, status: "ready" },
   { key: "customers", label: "Khách hàng", group: "Khách & nhu cầu", href: "/khach-hang", roles: SELLERS, status: "ready" },
@@ -40,7 +40,7 @@ export const MODULES: ModuleDef[] = [
   { key: "capital", label: "Vốn góp & vay", group: "Tài chính", roles: ["admin", "manager", "accountant"], status: "planned", phase: 4 },
   { key: "cashbook", label: "Thu chi & công nợ", group: "Tài chính", href: "/thu-chi", roles: ["admin", "manager", "accountant"], status: "partial", phase: 5 },
   { key: "settlement", label: "Quyết toán", group: "Tài chính", href: "/quyet-toan", roles: ["admin", "manager", "accountant"], status: "ready", phase: 5 },
-  { key: "reports", label: "Báo cáo", group: "Tài chính", roles: ["admin", "manager", "accountant"], status: "planned", phase: 6 },
+  { key: "reports", label: "Báo cáo", group: "Tài chính", href: "/bao-cao", roles: ["admin", "manager", "accountant"], status: "ready", phase: 6 },
   { key: "users", label: "Người dùng & vai trò", group: "Cài đặt", href: "/cai-dat/nguoi-dung", roles: ["admin"], status: "ready" },
 ];
 

@@ -97,3 +97,8 @@ nguyên tắc định hướng theo CLAUDE.md §11: sales không xem giá vốn,
 sales B không đọc/sửa/ghi nhật ký nhu cầu của A; kế toán và kỹ thuật không đọc được nhu cầu; sales và kỹ thuật không đọc giá vốn;
 kỹ thuật không đọc giá chào; người ngoài quyền không đọc/ghi được tệp; sales không đổi người phụ trách; khóa tài khoản/gỡ vai trò mất quyền ngay;
 người dùng không tự ghi được nhật ký hệ thống; `anon` bị chặn mọi bảng và RPC.
+
+## Báo cáo và dashboard (chặng 6 — lát 8)
+
+- `report_inventory`, `report_vehicle_results` (view security invoker, lọc `can_see_finance()`), RPC `report_dashboard()`, `report_results_totals()`: chỉ quản lý/kế toán/admin có dữ liệu; sales và kỹ thuật nhận rỗng (kiểm trong `tests/db/settlement.test.ts`); `anon` bị từ chối.
+- `/bao-cao/xuat` (CSV): kiểm vai trò tài chính ở route, dữ liệu đọc bằng phiên người dùng qua RLS; không dùng service-role; không chứa dữ liệu cá nhân của khách.
