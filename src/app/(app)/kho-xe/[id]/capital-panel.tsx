@@ -1,5 +1,6 @@
 "use client";
 
+import { AccountSelect, type AccountOption } from "./account-select";
 import { useActionState, useMemo, useState } from "react";
 import { capitalAction } from "../capital-actions";
 import type { ActionState } from "../../nhu-cau/actions";
@@ -12,7 +13,7 @@ import { formatDate } from "@/lib/dates";
 import type { EntryRow, LoanRow, PartyRow, SummaryRow, TermsRow } from "./capital-load";
 
 type Props = {
-  vehicleId: string; manager: boolean;
+  vehicleId: string; manager: boolean; accounts: AccountOption[];
   parties: PartyRow[]; terms: TermsRow[]; entries: EntryRow[]; summary: SummaryRow[]; loans: LoanRow[]; needsReconfirm: boolean;
   purchasePrice: string | null; confirmedCosts: string | null; openCostLines: number;
   requestIds: { party: string; terms: string; entry: string; loan: string; loanPay: Record<string, string> };
@@ -239,6 +240,7 @@ export function CapitalPanel(p: Props) {
               <label><span className="label">Loại *</span><select name="entry_type" defaultValue="receipt" className="field">{Object.entries(ENTRY_TYPE_LABEL).filter(([k]) => manager || k !== "commitment").map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select><Err k="entry_type" /></label>
               <label><span className="label">Số tiền *</span><input name="amount" className="field" placeholder="100tr" /><Err k="amount" /></label>
               <label><span className="label">Ngày</span><input type="date" name="entry_date" className="field" /><Err k="entry_date" /></label>
+              <AccountSelect accounts={p.accounts} hint="bắt buộc với tiền thực nhận/rút của bên ngoài; bỏ trống với vốn cam kết hoặc bên là công ty" error={s?.fieldErrors?.account_id} />
               <label className="md:col-span-2"><span className="label">Chứng từ / số tham chiếu</span><input name="reference" className="field" /></label>
               <label className="md:col-span-2"><span className="label">Ghi chú</span><input name="note" className="field" /></label>
               <button className="btn btn-primary md:w-fit" disabled={pending}>Ghi sổ</button>
@@ -281,6 +283,7 @@ export function CapitalPanel(p: Props) {
                         <label><span className="label">Loại</span><select name="kind" defaultValue="interest" className="field">{Object.entries(LOAN_KIND_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
                         <label><span className="label">Số tiền *</span><input name="amount" className="field" /><Err k="amount" /></label>
                         <label><span className="label">Ngày</span><input type="date" name="paid_on" className="field" /></label>
+                        <AccountSelect accounts={p.accounts} hint="bắt buộc, trừ bên cho vay là công ty" />
                         <label><span className="label">Chứng từ</span><input name="reference" className="field" /></label>
                         <button className="btn btn-primary md:w-fit" disabled={pending}>Ghi</button>
                       </form>
@@ -306,6 +309,7 @@ export function CapitalPanel(p: Props) {
               <input type="hidden" name="intent" value="loan_add" /><input type="hidden" name="vehicle_id" value={vehicleId} /><input type="hidden" name="request_id" value={p.requestIds.loan} />
               <label><span className="label">Bên cho vay *</span><select name="party_id" defaultValue="" className="field"><option value="">— Chọn —</option>{activeParties.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select><Err k="party_id" /></label>
               <label><span className="label">Số tiền vay *</span><input name="principal" className="field" placeholder="200tr" /><Err k="principal" /></label>
+              <AccountSelect accounts={p.accounts} hint="tài khoản nhận tiền vay; bỏ trống nếu bên cho vay là công ty" error={s?.fieldErrors?.account_id} />
               <label><span className="label">Ngày nhận tiền *</span><input type="date" name="drawn_date" className="field" /><Err k="drawn_date" /></label>
               <label><span className="label">Hạn trả</span><input type="date" name="due_date" className="field" /><Err k="due_date" /></label>
               <label className="md:col-span-2"><span className="label">Lãi thỏa thuận (nguyên văn) *</span><input name="interest_terms" className="field" placeholder="1,2%/tháng, trả lãi cuối kỳ" /><Err k="interest_terms" /></label>

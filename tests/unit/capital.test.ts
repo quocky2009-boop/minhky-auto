@@ -57,6 +57,19 @@ describe("Form bên góp vốn, sổ vốn, cho vay", () => {
     expect(parseEntryForm(fd({ ...base, amount: "1tr", entry_type: "bonus" })).ok).toBe(false);
     expect(parseEntryForm(fd({ ...base, amount: "1tr", entry_date: "03/10/2026" })).ok).toBe(false);
   });
+  it("tài khoản tiền (D87): chuyển đúng vào payload, sai định dạng bị từ chối, bỏ trống cho phép (vốn cam kết / bên là công ty)", () => {
+    const ACC = "5f0d1c64-8d3a-4a43-9a6e-2c2f1a9b7e10";
+    const base = { request_id: RID, vehicle_id: VID, party_id: A, entry_type: "receipt", amount: "5tr" };
+    const withAcc = parseEntryForm(fd({ ...base, account_id: ACC }));
+    expect(withAcc.ok && withAcc.payload).toMatchObject({ account_id: ACC });
+    const none = parseEntryForm(fd(base));
+    expect(none.ok && none.payload).toMatchObject({ account_id: "" });
+    expect(parseEntryForm(fd({ ...base, account_id: "abc" })).ok).toBe(false);
+    const loan = { request_id: RID, vehicle_id: VID, party_id: A, principal: "200tr", drawn_date: "2026-10-01", interest_terms: "1%" };
+    expect(parseLoanForm(fd({ ...loan, account_id: "abc" })).ok).toBe(false);
+    expect(parseLoanForm(fd({ ...loan, account_id: ACC })).ok).toBe(true);
+    expect(parseLoanPaymentForm(fd({ request_id: RID, loan_id: VID, kind: "interest", amount: "1tr", account_id: "abc" })).ok).toBe(false);
+  });
   it("cho vay: bắt buộc ngày nhận, lãi thỏa thuận (nguyên văn), hạn trả không trước ngày nhận", () => {
     const base = { request_id: RID, vehicle_id: VID, party_id: A, principal: "200tr", drawn_date: "2026-10-01", interest_terms: "1,2%/tháng" };
     expect(parseLoanForm(fd(base)).ok).toBe(true);

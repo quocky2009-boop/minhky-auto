@@ -9,6 +9,7 @@ import { BUSINESS_TYPE_LABEL, CONDITION_LABEL, FUEL_LABEL, PAPERWORK_LABEL, PREP
 import { PageHeader } from "@/components/ui";
 import { loadVehicle } from "./load";
 import { loadCosts } from "./cost-load";
+import { loadAccounts } from "../../thu-chi/load";
 import { CostsPanel } from "./costs-panel";
 import { loadConsignment } from "./consignment-load";
 import { ConsignmentPanel } from "./consignment-panel";
@@ -48,14 +49,16 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
   const isConsignment = v.business_type === "consignment";
   const canSellRole = user.roles.some((r) => r === "admin" || r === "manager" || r === "sales");
   const showReservations = canSellRole || finance;
-  const [files, costData, consignment, capital, reservations, quotes] = await Promise.all([
+  const [files, costData, consignment, capital, reservations, quotes, accountRows] = await Promise.all([
     loadVehicleFiles(supabase, v.id),
     finance ? loadCosts(supabase, v.id) : Promise.resolve(null),
     finance && isConsignment ? loadConsignment(supabase, v.id) : Promise.resolve(null),
     finance && !isConsignment ? loadCapital(supabase, v.id) : Promise.resolve(null),
     showReservations ? loadReservations(supabase, v.id, canSellRole && v.sale_status === "available") : Promise.resolve(null),
     showReservations ? loadQuotes(supabase, v.id, canSellRole && ["available", "held", "deposited"].includes(v.sale_status)) : Promise.resolve(null),
+    finance ? loadAccounts(supabase) : Promise.resolve([]),
   ]);
+  const accounts = accountRows.filter((a) => a.is_active).map((a) => ({ id: a.id, code: a.code, name: a.name, balance: a.balance }));
   const title = [v.make, v.model, v.variant, v.year_made].filter(Boolean).join(" ");
   const cycles = ((history ?? []) as { id: string; code: string; sale_status: string; business_type: string; intake_date: string | null; depth: number }[]).filter((h) => h.depth > 0);
   const age = v.intake_date ? Math.floor((Date.now() - new Date(`${v.intake_date}T00:00:00+07:00`).getTime()) / 86400000) : null;
@@ -149,7 +152,7 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
         <section className="panel p-4">
           <h2 className="mb-3 font-semibold">Chi phí chuẩn bị xe</h2>
           <CostsPanel vehicleId={v.id} businessType={v.business_type} costs={costData.costs} summary={costData.summary} manager={manager}
-            addRequestId={randomUUID()} payRequestIds={Object.fromEntries(costData.costs.map((c) => [c.id, randomUUID()]))} />
+            addRequestId={randomUUID()} payRequestIds={Object.fromEntries(costData.costs.map((c) => [c.id, randomUUID()]))} accounts={accounts} />
         </section>
       )}
       {consignment && (
@@ -164,7 +167,7 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
       {capital && (
         <section className="panel p-4">
           <h2 className="mb-3 font-semibold">Vốn góp và chia lợi nhuận</h2>
-          <CapitalPanel vehicleId={v.id} manager={manager} parties={capital.parties} terms={capital.terms} entries={capital.entries} summary={capital.summary}
+          <CapitalPanel vehicleId={v.id} manager={manager} accounts={accounts} parties={capital.parties} terms={capital.terms} entries={capital.entries} summary={capital.summary}
             loans={capital.loans} needsReconfirm={capital.needsReconfirm}
             purchasePrice={toVnd(v.purchase_price)?.toString() ?? null} confirmedCosts={toVnd(costData?.summary?.confirmed_showroom)?.toString() ?? null}
             openCostLines={costData?.summary?.open_lines ?? 0}

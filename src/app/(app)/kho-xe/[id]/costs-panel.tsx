@@ -1,5 +1,6 @@
 "use client";
 
+import { AccountSelect, type AccountOption } from "./account-select";
 import { useActionState } from "react";
 import { costAction } from "../cost-actions";
 import type { ActionState } from "../../nhu-cau/actions";
@@ -10,13 +11,13 @@ import type { CostLine, CostSummary } from "./cost-load";
 
 type Props = {
   vehicleId: string; businessType: string; costs: CostLine[]; summary: CostSummary;
-  manager: boolean; addRequestId: string; payRequestIds: Record<string, string>;
+  manager: boolean; addRequestId: string; payRequestIds: Record<string, string>; accounts: AccountOption[];
 };
 
 const money = (v: unknown, empty = "Chưa có") => (toVnd(v) === null ? empty : formatVnd(v));
 const STATUS_STYLE: Record<string, string> = { estimated: "bg-[#fdf7e6] text-[#8a6100]", confirmed: "bg-[#e6f2ea] text-sig-green", void: "bg-floor text-ink-soft line-through" };
 
-export function CostsPanel({ vehicleId, businessType, costs, summary, manager, addRequestId, payRequestIds }: Props) {
+export function CostsPanel({ vehicleId, businessType, costs, summary, manager, addRequestId, payRequestIds, accounts }: Props) {
   const [s, action, pending] = useActionState<ActionState, FormData>(costAction, null);
   const fe = s?.fieldErrors ?? {};
   const consignment = businessType === "consignment";
@@ -131,6 +132,7 @@ export function CostsPanel({ vehicleId, businessType, costs, summary, manager, a
                         <label><span className="label">Số tiền *</span><input name="amount" defaultValue={due.toString()} className="field" /><Err k="amount" /></label>
                         <label><span className="label">Hình thức</span><select name="method" defaultValue="cash" className="field">{Object.entries(PAYMENT_METHOD_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
                         <label><span className="label">Ngày chi</span><input type="date" name="paid_at" className="field" /><Err k="paid_at" /></label>
+                        <AccountSelect accounts={accounts} hint="tài khoản chi tiền, bắt buộc" error={s?.fieldErrors?.account_id} />
                         <label><span className="label">Chứng từ / số tham chiếu</span><input name="reference" className="field" /></label>
                         <label className="md:col-span-3"><span className="label">Ghi chú</span><input name="note" className="field" /></label>
                         <button className="btn btn-primary self-end" disabled={pending}>Ghi thanh toán</button>

@@ -5,17 +5,19 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Client } from "pg";
-import { DB_URL, as, connect, createUser, uuid } from "./helpers";
+import { DB_URL, as, connect, bigAccount, createUser, uuid } from "./helpers";
 
 const d = DB_URL ? describe : describe.skip;
 const SIGNED = "2026-01-15";
 
 d("Hợp đồng ký gửi — chặng 3 lát 4 (database thật)", () => {
   let sys: Client, c: Client, c2: Client;
+  let acct = "";
   let manager: string, accountant: string, sales: string, tech: string;
 
   beforeAll(async () => {
     sys = await connect(); c = await connect(); c2 = await connect();
+    acct = await bigAccount(sys);
     manager = await createUser(sys, "QL Ký gửi", ["manager"]);
     accountant = await createUser(sys, "KT Ký gửi", ["accountant"]);
     sales = await createUser(sys, "Sales Ký gửi", ["sales"]);
@@ -203,7 +205,7 @@ d("Hợp đồng ký gửi — chặng 3 lát 4 (database thật)", () => {
     await expect(returnCar(manager, contract)).rejects.toThrow(/Còn 1 khoản chi phí chưa xác nhận hoặc hủy/);
     await as(c, accountant, async (db) => db.query("select public.confirm_vehicle_cost($1, $2, $3::jsonb)", [ownerCost,
       (await db.query("select version from public.vehicle_costs where id = $1", [ownerCost])).rows[0].version, JSON.stringify({ confirmed_amount: "2800000" })]));
-    await as(c, accountant, (db) => db.query("select public.record_cost_payment($1::jsonb)", [JSON.stringify({ request_id: uuid(), cost_id: ownerCost, amount: "1000000" })]));
+    await as(c, accountant, (db) => db.query("select public.record_cost_payment($1::jsonb)", [JSON.stringify({ request_id: uuid(), cost_id: ownerCost, amount: "1000000", account_id: acct })]));
     // đã có 1.800.000 chi phí chủ xe chịu chưa thanh toán → phải ghi cách xử lý
     await expect(returnCar(manager, contract)).rejects.toThrow(/Còn 1800000 đ chi phí chủ xe chịu chưa thanh toán/);
     // thiếu ngày trả/lý do

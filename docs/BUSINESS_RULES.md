@@ -246,3 +246,13 @@ Dữ liệu test (KHÔNG phải mặc định nghiệp vụ): P = 40 triệu, c 
 ## 8. Chưa định nghĩa — sẽ bổ sung ở chặng tương ứng
 
 Hợp đồng mua, quyết toán chủ xe xe ký gửi (thu hộ, phần showroom, khấu trừ, còn phải trả; định nghĩa chính xác "giá bán" để tính phần trăm — giá ghi trên hợp đồng bán, đã/chưa trừ giảm giá, thuế, lệ phí), việc chi phí nào được trừ trước khi chia lợi nhuận, giữ/cọc xe đồng thời, thu cũ đổi mới đối trừ, hoa hồng, chỉ tiêu báo cáo.
+
+## 7o. Sổ quỹ nối vốn góp, khoản vay, chi phí xe (D88)
+
+- **Số dư tài khoản tiền** = số dư đầu + phiếu thu − phiếu chi + vốn góp thực nhận + gốc vay nhận − rút vốn − trả vay (gốc, lãi) − thanh toán chi phí xe. Mỗi khoản chỉ ghi **một lần** ở sổ gốc của nó, kèm tài khoản; không tạo phiếu thu/chi trùng.
+- Vốn **cam kết** không phải tiền thật: không gắn tài khoản. Bên góp vốn/cho vay là **công ty**: không gắn tài khoản (tiền công ty đã nằm trong sổ quỹ, gắn thêm sẽ đếm hai lần).
+- Dòng mới có tiền thật của bên ngoài **bắt buộc chọn tài khoản**; chi chỉ khi tài khoản đủ tiền thực có (kiểm dưới khóa theo tài khoản, chung với phiếu thu/chi → hai khoản chi song song cùng vượt số dư chỉ một thành công); tài khoản đang hoạt động; ngày không ở tương lai.
+- Hủy dòng đã thu tiền (vốn nhận, khoản vay) không được làm tài khoản âm. Không đổi tài khoản của dòng đã ghi: hủy (có lý do) rồi ghi lại.
+- Dòng cũ chưa có tài khoản không tính vào số dư (database thật hiện chưa có dữ liệu).
+- Hệ quả cho quyết toán: chi hoàn vốn/chia lợi nhuận dựa trên số dư phản ánh cả tiền góp thực nhận.
+

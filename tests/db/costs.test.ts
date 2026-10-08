@@ -4,17 +4,19 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Client } from "pg";
-import { DB_URL, as, connect, createUser, uuid } from "./helpers";
+import { DB_URL, as, connect, bigAccount, createUser, uuid } from "./helpers";
 
 const d = DB_URL ? describe : describe.skip;
 
 d("Chi phí chuẩn bị xe — chặng 3 lát 3 (database thật)", () => {
   let sys: Client, c: Client, c2: Client;
+  let acct = "";
   let manager: string, accountant: string, sales: string, tech: string;
   let owned: string, consign: string;
 
   beforeAll(async () => {
     sys = await connect(); c = await connect(); c2 = await connect();
+    acct = await bigAccount(sys);
     manager = await createUser(sys, "QL Chi phí", ["manager"]);
     accountant = await createUser(sys, "KT Chi phí", ["accountant"]);
     sales = await createUser(sys, "Sales Chi phí", ["sales"]);
@@ -34,7 +36,7 @@ d("Chi phí chuẩn bị xe — chặng 3 lát 3 (database thật)", () => {
     as(c, user, async (db) => db.query("select public.confirm_vehicle_cost($1, $2, $3::jsonb)", [id, await ver(id), JSON.stringify({ confirmed_amount: amount, accepted_note: note })]));
   const voidCost = (user: string, id: string, reason = "Làm sai hạng mục") => as(c, user, async (db) => db.query("select public.void_vehicle_cost($1, $2, $3)", [id, await ver(id), reason]));
   const pay = (user: string, cost: string, amount: string, extra: Record<string, unknown> = {}, client: Client = c) =>
-    as(client, user, async (db) => (await db.query("select public.record_cost_payment($1::jsonb) id", [JSON.stringify({ request_id: uuid(), cost_id: cost, amount, ...extra })])).rows[0].id as string);
+    as(client, user, async (db) => (await db.query("select public.record_cost_payment($1::jsonb) id", [JSON.stringify({ request_id: uuid(), cost_id: cost, amount, account_id: acct, ...extra })])).rows[0].id as string);
   const summary = async (user: string, vehicle: string) =>
     as(c, user, async (db) => (await db.query(
       `select line_count::int, open_lines::int, open_lines_no_estimate::int, estimated_showroom::text es, estimated_owner::text eo,
@@ -169,7 +171,7 @@ d("Chi phí chuẩn bị xe — chặng 3 lát 3 (database thật)", () => {
     expect((await sys.query("select count(*)::int n from public.vehicle_costs where client_request_id = $1", [request_id])).rows[0].n).toBe(1);
     await confirm(manager, id1, "500000");
     const prequest = uuid();
-    const payOnce = () => as(c, manager, async (db) => (await db.query("select public.record_cost_payment($1::jsonb) id", [JSON.stringify({ request_id: prequest, cost_id: id1, amount: "500000" })])).rows[0].id as string);
+    const payOnce = () => as(c, manager, async (db) => (await db.query("select public.record_cost_payment($1::jsonb) id", [JSON.stringify({ request_id: prequest, cost_id: id1, amount: "500000", account_id: acct })])).rows[0].id as string);
     expect(await payOnce()).toBe(await payOnce());
     expect((await sys.query("select count(*)::int n from public.vehicle_cost_payments where client_request_id = $1", [prequest])).rows[0].n).toBe(1);
   });
@@ -188,7 +190,7 @@ d("Chi phí chuẩn bị xe — chặng 3 lát 3 (database thật)", () => {
     await as(c, accountant, (db) => db.query("update public.vehicle_costs set status = 'confirmed', confirmed_amount = 650000, confirmed_by = $2, confirmed_at = '2020-01-01' where id = $1", [id, manager]));
     const row = (await sys.query("select confirmed_by, confirmed_at > now() - interval '1 minute' as fresh, created_by from public.vehicle_costs where id = $1", [id])).rows[0];
     expect(row).toEqual({ confirmed_by: accountant, fresh: true, created_by: accountant });
-    const pid = await as(c, accountant, async (db) => (await db.query("insert into public.vehicle_cost_payments (cost_id, amount, paid_by) values ($1, 100000, $2) returning id", [id, manager])).rows[0].id as string);
+    const pid = await as(c, accountant, async (db) => (await db.query("insert into public.vehicle_cost_payments (cost_id, amount, paid_by, account_id) values ($1, 100000, $2, $3) returning id", [id, manager, acct])).rows[0].id as string);
     expect((await sys.query("select paid_by from public.vehicle_cost_payments where id = $1", [pid])).rows[0].paid_by).toBe(accountant);
   });
 });

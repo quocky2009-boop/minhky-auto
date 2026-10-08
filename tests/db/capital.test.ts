@@ -4,16 +4,18 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Client } from "pg";
-import { DB_URL, as, connect, createUser, uuid } from "./helpers";
+import { DB_URL, as, connect, bigAccount, createUser, uuid } from "./helpers";
 
 const d = DB_URL ? describe : describe.skip;
 
 d("Vốn góp và điều khoản chia lợi nhuận — chặng 4 lát 1 (database thật)", () => {
   let sys: Client, c: Client, c2: Client;
+  let acct = "";
   let manager: string, accountant: string, sales: string, tech: string;
 
   beforeAll(async () => {
     sys = await connect(); c = await connect(); c2 = await connect();
+    acct = await bigAccount(sys);
     manager = await createUser(sys, "QL Vốn", ["manager"]);
     accountant = await createUser(sys, "KT Vốn", ["accountant"]);
     sales = await createUser(sys, "Sales Vốn", ["sales"]);
@@ -32,7 +34,7 @@ d("Vốn góp và điều khoản chia lợi nhuận — chặng 4 lát 1 (datab
   const approve = (id: string, user = manager) => as(c, user, async (db) => db.query("select public.approve_capital_terms($1, $2)", [id, await termsVer(id)]));
   const status = async (id: string) => (await sys.query("select status from public.vehicle_capital_terms where id = $1", [id])).rows[0].status as string;
   const entry = (user: string, vehicle: string, party: string, type: string, amount: string, extra: Record<string, unknown> = {}, client: Client = c) =>
-    call(user, "select public.record_capital_entry($1::jsonb) r", [JSON.stringify({ request_id: uuid(), vehicle_id: vehicle, party_id: party, entry_type: type, amount, ...extra })], client);
+    call(user, "select public.record_capital_entry($1::jsonb) r", [JSON.stringify({ request_id: uuid(), vehicle_id: vehicle, party_id: party, entry_type: type, amount, ...(type === "commitment" ? {} : { account_id: acct }), ...extra })], client);
   const summary = async (vehicle: string, party: string) => (await sys.query(
     "select committed::text c, received::text r, withdrawn::text w, net_received::text n from public.vehicle_capital_summary where vehicle_id = $1 and party_id = $2", [vehicle, party])).rows[0];
   const needsReconfirm = async (vehicle: string) => (await sys.query("select needs_reconfirm from public.vehicle_capital_status where vehicle_id = $1", [vehicle])).rows[0]?.needs_reconfirm as boolean | undefined;
@@ -200,15 +202,15 @@ d("Vốn góp và điều khoản chia lợi nhuận — chặng 4 lát 1 (datab
     const { vehicle, a } = await approvedVehicle();
     const lender = await newParty("Chị Lan cho vay");
     const loan = await call(manager, "select public.create_vehicle_loan($1::jsonb) r", [JSON.stringify({
-      request_id: uuid(), vehicle_id: vehicle, party_id: lender, principal: "200000000", drawn_date: "2026-10-01", interest_terms: "1,2%/tháng, trả lãi cuối kỳ" })]);
+      request_id: uuid(), vehicle_id: vehicle, party_id: lender, principal: "200000000", drawn_date: "2026-10-01", interest_terms: "1,2%/tháng, trả lãi cuối kỳ", account_id: acct })]);
     await expect(call(manager, "select public.create_vehicle_loan($1::jsonb) r", [JSON.stringify({
-      request_id: uuid(), vehicle_id: vehicle, party_id: lender, principal: "1", drawn_date: "2026-10-01", interest_terms: "  " })])).rejects.toThrow(/interest_terms/);
+      request_id: uuid(), vehicle_id: vehicle, party_id: lender, principal: "1", drawn_date: "2026-10-01", interest_terms: "  ", account_id: acct })])).rejects.toThrow(/interest_terms/);
     await expect(call(accountant, "select public.create_vehicle_loan($1::jsonb) r", [JSON.stringify({
-      request_id: uuid(), vehicle_id: vehicle, party_id: lender, principal: "1", drawn_date: "2026-10-01", interest_terms: "x" })])).rejects.toThrow(/Chỉ quản lý được ghi khoản cho vay/);
+      request_id: uuid(), vehicle_id: vehicle, party_id: lender, principal: "1", drawn_date: "2026-10-01", interest_terms: "x", account_id: acct })])).rejects.toThrow(/Chỉ quản lý được ghi khoản cho vay/);
     // tiền vay không làm tăng "vốn góp"
     expect(await summary(vehicle, lender)).toBeUndefined();
     await expect(entry(manager, vehicle, lender, "receipt", "1000")).rejects.toThrow(/chưa có trong điều khoản góp vốn/);
-    const pay = (kind: string, amount: string, user = accountant) => call(user, "select public.record_loan_payment($1::jsonb) r", [JSON.stringify({ request_id: uuid(), loan_id: loan, kind, amount })]);
+    const pay = (kind: string, amount: string, user = accountant) => call(user, "select public.record_loan_payment($1::jsonb) r", [JSON.stringify({ request_id: uuid(), loan_id: loan, kind, amount, account_id: acct })]);
     const p1 = await pay("principal", "150000000");
     await pay("interest", "2400000");
     await expect(pay("principal", "50000001")).rejects.toThrow(/vượt gốc vay/);
@@ -221,7 +223,7 @@ d("Vốn góp và điều khoản chia lợi nhuận — chặng 4 lát 1 (datab
     // lãi trả không bị giới hạn bởi gốc; gốc sau khi hủy một khoản: còn trống 150tr
     expect((await sys.query("select principal_outstanding::text po from public.vehicle_loan_summary where loan_id = $1", [loan])).rows[0].po).toBe("150000000");
     // hai người trả gốc cùng lúc không cùng vượt hạn mức
-    const results = await Promise.allSettled([c, c2].map((cl) => call(accountant, "select public.record_loan_payment($1::jsonb) r", [JSON.stringify({ request_id: uuid(), loan_id: loan, kind: "principal", amount: "100000000" })], cl)).flat());
+    const results = await Promise.allSettled([c, c2].map((cl) => call(accountant, "select public.record_loan_payment($1::jsonb) r", [JSON.stringify({ request_id: uuid(), loan_id: loan, kind: "principal", amount: "100000000", account_id: acct })], cl)).flat());
     expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
     expect(results.filter((r) => r.status === "rejected")).toHaveLength(1);
     void a;

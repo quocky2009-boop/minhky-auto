@@ -109,8 +109,9 @@ export function parseEntryForm(fd: FormInput): ParseResult {
   const amount = r.money("amount");
   if (!errs.amount && (amount === "" || BigInt(amount) <= 0n)) errs.amount = "Số tiền phải lớn hơn 0";
   const date = r.date("entry_date");
+  if (r.s("account_id") && !UUID.test(r.s("account_id"))) errs.account_id = "Tài khoản tiền không hợp lệ";
   if (Object.keys(errs).length) return fail(errs);
-  return { ok: true, payload: { request_id: requestId, vehicle_id: vehicleId, party_id: partyId, entry_type: type, amount, entry_date: date, reference: r.s("reference"), note: r.s("note") } };
+  return { ok: true, payload: { request_id: requestId, vehicle_id: vehicleId, party_id: partyId, entry_type: type, amount, entry_date: date, reference: r.s("reference"), note: r.s("note"), account_id: r.s("account_id") } };
 }
 
 export function parseLoanForm(fd: FormInput): ParseResult {
@@ -122,11 +123,12 @@ export function parseLoanForm(fd: FormInput): ParseResult {
   const principal = r.money("principal");
   if (!errs.principal && (principal === "" || BigInt(principal) <= 0n)) errs.principal = "Số tiền vay phải lớn hơn 0";
   const drawn = r.date("drawn_date"), due = r.date("due_date");
+  if (r.s("account_id") && !UUID.test(r.s("account_id"))) errs.account_id = "Tài khoản tiền không hợp lệ";
   if (!drawn) errs.drawn_date = "Nhập ngày nhận tiền vay";
   if (drawn && due && !errs.drawn_date && !errs.due_date && due < drawn) errs.due_date = "Hạn trả không được trước ngày nhận";
   if (!r.s("interest_terms")) errs.interest_terms = "Ghi lãi thỏa thuận (nguyên văn, ví dụ: 1,2%/tháng, trả lãi cuối kỳ)";
   if (Object.keys(errs).length) return fail(errs);
-  return { ok: true, payload: { request_id: requestId, vehicle_id: vehicleId, party_id: partyId, principal, drawn_date: drawn, due_date: due, interest_terms: r.s("interest_terms"), reference: r.s("reference") } };
+  return { ok: true, payload: { request_id: requestId, vehicle_id: vehicleId, party_id: partyId, principal, drawn_date: drawn, due_date: due, interest_terms: r.s("interest_terms"), reference: r.s("reference"), account_id: r.s("account_id") } };
 }
 
 export function parseLoanPaymentForm(fd: FormInput): ParseResult {
@@ -139,8 +141,9 @@ export function parseLoanPaymentForm(fd: FormInput): ParseResult {
   const amount = r.money("amount");
   if (!errs.amount && (amount === "" || BigInt(amount) <= 0n)) errs.amount = "Số tiền phải lớn hơn 0";
   const date = r.date("paid_on");
+  if (r.s("account_id") && !UUID.test(r.s("account_id"))) errs.account_id = "Tài khoản tiền không hợp lệ";
   if (Object.keys(errs).length) return fail(errs);
-  return { ok: true, payload: { request_id: requestId, loan_id: loanId, kind, amount, paid_on: date, reference: r.s("reference"), note: r.s("note") } };
+  return { ok: true, payload: { request_id: requestId, loan_id: loanId, kind, amount, paid_on: date, reference: r.s("reference"), note: r.s("note"), account_id: r.s("account_id") } };
 }
 
 export type TermsLike = { status: string; cost_basis: string | null; loss_policy: string | null };

@@ -91,11 +91,12 @@ export function parsePayment(fd: FormInput): ParseResult {
   const method = r.s("method");
   if (!(method in PAYMENT_METHOD_LABEL)) errs.method = "Chọn hình thức thanh toán";
   const paidAt = r.s("paid_at");
+  if (r.s("account_id") && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(r.s("account_id"))) errs.account_id = "Tài khoản tiền không hợp lệ";
   if (paidAt && !/^\d{4}-\d{2}-\d{2}$/.test(paidAt)) errs.paid_at = "Ngày không hợp lệ";
   const requestId = r.s("request_id"), costId = r.s("cost_id");
   if (!UUID.test(requestId) || !UUID.test(costId)) return { ok: false, error: "Phiên nhập không hợp lệ, tải lại trang.", fieldErrors: {} };
   if (Object.keys(errs).length) return { ok: false, error: "Kiểm tra lại các ô được đánh dấu.", fieldErrors: errs };
-  return { ok: true, payload: { request_id: requestId, cost_id: costId, amount, method, paid_at: paidAt, reference: r.s("reference"), note: r.s("note") } };
+  return { ok: true, payload: { request_id: requestId, cost_id: costId, amount, method, paid_at: paidAt, reference: r.s("reference"), note: r.s("note"), account_id: r.s("account_id") } };
 }
 
 /** Còn phải trả = đã xác nhận − đã thanh toán (chỉ khi có số xác nhận; không có thì "chưa rõ", không phải 0). */

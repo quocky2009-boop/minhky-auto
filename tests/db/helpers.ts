@@ -40,3 +40,13 @@ export async function as<T>(c: Client, userId: string | null, fn: (c: Client) =>
 }
 
 export const uuid = randomUUID;
+
+/** Tài khoản tiền dùng chung cho test không quan tâm sổ quỹ (số dư đầu rất lớn); từ migration 2100 mọi dòng tiền thật phải gắn tài khoản. */
+export async function bigAccount(sys: Client): Promise<string> {
+  const name = "TK test dùng chung";
+  const r = await sys.query("select id from public.money_accounts where name = $1", [name]);
+  if (r.rows[0]) return r.rows[0].id as string;
+  const mgr = await createUser(sys, "Quản lý TK test", ["manager"]);
+  return as(sys, mgr, async (db) => (await db.query("select public.create_money_account($1::jsonb) id",
+    [JSON.stringify({ request_id: randomUUID(), name, kind: "cash", opening_balance: "1000000000000" })])).rows[0].id as string);
+}

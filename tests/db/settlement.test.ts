@@ -4,7 +4,7 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Client } from "pg";
-import { DB_URL, as, connect, createUser, uuid } from "./helpers";
+import { DB_URL, as, connect, bigAccount, createUser, uuid } from "./helpers";
 import { computeProfitSplit } from "../../src/lib/profit-split";
 
 const d = DB_URL ? describe : describe.skip;
@@ -12,11 +12,13 @@ const TODAY = new Date(Date.now() + 7 * 3_600_000).toISOString().slice(0, 10);
 const M = (n: number) => String(n * 1_000_000);
 
 d("Quyết toán xe — chặng 5 lát 7 (database thật)", () => {
+  let acct = "";
   let sys: Client, cM: Client, cM2: Client, cK: Client, cK2: Client, cA: Client;
   let manager: string, accountant: string, salesA: string, tech: string;
 
   beforeAll(async () => {
     sys = await connect(); cM = await connect(); cM2 = await connect(); cK = await connect(); cK2 = await connect(); cA = await connect();
+    acct = await bigAccount(sys);
     manager = await createUser(sys, "QL Quyết toán", ["manager"]);
     accountant = await createUser(sys, "KT Quyết toán", ["accountant"]);
     salesA = await createUser(sys, "Sales Quyết toán", ["sales"]);
@@ -62,7 +64,7 @@ d("Quyết toán xe — chặng 5 lát 7 (database thật)", () => {
       request_id: uuid(), vehicle_id: v, company_rate: opts.rate ?? "20", cost_basis: opts.basis === undefined ? "all_confirmed_costs" : opts.basis,
       loss_policy: opts.loss === undefined ? "Hoàn vốn theo thỏa thuận, lỗ chia theo vốn" : opts.loss, shares })]);
     for (let i = 0; i < parts.length; i++) {
-      if (parts[i].paid > 0) { await call(cK, accountant, "select public.record_capital_entry($1::jsonb) r", [JSON.stringify({ request_id: uuid(), vehicle_id: v, party_id: ids[i], entry_type: "receipt", amount: M(parts[i].paid) })]); net[ids[i]] = M(parts[i].paid); }
+      if (parts[i].paid > 0) { await call(cK, accountant, "select public.record_capital_entry($1::jsonb) r", [JSON.stringify({ request_id: uuid(), vehicle_id: v, party_id: ids[i], entry_type: "receipt", amount: M(parts[i].paid), ...(parts[i].kind === "company" ? {} : { account_id: acct }) })]); net[ids[i]] = M(parts[i].paid); }
     }
     await as(cM, manager, async (db) => db.query("select public.approve_capital_terms($1, $2)", [t, (await sys.query("select version from public.vehicle_capital_terms where id = $1", [t])).rows[0].version]));
     await vehicleUpdate(v, { sale_status: "available", prep_status: "ready", paperwork_status: "complete" });
