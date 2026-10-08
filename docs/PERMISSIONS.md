@@ -109,3 +109,10 @@ người dùng không tự ghi được nhật ký hệ thống; `anon` bị ch�
 - `aftersales_cases`: quản lý hoặc sales phụ trách đơn mở phiếu (sales tự phụ trách); xem: quản lý, tài chính, sales của đơn, người được giao, người tạo; cập nhật: quản lý, người được giao, sales của đơn; **chỉ quản lý** đổi người phụ trách hoặc mở lại phiếu đã xử lý. Kỹ thuật chỉ thấy phiếu được giao và không đọc được chi phí.
 - `aftersales_events`: ghi thêm cho ai thấy phiếu; không sửa/xóa. `list_staff()`: chỉ quản lý.
 - Chi phí sau bán: chỉ kế toán/quản lý ghi (như mọi chi phí xe). Kiểm trong `tests/db/settlement.test.ts` (nhóm HẬU MÃI).
+
+## Hoa hồng (chặng 6 — lát 10)
+
+- `commission_rules`: quản lý/admin ghi và hủy; quản lý + tài chính đọc; sales không đọc. Không xóa.
+- `commission_entries`: tạo bởi trigger của đơn bán (định danh nội bộ), người dùng không INSERT; xem: quản lý, tài chính, **sales chỉ khoản của mình**; tính lại/duyệt/hủy: chỉ quản lý.
+- `commission_payments`: kế toán/quản lý ghi; hủy: chỉ quản lý; sales xem lần chi của khoản của mình. Số dư tài khoản gồm các khoản chi này.
+- Kiểm trong `tests/db/commission.test.ts`.

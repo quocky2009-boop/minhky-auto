@@ -23,7 +23,8 @@ export function parsePeriod(from: string | undefined, to: string | undefined, no
 export type Totals = {
   lines: number; owned_lines: number; consignment_lines: number; sale_total_owned: string; gross_profit: string; gross_unknown: number;
   result_after_costs: string; open_cost_lines: number; distributable: string; company_operating: string; owned_unsettled: number;
-  consignment_fee: string; consignment_unsettled: number; general_expense: string; other_expense: string; other_income: string; showroom_result: string;
+  consignment_fee: string; consignment_unsettled: number; general_expense: string; other_expense: string; other_income: string; aftersales_cost: string;
+  commission_approved: string; commission_pending: number; commission_no_rule: number; showroom_result: string;
 };
 
 /** Các chỉ tiêu cần cảnh báo dữ liệu chưa đủ: không để số trông như đầy đủ khi còn dòng thiếu. */
@@ -33,6 +34,8 @@ export function totalsWarnings(t: Totals): string[] {
   if (t.open_cost_lines > 0) w.push(`Còn ${t.open_cost_lines} khoản chi phí dự kiến chưa xác nhận: kết quả sau chi phí có thể thay đổi.`);
   if (t.owned_unsettled > 0) w.push(`${t.owned_unsettled} xe sở hữu chưa có quyết toán đã duyệt nên chưa có lợi nhuận phân chia.`);
   if (t.consignment_unsettled > 0) w.push(`${t.consignment_unsettled} xe ký gửi chưa có quyết toán đã duyệt nên chưa tính phí ký gửi showroom hưởng.`);
+  if (t.commission_pending > 0) w.push(`${t.commission_pending} khoản hoa hồng đã tính nhưng chưa được quản lý duyệt nên chưa trừ vào kết quả toàn showroom.`);
+  if (t.commission_no_rule > 0) w.push(`${t.commission_no_rule} khoản hoa hồng chưa có quy tắc nên chưa tính (không coi là 0).`);
   return w;
 }
 

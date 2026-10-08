@@ -47,11 +47,14 @@ describe("CSV", () => {
 
 describe("Cảnh báo dữ liệu chưa đủ", () => {
   const t: Totals = { lines: 3, owned_lines: 3, consignment_lines: 0, sale_total_owned: "0", gross_profit: "0", gross_unknown: 0, result_after_costs: "0", open_cost_lines: 0, distributable: "0",
-    company_operating: "0", owned_unsettled: 0, consignment_fee: "0", consignment_unsettled: 0, general_expense: "0", other_expense: "0", other_income: "0", showroom_result: "0" };
+    company_operating: "0", owned_unsettled: 0, consignment_fee: "0", consignment_unsettled: 0, general_expense: "0", other_expense: "0", other_income: "0", aftersales_cost: "0",
+    commission_approved: "0", commission_pending: 0, commission_no_rule: 0, showroom_result: "0" };
   it("không cảnh báo khi đủ dữ liệu; cảnh báo từng thiếu sót khi có", () => {
     expect(totalsWarnings(t)).toEqual([]);
-    const w = totalsWarnings({ ...t, gross_unknown: 2, open_cost_lines: 1, owned_unsettled: 1, consignment_unsettled: 4 });
-    expect(w).toHaveLength(4);
+    const w = totalsWarnings({ ...t, gross_unknown: 2, open_cost_lines: 1, owned_unsettled: 1, consignment_unsettled: 4, commission_pending: 2, commission_no_rule: 3 });
+    expect(w).toHaveLength(6);
+    expect(w.join(" ")).toMatch(/2 khoản hoa hồng đã tính nhưng chưa được quản lý duyệt/);
+    expect(w.join(" ")).toMatch(/3 khoản hoa hồng chưa có quy tắc/);
     expect(w[0]).toMatch(/2 xe sở hữu chưa có giá mua/);
   });
 });

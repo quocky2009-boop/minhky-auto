@@ -274,3 +274,11 @@ Hợp đồng mua, quyết toán chủ xe xe ký gửi (thu hộ, phần showroo
 - **Lịch chăm sóc tự động:** khi giao xe, tự mở 3 phiếu nhắc chăm sóc hạn sau 7, 30, 90 ngày kể từ ngày giao, giao cho sales phụ trách đơn.
 - **Nhắc việc:** danh sách `/hau-mai` (quá hạn, hôm nay, đang xử lý, của tôi) và thẻ ở Tổng quan.
 
+## 7r. Hoa hồng nhân viên (chặng 6 — lát 10, D95–D97)
+
+- **Chính sách:** số tiền theo từng đầu xe. Xe mới: theo hãng + model (quy tắc riêng của model ưu tiên; không có thì dùng mức chung cả hãng). Xe cũ: theo đúng số VIN. Không có quy tắc → "chưa có quy tắc", không tự tính 0.
+- **Quy tắc** do quản lý ghi, có ngày hiệu lực, không sửa (thêm quy tắc mới hoặc hủy có lý do). Áp theo ngày ký hợp đồng bán: lấy quy tắc hiệu lực mới nhất có ngày hiệu lực ≤ ngày ký. Quy tắc thêm sau không đổi khoản đã tính; quản lý bấm "Tính lại" trên khoản chưa duyệt khi cần.
+- **Khoản hoa hồng** tạo tự động khi đơn bán được ký, mỗi dòng xe một khoản, cho nhân viên phụ trách đơn: chưa có quy tắc → đã tính → đã duyệt (quản lý). Đã duyệt không đổi số tiền.
+- **Chi trả:** nhiều lần, tổng ≤ khoản đã duyệt, gắn tài khoản tiền và chỉ khi đủ tiền thực có (sổ quỹ như D88).
+- **Báo cáo:** hoa hồng đã duyệt trừ ở kết quả toàn showroom; chưa duyệt / chưa có quy tắc được cảnh báo. Không trừ trước khi chia lợi nhuận góp vốn.
+

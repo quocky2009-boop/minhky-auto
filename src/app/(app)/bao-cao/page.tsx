@@ -65,8 +65,10 @@ async function Results({ supabase, period, adjusted, page, href }: { supabase: A
             <Line label="Trong đó phần công ty vận hành (C)" hint="Phần showroom hưởng cho vận hành theo điều khoản từng xe" value={money(totals.company_operating)} />
             <Line label="Phí ký gửi showroom hưởng" hint="Theo quyết toán xe ký gửi đã duyệt; giá bán là tiền thu hộ chủ xe" value={money(totals.consignment_fee)} />
             <Line label="Chi phí chung / chi khác (phiếu chi)" hint="Chi phí chung thực tế của showroom, không phân bổ vào từng xe" value={money(BigInt(totals.general_expense) + BigInt(totals.other_expense))} />
+            <Line label="Chi phí sau bán (hậu mãi, chi phí chung)" hint="Chi phí bảo hành/hậu mãi đã xác nhận trong kỳ; không trừ vào kết quả từng xe" value={money(totals.aftersales_cost)} />
+            <Line label="Hoa hồng nhân viên đã duyệt" hint="Theo ngày ký hợp đồng của xe trong kỳ; không trừ trước khi chia lợi nhuận góp vốn" value={money(totals.commission_approved)} />
             <Line label="Thu khác (phiếu thu)" value={money(totals.other_income)} />
-            <Line strong label="Kết quả toàn showroom (tạm tính)" hint="Sau chi phí trực tiếp + phí ký gửi − chi phí chung/chi khác + thu khác. Chưa tính hoa hồng, lãi vay, thuế" value={money(totals.showroom_result)} />
+            <Line strong label="Kết quả toàn showroom (tạm tính)" hint="Sau chi phí trực tiếp + phí ký gửi − chi phí chung/chi khác − chi phí sau bán − hoa hồng đã duyệt + thu khác. Chưa tính lãi vay, thuế" value={money(totals.showroom_result)} />
           </section>
           {warns.length > 0 && <ul className="mb-4 list-disc space-y-1 rounded border border-[#e8d9a8] bg-[#fdf7e6] p-3 pl-7 text-sm text-[#8a6100]">{warns.map((w) => <li key={w}>{w}</li>)}</ul>}
         </>
