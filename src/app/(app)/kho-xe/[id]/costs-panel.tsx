@@ -4,7 +4,7 @@ import { AccountSelect, type AccountOption } from "./account-select";
 import { useActionState } from "react";
 import { costAction } from "../cost-actions";
 import type { ActionState } from "../../nhu-cau/actions";
-import { BORNE_BY_LABEL, COST_CATEGORY_LABEL, COST_STATUS_LABEL, PAYMENT_METHOD_LABEL, outstanding } from "@/lib/costs";
+import { BORNE_BY_LABEL, COST_CATEGORY_CHOICES, COST_CATEGORY_LABEL, COST_STATUS_LABEL, PAYMENT_METHOD_LABEL, outstanding } from "@/lib/costs";
 import { formatVnd, toVnd } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
 import type { CostLine, CostSummary } from "./cost-load";
@@ -114,7 +114,7 @@ export function CostsPanel({ vehicleId, businessType, costs, summary, manager, a
                       <summary className="btn btn-ghost !py-1 cursor-pointer text-sm">Sửa dự toán</summary>
                       <form action={action} className="mt-2 grid gap-2 md:grid-cols-2">
                         <input type="hidden" name="intent" value="update" /><input type="hidden" name="vehicle_id" value={vehicleId} /><input type="hidden" name="cost_id" value={c.id} /><input type="hidden" name="version" value={c.version} />
-                        <label><span className="label">Loại</span><select name="category" defaultValue={c.category} className="field">{Object.entries(COST_CATEGORY_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
+                        <label><span className="label">Loại</span><select name="category" defaultValue={c.category} className="field">{Object.entries(c.category === "after_sales" ? COST_CATEGORY_LABEL : COST_CATEGORY_CHOICES).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
                         <label><span className="label">Dự toán</span><input name="estimated_amount" defaultValue={toVnd(c.estimated_amount)?.toString() ?? ""} className="field" /><Err k="estimated_amount" /></label>
                         <label className="md:col-span-2"><span className="label">Mô tả</span><input name="description" defaultValue={c.description} className="field" /><Err k="description" /></label>
                         <label><span className="label">Đơn vị thực hiện</span><input name="vendor" defaultValue={c.vendor ?? ""} className="field" /></label>
@@ -162,7 +162,7 @@ export function CostsPanel({ vehicleId, businessType, costs, summary, manager, a
         <form action={action} className="mt-3 grid gap-3 md:grid-cols-2">
           <input type="hidden" name="intent" value="add" /><input type="hidden" name="vehicle_id" value={vehicleId} /><input type="hidden" name="request_id" value={addRequestId} />
           <label><span className="label">Loại *</span>
-            <select name="category" defaultValue="repair" className="field">{Object.entries(COST_CATEGORY_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select><Err k="category" /></label>
+            <select name="category" defaultValue="repair" className="field">{Object.entries(COST_CATEGORY_CHOICES).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select><Err k="category" /></label>
           <label><span className="label">Dự toán (để trống nếu chưa rõ)</span><input name="estimated_amount" className="field" placeholder="5tr" /><Err k="estimated_amount" /></label>
           <label className="md:col-span-2"><span className="label">Mô tả công việc / khoản chi *</span><input name="description" className="field" placeholder="Sơn lại cản trước, đánh bóng" /><Err k="description" /></label>
           <label><span className="label">Đơn vị thực hiện</span><input name="vendor" className="field" placeholder="Gara Minh Kỳ / Spa Tùng Kỳ / bên ngoài" /></label>

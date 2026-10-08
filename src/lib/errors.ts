@@ -45,6 +45,12 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
   quote_versions_reject_reason: "Từ chối phiên bản báo giá phải ghi lý do.",
   quote_versions_approved_complete: "Giá báo thấp hơn mức cho phép phải có người duyệt và lý do duyệt.",
   quote_versions_offered_price_check: "Giá báo phải lớn hơn 0.",
+  aftersales_commitments_limit: "Bảo hành phải có ngày hết hạn và/hoặc giới hạn km.",
+  aftersales_commitments_range: "Ngày hết hạn không được trước ngày bắt đầu.",
+  aftersales_commitments_void_complete: "Hủy cam kết/bảo hành phải ghi lý do.",
+  aftersales_cases_next_required: "Phiếu đang xử lý phải có việc tiếp theo và hạn thực hiện.",
+  aftersales_cases_resolved_complete: "Đóng phiếu phải ghi kết quả xử lý.",
+  aftersales_cases_cancel_complete: "Hủy phiếu hậu mãi phải ghi lý do.",
   consignment_one_open_per_vehicle: "Xe này đã có hợp đồng ký gửi đang soạn hoặc đang hiệu lực.",
 };
 

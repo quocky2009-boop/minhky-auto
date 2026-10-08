@@ -16,6 +16,9 @@ import { HandoverCreate } from "./handover-create";
 import { loadOrderSettlements } from "../../quyet-toan/load";
 import { SettlementCreate } from "./settlement-create";
 import { TradeInPanel } from "./trade-in-panel";
+import { AftersalesPanel } from "./aftersales-panel";
+import { loadOrderAftersales } from "../../hau-mai/load";
+import { todayVn } from "@/lib/cashbook";
 import { randomUUID } from "node:crypto";
 
 export const metadata = { title: "Chi tiết đơn bán" };
@@ -37,6 +40,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
   const finance = canSeeFinance(user.roles);
   const handovers = o.status === "confirmed" ? await loadOrderHandovers(supabase, o.id) : [];
   const settlements = finance && o.status === "confirmed" ? await loadOrderSettlements(supabase, o.id) : [];
+  const after = o.status === "confirmed" && active.length > 0 ? await loadOrderAftersales(supabase, active.map((l) => l.id)) : null;
   const trade = finance ? await loadTradeIns(supabase, o.id, manager) : null;
   const money = finance
     ? ((await supabase.from("sales_order_balances").select("total, paid_direct, applied_deposit, outstanding, trade_in_offset").eq("order_id", o.id).maybeSingle()).data as
@@ -137,6 +141,15 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               ))}
             </ul>
             <p className="mt-2 text-xs text-ink-soft">Quyết toán chia lợi nhuận (xe góp vốn) hoặc trả chủ xe (xe ký gửi). Chỉ phê duyệt được khi đơn đã thu đủ tiền.</p>
+          </section>
+        )}
+
+        {after && (
+          <section className="panel p-4">
+            <h2 className="mb-2 font-semibold">Hậu mãi: cam kết, bảo hành, phản ánh</h2>
+            <AftersalesPanel lines={active.map((l) => ({ id: l.id, label: l.vehicle_label || l.vehicle_id }))} commitments={after.commitments} cases={after.cases}
+              manager={manager} canOpen={mine} today={todayVn()}
+              requestIds={Object.fromEntries(active.map((l) => [l.id, { commitment: randomUUID(), case: randomUUID() }]))} />
           </section>
         )}
 

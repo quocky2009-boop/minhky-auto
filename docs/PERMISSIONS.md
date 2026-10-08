@@ -102,3 +102,10 @@ người dùng không tự ghi được nhật ký hệ thống; `anon` bị ch�
 
 - `report_inventory`, `report_vehicle_results` (view security invoker, lọc `can_see_finance()`), RPC `report_dashboard()`, `report_results_totals()`: chỉ quản lý/kế toán/admin có dữ liệu; sales và kỹ thuật nhận rỗng (kiểm trong `tests/db/settlement.test.ts`); `anon` bị từ chối.
 - `/bao-cao/xuat` (CSV): kiểm vai trò tài chính ở route, dữ liệu đọc bằng phiên người dùng qua RLS; không dùng service-role; không chứa dữ liệu cá nhân của khách.
+
+## Hậu mãi (chặng 6 — lát 9)
+
+- `aftersales_commitments`: quản lý/admin ghi và hủy; xem: quản lý, tài chính, sales phụ trách đơn. Không xóa.
+- `aftersales_cases`: quản lý hoặc sales phụ trách đơn mở phiếu (sales tự phụ trách); xem: quản lý, tài chính, sales của đơn, người được giao, người tạo; cập nhật: quản lý, người được giao, sales của đơn; **chỉ quản lý** đổi người phụ trách hoặc mở lại phiếu đã xử lý. Kỹ thuật chỉ thấy phiếu được giao và không đọc được chi phí.
+- `aftersales_events`: ghi thêm cho ai thấy phiếu; không sửa/xóa. `list_staff()`: chỉ quản lý.
+- Chi phí sau bán: chỉ kế toán/quản lý ghi (như mọi chi phí xe). Kiểm trong `tests/db/settlement.test.ts` (nhóm HẬU MÃI).

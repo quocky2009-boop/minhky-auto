@@ -265,3 +265,11 @@ Hợp đồng mua, quyết toán chủ xe xe ký gửi (thu hộ, phần showroo
 - **Kết quả xe theo kỳ ký hợp đồng:** lãi gộp = giá bán − giá mua; sau chi phí = lãi gộp − chi phí đã xác nhận do showroom chịu; P và C từ quyết toán đã duyệt; xe ký gửi: showroom hưởng phí ký gửi (giá bán là thu hộ). Toàn showroom (tạm tính) = sau chi phí + phí ký gửi đã quyết toán − chi phí chung/chi khác + thu khác. **Không cộng P/C thành doanh thu mới.**
 - Mỗi dòng truy ngược được: đơn bán → xe → quyết toán. Cảnh báo khi còn xe thiếu giá mua, chi phí chưa xác nhận, chưa quyết toán.
 
+## 7q. Hậu mãi (chặng 6 — lát 9, D92–D94)
+
+- **Cam kết/bảo hành** gắn dòng xe của đơn bán đã ký; quản lý ghi; không sửa (hủy có lý do). Bảo hành có hạn ngày và/hoặc giới hạn km.
+- **Phiếu hậu mãi**: phản ánh, yêu cầu bảo hành, yêu cầu dịch vụ, nhắc chăm sóc. Luôn có người phụ trách; đang xử lý phải có việc tiếp theo + hạn; đóng cần kết quả; hủy cần lý do; mở lại chỉ quản lý và phải có việc mới. Nhật ký không sửa.
+- **Gợi ý bảo hành** theo ngày tiếp nhận và km; thiếu km khi có giới hạn km → "chưa rõ". Quản lý quyết định.
+- **Chi phí sau bán** gắn đúng phiếu và đúng xe; vào chi phí đã xác nhận của xe và báo cáo kết quả; làm quyết toán đã duyệt lỗi thời → điều chỉnh có lưu vết, không sửa âm thầm.
+- **Nhắc việc:** danh sách `/hau-mai` (quá hạn, hôm nay, đang xử lý, của tôi) và thẻ ở Tổng quan.
+

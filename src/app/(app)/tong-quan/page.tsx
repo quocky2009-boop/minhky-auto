@@ -8,6 +8,7 @@ import { ErrorBox, PageHeader, Signal } from "@/components/ui";
 import type { FollowupState } from "@/lib/followup";
 import { money } from "@/lib/reports";
 import { loadDashboard } from "../bao-cao/load";
+import { todayVn } from "@/lib/cashbook";
 
 export const metadata = { title: "Tổng quan" };
 
@@ -36,7 +37,11 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
         searchDemands({ kind: "buy" }, 1, 0), searchDemands({ kind: "sell" }, 1, 0),
       ])
     : null;
-  const [vehicles, dash] = await Promise.all([vehiclesQ, loadDashboard(supabase)]);
+  const day = todayVn();
+  const openCases = () => supabase.from("aftersales_cases").select("id", { count: "exact", head: true }).in("status", ["open", "in_progress"]);
+  const [vehicles, dash, caseOverdue, caseToday, caseOpen] = await Promise.all([
+    vehiclesQ, loadDashboard(supabase), openCases().lt("next_due", day), openCases().eq("next_due", day), openCases(),
+  ]);
   const [overdue, today, stale, buy, sell] = care ?? [null, null, null, null, null];
 
   return (
@@ -55,6 +60,14 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
           </div>
         </section>
       )}
+      <section className="mb-6">
+        <h2 className="mb-2 text-sm font-semibold text-ink-soft">Hậu mãi{user.roles.some((r) => r === "admin" || r === "manager") ? " — toàn showroom" : " — của tôi"}</h2>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+          <Stat label="Phiếu quá hạn" value={caseOverdue.count ?? "—"} href="/hau-mai?tab=overdue" state="overdue" />
+          <Stat label="Phiếu đến hạn hôm nay" value={caseToday.count ?? "—"} href="/hau-mai?tab=today" state="today" />
+          <Stat label="Phiếu đang xử lý" value={caseOpen.count ?? "—"} href="/hau-mai" />
+        </div>
+      </section>
       <section className="mb-6">
         <h2 className="mb-2 text-sm font-semibold text-ink-soft">Kho xe</h2>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-5">

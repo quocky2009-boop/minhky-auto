@@ -11,8 +11,10 @@ export type ParseResult<T = Record<string, unknown>> =
 
 export const COST_CATEGORY_LABEL: Record<string, string> = {
   repair: "Sửa chữa", detailing: "Spa / làm đẹp", accessories: "Phụ kiện", paperwork: "Giấy tờ / sang tên",
-  transport: "Vận chuyển", inspection: "Kiểm định / thẩm định", other: "Khác",
+  transport: "Vận chuyển", inspection: "Kiểm định / thẩm định", other: "Khác", after_sales: "Sau bán (hậu mãi)",
 };
+/** Loại có thể chọn khi tạo chi phí ở trang xe. "Sau bán" chỉ tạo từ phiếu hậu mãi (bắt buộc gắn phiếu). */
+export const COST_CATEGORY_CHOICES: Record<string, string> = Object.fromEntries(Object.entries(COST_CATEGORY_LABEL).filter(([k]) => k !== "after_sales"));
 export const COST_STATUS_LABEL: Record<string, string> = { estimated: "Dự kiến", confirmed: "Đã xác nhận", void: "Đã hủy" };
 export const PAYMENT_METHOD_LABEL: Record<string, string> = { cash: "Tiền mặt", transfer: "Chuyển khoản", other: "Khác" };
 export const BORNE_BY_LABEL: Record<string, string> = { showroom: "Showroom chịu", owner: "Chủ xe chịu" };

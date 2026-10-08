@@ -511,4 +511,133 @@ d("Quyết toán xe — chặng 5 lát 7 (database thật)", () => {
     expect(d2.inventory.owned.cost_unknown - d1.inventory.owned.cost_unknown).toBe(1);
     expect(BigInt(d2.inventory.owned.capital_tied)).toBe(BigInt(d0.inventory.owned.capital_tied));
   });
+  // ---------------------------------------------------------------------------------------------------------------------
+  // HẬU MÃI (chặng 6 lát 9): cam kết/bảo hành, phiếu phản ánh, chi phí sau bán quay về đúng xe → quyết toán lỗi thời → điều chỉnh
+  // ---------------------------------------------------------------------------------------------------------------------
+  const shift = (days: number) => new Date(Date.now() + 7 * 3_600_000 + days * 86_400_000).toISOString().slice(0, 10);
+  const sold = async (price = 650, purchase = 600) => {
+    const car = await ownedCar(purchase, [{ name: "Bên H", ratio: "100", paid: 100 }]);
+    const so = await sellOrder(car.v, price);
+    return { ...car, ...so };
+  };
+  const commit = (user: string, line: string, extra: Record<string, unknown> = {}, client: Client = cM) =>
+    call(client, user, "select public.create_aftersales_commitment($1::jsonb) r", [JSON.stringify({ request_id: uuid(), order_line_id: line, kind: "warranty", title: "Bảo hành thân vỏ", starts_on: shift(-10), ends_on: shift(30), odo_limit: 100000, ...extra })]);
+  const openCase = (user: string, line: string, extra: Record<string, unknown> = {}, client: Client = cA) =>
+    call(client, user, "select public.create_aftersales_case($1::jsonb) r", [JSON.stringify({ request_id: uuid(), order_line_id: line, kind: "complaint", title: "Khách báo tiếng ồn gầm", next_action: "Gọi khách hẹn lịch kiểm tra", next_due: shift(2), ...extra })]);
+  const cver = async (id: string) => (await sys.query("select version from public.aftersales_cases where id = $1", [id])).rows[0].version as number;
+  const caseRow = async (id: string) => (await sys.query("select status, coverage, assigned_to, next_action, next_due::text nd, resolution from public.aftersales_cases where id = $1", [id])).rows[0] as { status: string; coverage: string | null; assigned_to: string; next_action: string | null; nd: string | null; resolution: string | null };
+  const resolveCase = (client: Client, user: string, id: string, resolution = "Đã thay giảm xóc, khách xác nhận") => as(client, user, async (db) => db.query("select public.resolve_aftersales_case($1, $2, $3)", [id, await cver(id), resolution]));
+  const afterCost = (user: string, vehicle: string, caseId: string | null, amount = "3000000", extra: Record<string, unknown> = {}) =>
+    call(cK, user, "select public.create_vehicle_cost($1::jsonb) r", [JSON.stringify({ request_id: uuid(), vehicle_id: vehicle, category: "after_sales", description: "Thay giảm xóc theo bảo hành", estimated_amount: amount, ...(caseId ? { aftersales_case_id: caseId } : {}), ...extra })]);
+
+  it("HẬU MÃI — cam kết/bảo hành: chỉ quản lý ghi; bảo hành phải có hạn hoặc km; sales chỉ thấy của đơn mình; không sửa, hủy cần lý do", async () => {
+    const x = await sold();
+    await expect(commit(salesA, x.line, {}, cA)).rejects.toThrow(/Chỉ quản lý được ghi cam kết|row-level security/);
+    await expect(commit(manager, x.line, { ends_on: null, odo_limit: null })).rejects.toThrow(/aftersales_commitments_limit|violates/);
+    await expect(commit(manager, x.line, { ends_on: shift(-20) })).rejects.toThrow(/aftersales_commitments_range|violates/);
+    const unsold = await ownedCar(500, [{ name: "Bên K", ratio: "100", paid: 10 }]);
+    const dl = await call(cA, salesA, "select public.create_demand($1::jsonb) r", [JSON.stringify({ request_id: uuid(), kind: "buy", customer: { full_name: "Khách " + uuid().slice(0, 5) } })]);
+    const draft = await call(cA, salesA, "select public.create_sales_order($1::jsonb) r", [JSON.stringify({ request_id: uuid(), demand_id: dl, lines: [{ vehicle_id: unsold.v, sale_price: M(520) }] })]);
+    const draftLine = (await sys.query("select id from public.sales_order_lines where order_id = $1", [draft])).rows[0].id as string;
+    await expect(commit(manager, draftLine)).rejects.toThrow(/xe đã bán/);
+    const ck = await commit(manager, x.line);
+    expect(await count(cA, salesA, "select count(*)::int n from public.aftersales_commitments where id = $1", [ck])).toBe(1);
+    const salesB = await createUser(sys, "Sales B Hậu mãi", ["sales"]);
+    expect(await count(cA, salesB, "select count(*)::int n from public.aftersales_commitments")).toBe(0);
+    expect(await count(cK, accountant, "select count(*)::int n from public.aftersales_commitments where id = $1", [ck])).toBe(1);
+    await expect(sys.query("update public.aftersales_commitments set title = 'Sửa lén' where id = $1", [ck])).rejects.toThrow(/Không sửa cam kết/);
+    const ver = (await sys.query("select version from public.aftersales_commitments where id = $1", [ck])).rows[0].version;
+    await expect(as(cM, manager, (db) => db.query("select public.void_aftersales_commitment($1, $2, '  ')", [ck, ver]))).rejects.toThrow(/Ghi lý do hủy/);
+    await as(cM, manager, (db) => db.query("select public.void_aftersales_commitment($1, $2, 'Ghi nhầm xe')", [ck, ver]));
+    await expect(as(cM, manager, (db) => db.query("select public.void_aftersales_commitment($1, $2, 'x')", [ck, ver]))).rejects.toThrow(/vừa được cập nhật/);
+    await expect(as(cM, manager, (db) => db.query("delete from public.aftersales_commitments"))).rejects.toThrow(/permission denied/);
+  });
+
+  it("HẬU MÃI — phiếu: gợi ý trong/ngoài bảo hành theo ngày và km (thiếu km = chưa rõ); sales chỉ mở cho đơn của mình và tự phụ trách; đang xử lý bắt buộc việc tiếp theo + hạn", async () => {
+    const x = await sold();
+    const ck = await commit(manager, x.line);                                    // hạn đến +30 ngày, giới hạn 100.000 km
+    const within = await openCase(salesA, x.line, { commitment_id: ck, odo_at_case: 50000 });
+    expect((await caseRow(within)).coverage).toBe("within");
+    expect((await caseRow(await openCase(salesA, x.line, { commitment_id: ck, odo_at_case: 120000 }))).coverage).toBe("outside");
+    expect((await caseRow(await openCase(salesA, x.line, { commitment_id: ck }))).coverage).toBe("unknown");   // có giới hạn km mà chưa nhập km → cần xác minh, không đoán
+    const expired = await commit(manager, x.line, { starts_on: shift(-60), ends_on: shift(-1), odo_limit: null });
+    expect((await caseRow(await openCase(salesA, x.line, { commitment_id: expired }))).coverage).toBe("outside");
+    expect((await caseRow(await openCase(salesA, x.line))).coverage).toBeNull();                              // không gắn cam kết → không có gợi ý
+    // cam kết của xe khác không gắn được
+    const y = await sold();
+    const otherCk = await commit(manager, y.line);
+    await expect(openCase(salesA, x.line, { commitment_id: otherCk })).rejects.toThrow(/đúng xe này/);
+    // sales khác không mở được phiếu cho đơn không phải của mình; sales tự phụ trách dù chỉ định người khác
+    const salesB = await createUser(sys, "Sales B Hậu mãi 2", ["sales"]);
+    await expect(openCase(salesB, x.line, {}, cK)).rejects.toThrow(/Chỉ quản lý hoặc sales phụ trách|không tìm thấy|Không tìm thấy/i);
+    const assignedAttempt = await openCase(salesA, x.line, { assigned_to: tech });
+    expect((await caseRow(assignedAttempt)).assigned_to).toBe(salesA);
+    // đang xử lý bắt buộc việc tiếp theo + hạn
+    await expect(openCase(salesA, x.line, { next_action: "", next_due: null })).rejects.toThrow(/aftersales_cases_next_required|violates/);
+    // quản lý giao cho kỹ thuật; kỹ thuật thấy đúng phiếu được giao; sales không đổi người phụ trách
+    const ver = await cver(within);
+    await expect(as(cA, salesA, (db) => db.query("select public.update_aftersales_case($1, $2, $3::jsonb)", [within, ver, JSON.stringify({ assigned_to: tech })]))).rejects.toThrow(/Chỉ quản lý được đổi người phụ trách/);
+    await as(cM, manager, (db) => db.query("select public.update_aftersales_case($1, $2, $3::jsonb)", [within, ver, JSON.stringify({ assigned_to: tech, next_action: "Kiểm tra gầm tại xưởng", next_due: shift(1) })]));
+    expect((await caseRow(within))).toMatchObject({ assigned_to: tech, status: "in_progress", next_action: "Kiểm tra gầm tại xưởng" });
+    expect(await count(cA, tech, "select count(*)::int n from public.aftersales_cases")).toBe(1);
+    expect(await count(cA, tech, "select count(*)::int n from public.vehicle_costs")).toBe(0);
+    // nhật ký: ghi liên hệ, không sửa/xóa
+    await call(cA, tech, "select public.add_aftersales_event($1::jsonb) r", [JSON.stringify({ case_id: within, kind: "contact", content: "Đã gọi khách, hẹn 9h sáng mai" })]);
+    expect(await count(cA, tech, "select count(*)::int n from public.aftersales_events where case_id = $1", [within])).toBeGreaterThanOrEqual(3);
+    await expect(sys.query("update public.aftersales_events set content = 'x' where case_id = $1", [within])).rejects.toThrow(/không sửa\/xóa/);
+    await expect(call(cA, salesB, "select public.add_aftersales_event($1::jsonb) r", [JSON.stringify({ case_id: within, kind: "note", content: "Xen vào" })])).rejects.toThrow(/Không tìm thấy phiếu|row-level security/);
+  });
+
+  it("HẬU MÃI — đóng phiếu cần kết quả; mở lại chỉ quản lý và phải có việc mới; hủy cần lý do; chi phí sau bán bắt buộc gắn phiếu đúng xe, chặn đóng/hủy khi còn chi phí chưa xử lý", async () => {
+    const x = await sold();
+    const y = await sold();
+    const c1 = await openCase(salesA, x.line);
+    await expect(resolveCase(cA, salesA, c1, "  ")).rejects.toThrow(/Ghi kết quả xử lý|aftersales_cases_resolved_complete/);
+    // chi phí sau bán: phải có phiếu, đúng xe, đúng loại
+    await expect(afterCost(accountant, x.v, null)).rejects.toThrow(/phải gắn một phiếu hậu mãi/);
+    const cOther = await openCase(salesA, y.line, {});
+    await expect(afterCost(accountant, x.v, cOther)).rejects.toThrow(/không thuộc xe này/);
+    await expect(call(cK, accountant, "select public.create_vehicle_cost($1::jsonb) r", [JSON.stringify({ request_id: uuid(), vehicle_id: x.v, category: "repair", description: "Sửa", estimated_amount: "1000000", aftersales_case_id: c1 })])).rejects.toThrow(/Chỉ chi phí loại "sau bán"/);
+    // sales không tạo được chi phí
+    await expect(afterCost(salesA, x.v, c1)).rejects.toThrow(/không có quyền ghi chi phí/);
+    const cost1 = await afterCost(accountant, x.v, c1, "3000000");
+    // còn chi phí dự kiến → không đóng; xác nhận rồi mới đóng
+    await expect(resolveCase(cA, salesA, c1)).rejects.toThrow(/Còn 1 khoản chi phí sau bán dự kiến chưa xác nhận/);
+    await confirmCost(cost1, "2800000");
+    // có chi phí chưa đảo → không hủy phiếu
+    await expect(as(cA, salesA, async (db) => db.query("select public.cancel_aftersales_case($1, $2, 'Khách rút')", [c1, await cver(c1)]))).rejects.toThrow(/Hủy \(đảo\) các khoản chi phí trước/);
+    await resolveCase(cA, salesA, c1);
+    expect(await caseRow(c1)).toMatchObject({ status: "resolved", next_action: null, nd: null, resolution: "Đã thay giảm xóc, khách xác nhận" });
+    // đã xử lý xong → không sửa việc tiếp theo; sales không mở lại; quản lý mở lại phải có việc mới
+    await expect(as(cA, salesA, async (db) => db.query("select public.update_aftersales_case($1, $2, $3::jsonb)", [c1, await cver(c1), JSON.stringify({ next_action: "x", next_due: shift(1) })]))).rejects.toThrow(/vừa được cập nhật, đã đóng/);
+    await expect(as(cA, salesA, async (db) => db.query("select public.reopen_aftersales_case($1, $2, $3::jsonb)", [c1, await cver(c1), JSON.stringify({ next_action: "Gọi lại", next_due: shift(3) })]))).rejects.toThrow(/Chỉ quản lý được mở lại/);
+    await expect(as(cM, manager, async (db) => db.query("select public.reopen_aftersales_case($1, $2, $3::jsonb)", [c1, await cver(c1), JSON.stringify({ next_action: "", next_due: null })]))).rejects.toThrow(/aftersales_cases_next_required|violates|Mở lại phiếu phải ghi/);
+    await as(cM, manager, async (db) => db.query("select public.reopen_aftersales_case($1, $2, $3::jsonb)", [c1, await cver(c1), JSON.stringify({ next_action: "Gọi lại kiểm tra sau sửa", next_due: shift(3) })]));
+    expect((await caseRow(c1)).status).toBe("in_progress");
+    // hủy phiếu khác: cần lý do; phiếu đã hủy không sửa
+    await expect(as(cA, salesA, async (db) => db.query("select public.cancel_aftersales_case($1, $2, ' ')", [cOther, await cver(cOther)]))).rejects.toThrow(/Ghi lý do hủy/);
+    await as(cA, salesA, async (db) => db.query("select public.cancel_aftersales_case($1, $2, 'Khách báo nhầm xe')", [cOther, await cver(cOther)]));
+    await expect(afterCost(accountant, y.v, cOther)).rejects.toThrow(/đã hủy/);
+    await expect(sys.query("update public.aftersales_cases set title = 'Sửa lén' where id = $1", [c1])).rejects.toThrow(/Không sửa nội dung phiếu/);
+  });
+
+  it("HẬU MÃI — chi phí sau bán làm quyết toán đã duyệt LỖI THỜI → điều chỉnh có lưu vết; chi phí quay về đúng xe và vào báo cáo kết quả", async () => {
+    const x = await approvedOwned(600, 650, [{ name: "Bên M", ratio: "100", paid: 100 }], { costs: 0 });   // P = 50 tr, công ty 20% = 10 tr, bên M 40 tr
+    expect((await settle(x.s))).toMatchObject({ p: M(50), c: M(10), status: "approved" });
+    expect(await as(cK, accountant, async (db) => (await db.query("select public.settlement_is_stale($1) r", [x.s])).rows[0].r)).toBe(false);
+    const hm = await openCase(salesA, x.line);
+    const cost1 = await afterCost(accountant, x.v, hm, "5000000");
+    // chi phí dự kiến chưa xác nhận đã làm số liệu đầu vào đổi → quyết toán đã duyệt bị đánh dấu lỗi thời
+    expect(await as(cK, accountant, async (db) => (await db.query("select public.settlement_is_stale($1) r", [x.s])).rows[0].r)).toBe(true);
+    await confirmCost(cost1, "5000000");
+    const r = await revise(cM, manager, x.s, "Chi phí bảo hành sau bán");
+    expect(await settle(r)).toMatchObject({ p: M(45), c: M(9), k: M(5), status: "provisional" });   // P giảm đúng 5 tr chi phí sau bán
+    await check(cK, accountant, r);
+    await approve(cM, manager, r);
+    expect((await sver(x.s)).status).toBe("superseded");
+    // báo cáo: chi phí sau bán nằm trong chi phí xác nhận của đúng xe
+    const row = (await as(cM, manager, (db) => db.query("select costs_confirmed::text k, result_after_costs::text a, distributable::text p from public.report_vehicle_results where line_id = $1", [x.line]))).rows[0];
+    expect(row).toEqual({ k: M(5), a: M(45), p: M(45) });
+    expect((await sys.query("select category, aftersales_case_id from public.vehicle_costs where id = $1", [cost1])).rows[0]).toEqual({ category: "after_sales", aftersales_case_id: hm });
+  });
 });
