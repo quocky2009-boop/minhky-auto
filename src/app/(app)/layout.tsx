@@ -22,13 +22,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <ul className="space-y-0.5">
             {visible.filter((m) => m.group === g).map((m) => (
               <li key={m.key}>
-                {m.status === "planned" || !m.href ? (
-                  <span className="flex items-center justify-between rounded-md px-3 py-1.5 text-sm text-sig-off" aria-disabled title="Chưa triển khai">
-                    {m.label}<span className="text-[11px]">chặng {m.phase}</span>
-                  </span>
-                ) : (
-                  <NavLink href={m.href}>{m.label}</NavLink>
-                )}
+                <NavLink href={m.href} hint={m.hint}>{m.label}</NavLink>
               </li>
             ))}
           </ul>

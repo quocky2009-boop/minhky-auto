@@ -8,7 +8,7 @@ Không tuyên bố "hoàn tất" cho phần chỉ có giao diện/mã mà chưa 
 | Kiểm tra | Kết quả (08/10/2026) |
 |---|---|
 | `npm run typecheck`, `npm run lint`, `npm run build` | đạt |
-| `npm test` (unit) | 21 file, 158 test đạt |
+| `npm test` (unit) | 22 file, 161 test đạt |
 | `npm run test:db` (database PostgreSQL thật cục bộ, chạy bằng role `postgres`) | 19 file, **171/171 đạt** (gồm test đồng thời thật ở database) |
 | Áp migration lên Supabase `minhky-auto` | migrations 1400 → 4200 đã áp (14 migration 2700–4000 là bản xuất từ Supabase, không áp lại), mỗi lần kiểm RLS/quyền/advisor |
 
@@ -57,6 +57,16 @@ Mỗi bước thực hiện trên **điện thoại và máy tính**; ghi kết 
 8. Hậu mãi: ghi bảo hành, mở phiếu, ghi chi phí sau bán, đóng phiếu; Báo cáo (`/bao-cao`) và xuất CSV mở được bằng Excel, tiếng Việt đúng.
 9. Điện thoại: mọi form nhập tay được, không tràn ngang, nút bấm đủ lớn; thử bấm "Lưu" hai lần liên tiếp không sinh bản ghi trùng.
 10. Sao lưu: thực hiện một lần theo DEPLOYMENT.md §4 trên project thật và ghi ngày.
+
+### Kết quả nghiệm thu đã có (do Chủ tịch thực hiện)
+
+| Ngày | Bước | Kết quả | Bằng chứng |
+|---|---|---|---|
+| 11/10/2026 | Bước 1 (một phần): đăng nhập bằng tài khoản thật trên bản Production (`minhky-auto.vercel.app`), mở Tổng quan **trên máy tính** | **Đạt**: đăng nhập thành công; Tổng quan hiển thị đủ các khối (Chăm sóc khách, Hậu mãi, Kho xe, Tồn kho, Vốn và tiền); số liệu bằng 0 là đúng vì chưa nhập dữ liệu thật (0 xe, 0 tài khoản tiền) | Ảnh chụp màn hình do Chủ tịch gửi |
+| 11/10/2026 | Deploy Production | **Đạt**: commit `f926a85` trên `main` trạng thái Ready (50 giây); các bản preview của nhánh làm việc đều Ready, không có bản lỗi | Ảnh trang Deployments của Vercel; trạng thái "success" qua GitHub |
+| 11/10/2026 | Menu | **Phát hiện và đã sửa**: 5 mục menu (Mua & thẩm định, Ký gửi, Chuẩn bị xe & chi phí, Thu cũ đổi mới, Vốn góp & vay) còn ghi "chặng 3/4/5" và không bấm được dù chức năng đã làm xong (nằm trong trang Kho xe và Đơn bán) | Đã bỏ 5 mục, thêm gợi ý khi rê chuột ở "Kho xe" và "Đơn bán"; test `modules.test.ts` bảo đảm mọi mục menu trỏ tới trang có thật |
+
+Chưa làm: bước 1 trên điện thoại và với các vai trò còn lại (kế toán, sales, kỹ thuật), các bước 2–10.
 
 ## 5. Còn tồn đọng cần quyết định
 

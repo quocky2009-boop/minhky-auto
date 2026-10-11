@@ -18,32 +18,26 @@ export type ModuleDef = {
   key: string;
   label: string;
   group: string;
-  href?: string;
+  href: string;
   roles: AppRole[];
-  /** ready: dùng được; planned: chưa triển khai (hiện mờ, không bấm được) */
-  status: "ready" | "partial" | "planned";
-  phase?: number;
+  /** Gợi ý ngắn hiện khi rê chuột: chức năng nằm trong trang này nhưng không có mục menu riêng. */
+  hint?: string;
 };
 
 export const MODULES: ModuleDef[] = [
-  { key: "overview", label: "Tổng quan", group: "Điều hành", href: "/tong-quan", roles: ALL, status: "ready", phase: 6 },
-  { key: "today", label: "Việc hôm nay", group: "Khách & nhu cầu", href: "/viec-hom-nay", roles: SELLERS, status: "ready" },
-  { key: "demands", label: "Nhu cầu mua/bán", group: "Khách & nhu cầu", href: "/nhu-cau", roles: SELLERS, status: "ready" },
-  { key: "customers", label: "Khách hàng", group: "Khách & nhu cầu", href: "/khach-hang", roles: SELLERS, status: "ready" },
-  { key: "inventory", label: "Kho xe", group: "Xe", href: "/kho-xe", roles: ALL, status: "partial", phase: 3 },
-  { key: "purchasing", label: "Mua & thẩm định", group: "Xe", roles: ["admin", "manager", "technician"], status: "planned", phase: 3 },
-  { key: "consignment", label: "Ký gửi", group: "Xe", roles: ["admin", "manager", "accountant"], status: "planned", phase: 3 },
-  { key: "prep", label: "Chuẩn bị xe & chi phí", group: "Xe", roles: ["admin", "manager", "technician", "accountant"], status: "planned", phase: 3 },
-  { key: "sales", label: "Đơn bán", group: "Giao dịch", href: "/don-ban", roles: [...SELLERS, "accountant"], status: "partial", phase: 5 },
-  { key: "tradein", label: "Thu cũ đổi mới", group: "Giao dịch", roles: SELLERS, status: "planned", phase: 5 },
-  { key: "docs", label: "Hồ sơ & bàn giao", group: "Giao dịch", href: "/ban-giao", roles: ["admin", "manager", "sales", "accountant"], status: "partial", phase: 5 },
-  { key: "capital", label: "Vốn góp & vay", group: "Tài chính", roles: ["admin", "manager", "accountant"], status: "planned", phase: 4 },
-  { key: "cashbook", label: "Thu chi & công nợ", group: "Tài chính", href: "/thu-chi", roles: ["admin", "manager", "accountant"], status: "partial", phase: 5 },
-  { key: "aftersales", label: "Hậu mãi", group: "Giao dịch", href: "/hau-mai", roles: ALL, status: "ready", phase: 6 },
-  { key: "commission", label: "Hoa hồng", group: "Giao dịch", href: "/hoa-hong", roles: ["admin", "manager", "accountant", "sales"], status: "ready", phase: 6 },
-  { key: "settlement", label: "Quyết toán", group: "Tài chính", href: "/quyet-toan", roles: ["admin", "manager", "accountant"], status: "ready", phase: 5 },
-  { key: "reports", label: "Báo cáo", group: "Tài chính", href: "/bao-cao", roles: ["admin", "manager", "accountant"], status: "ready", phase: 6 },
-  { key: "users", label: "Người dùng & vai trò", group: "Cài đặt", href: "/cai-dat/nguoi-dung", roles: ["admin"], status: "ready" },
+  { key: "overview", label: "Tổng quan", group: "Điều hành", href: "/tong-quan", roles: ALL },
+  { key: "today", label: "Việc hôm nay", group: "Khách & nhu cầu", href: "/viec-hom-nay", roles: SELLERS },
+  { key: "demands", label: "Nhu cầu mua/bán", group: "Khách & nhu cầu", href: "/nhu-cau", roles: SELLERS },
+  { key: "customers", label: "Khách hàng", group: "Khách & nhu cầu", href: "/khach-hang", roles: SELLERS },
+  { key: "inventory", label: "Kho xe", group: "Xe", href: "/kho-xe", roles: ALL, hint: "Kho xe, mua & thẩm định, ký gửi, chi phí chuẩn bị xe, vốn góp và vay đều nằm trong từng xe" },
+  { key: "sales", label: "Đơn bán", group: "Giao dịch", href: "/don-ban", roles: [...SELLERS, "accountant"], hint: "Báo giá, đơn bán và thu cũ đổi mới nằm trong từng đơn" },
+  { key: "docs", label: "Hồ sơ & bàn giao", group: "Giao dịch", href: "/ban-giao", roles: ["admin", "manager", "sales", "accountant"] },
+  { key: "cashbook", label: "Thu chi & công nợ", group: "Tài chính", href: "/thu-chi", roles: ["admin", "manager", "accountant"] },
+  { key: "aftersales", label: "Hậu mãi", group: "Giao dịch", href: "/hau-mai", roles: ALL },
+  { key: "commission", label: "Hoa hồng", group: "Giao dịch", href: "/hoa-hong", roles: ["admin", "manager", "accountant", "sales"] },
+  { key: "settlement", label: "Quyết toán", group: "Tài chính", href: "/quyet-toan", roles: ["admin", "manager", "accountant"] },
+  { key: "reports", label: "Báo cáo", group: "Tài chính", href: "/bao-cao", roles: ["admin", "manager", "accountant"] },
+  { key: "users", label: "Người dùng & vai trò", group: "Cài đặt", href: "/cai-dat/nguoi-dung", roles: ["admin"] },
 ];
 
 export function canUse(roles: AppRole[], key: string): boolean {
