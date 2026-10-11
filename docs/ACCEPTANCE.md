@@ -65,6 +65,7 @@ Mỗi bước thực hiện trên **điện thoại và máy tính**; ghi kết 
 | 11/10/2026 | Bước 1 (một phần): đăng nhập bằng tài khoản thật trên bản Production (`minhky-auto.vercel.app`), mở Tổng quan **trên máy tính** | **Đạt**: đăng nhập thành công; Tổng quan hiển thị đủ các khối (Chăm sóc khách, Hậu mãi, Kho xe, Tồn kho, Vốn và tiền); số liệu bằng 0 là đúng vì chưa nhập dữ liệu thật (0 xe, 0 tài khoản tiền) | Ảnh chụp màn hình do Chủ tịch gửi |
 | 11/10/2026 | Deploy Production | **Đạt**: commit `f926a85` trên `main` trạng thái Ready (50 giây); các bản preview của nhánh làm việc đều Ready, không có bản lỗi | Ảnh trang Deployments của Vercel; trạng thái "success" qua GitHub |
 | 11/10/2026 | Menu | **Phát hiện và đã sửa**: 5 mục menu (Mua & thẩm định, Ký gửi, Chuẩn bị xe & chi phí, Thu cũ đổi mới, Vốn góp & vay) còn ghi "chặng 3/4/5" và không bấm được dù chức năng đã làm xong (nằm trong trang Kho xe và Đơn bán) | Đã bỏ 5 mục, thêm gợi ý khi rê chuột ở "Kho xe" và "Đơn bán"; test `modules.test.ts` bảo đảm mọi mục menu trỏ tới trang có thật |
+| 12/10/2026 | Menu sau khi gộp vào `main` (commit `2b813e7`) | **Đạt**: Chủ tịch xác nhận trên bản Production, menu trái không còn 5 mục "chặng 3/4/5" | Xác nhận của Chủ tịch |
 
 Chưa làm: bước 1 trên điện thoại và với các vai trò còn lại (kế toán, sales, kỹ thuật), các bước 2–10.
 
