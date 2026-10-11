@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hướng dẫn sử dụng dành cho Sales · Minh Kỳ Auto</title>
+<style>
+:root{
+  --ink:#18212b; --soft:#5b6672; --floor:#eef1f0; --surface:#fff; --line:#d7dde0;
+  --petrol:#0b5d6b; --deep:#084651; --wash:#e3f0f1;
+  --red:#c0392b; --amber:#d99a00; --green:#2f7d4f; --off:#9aa4ad;
+  --warn:#fdf7e6; --warnline:#e8d9a8; --okbg:#e6f2ea;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--floor);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px 64px}
+h1,h2,h3{line-height:1.25;margin:0}
+a{color:var(--petrol)}
+/* Bìa */
+.cover{background:linear-gradient(135deg,var(--deep),var(--petrol));color:#fff;padding:44px 16px 36px}
+.cover .wrap{padding-bottom:0}
+.cover small{opacity:.8;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.cover h1{font-size:2rem;margin:.5rem 0 .6rem}
+.cover p{margin:0;opacity:.92;max-width:62ch}
+.cover .meta{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;font-size:.85rem}
+.cover .meta span{background:rgba(255,255,255,.14);border-radius:999px;padding:3px 12px}
+/* Mục lục */
+.toc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:-18px 0 28px;position:relative;box-shadow:0 6px 20px rgba(8,70,81,.08)}
+.toc h2{font-size:1rem;margin-bottom:8px}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:2px 18px}
+.toc a{display:flex;gap:8px;text-decoration:none;color:var(--ink);padding:4px 0;font-size:.93rem}
+.toc a b{color:var(--petrol);min-width:1.6em}
+.toc a:hover{color:var(--petrol)}
+/* Phần */
+section.part{margin-top:44px}
+section.part>h2{font-size:1.45rem;color:var(--deep);padding-bottom:8px;border-bottom:3px solid var(--wash);margin-bottom:16px;display:flex;gap:10px;align-items:baseline}
+section.part>h2 .num{background:var(--petrol);color:#fff;border-radius:8px;font-size:1rem;padding:1px 10px;font-weight:700}
+.goal{background:var(--wash);border-left:4px solid var(--petrol);padding:10px 14px;border-radius:0 8px 8px 0;margin:0 0 14px;font-weight:500}
+h3{font-size:1.02rem;margin:20px 0 8px;color:var(--deep)}
+ol.steps{list-style:none;counter-reset:s;padding:0;margin:0}
+ol.steps>li{counter-increment:s;position:relative;padding:6px 0 6px 38px;border-bottom:1px dashed var(--line)}
+ol.steps>li:last-child{border-bottom:0}
+ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:26px;height:26px;border-radius:50%;background:var(--petrol);color:#fff;font-weight:700;font-size:.85rem;display:grid;place-items:center}
+code,kbd,.btn,.tag{font-family:inherit}
+.btn{display:inline-block;background:var(--petrol);color:#fff;border-radius:6px;padding:1px 9px;font-weight:600;font-size:.88em;white-space:nowrap}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+b.k{background:#fff;border:1px solid var(--line);border-radius:5px;padding:0 6px;font-weight:600;white-space:nowrap}
+/* Hộp */
+.box{border-radius:8px;padding:10px 14px;margin:14px 0;font-size:.95rem}
+.box strong:first-child{display:block;margin-bottom:2px}
+.box.ex{background:var(--okbg);border:1px solid #b9dcc6}
+.box.warn{background:var(--warn);border:1px solid var(--warnline)}
+.box.rule{background:#fff;border:1px solid var(--line);border-left:4px solid var(--red)}
+.box ul{margin:4px 0 0;padding-left:20px}
+/* Bảng */
+table.t{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:.93rem}
+table.t th,table.t td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+table.t th{background:var(--floor);font-size:.8rem;color:var(--soft);text-transform:uppercase;letter-spacing:.03em}
+table.t tr:last-child td{border-bottom:0}
+.scroll{overflow-x:auto}
+/* Sơ đồ luồng */
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;counter-reset:f;margin:10px 0}
+.flow .st{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px 12px;position:relative;counter-increment:f}
+.flow .st::before{content:counter(f);position:absolute;top:-10px;left:10px;background:var(--petrol);color:#fff;border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;font-size:.78rem;font-weight:700}
+.flow .st b{display:block;margin:4px 0 2px;color:var(--deep)}
+.flow .st span:not(.who){display:block;font-size:.82rem;color:var(--soft);line-height:1.4;margin-top:4px}
+.who{display:inline-block;font-size:.72rem;font-weight:700;border-radius:999px;padding:0 8px;margin:1px 2px 0 0}
+.who.me{background:var(--petrol);color:#fff}.who.ql{background:#fde9c8;color:#7a5200}.who.kt{background:#dfe7f6;color:#1f3d7a}.who.auto{background:#e6f2ea;color:var(--green)}
+.legend{font-size:.85rem;color:var(--soft);margin-top:6px}
+/* Hình minh họa: khung trình duyệt */
+figure.shot{margin:14px 0 6px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--floor);box-shadow:0 4px 14px rgba(24,33,43,.07)}
+.bar{background:#dfe5e7;display:flex;gap:6px;align-items:center;padding:7px 10px;font-size:.74rem;color:var(--soft)}
+.bar i{width:9px;height:9px;border-radius:50%;background:#bcc6ca;display:inline-block}
+.bar span{margin-left:6px;background:#fff;border-radius:999px;padding:1px 12px;flex:1;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scr{padding:14px;font-size:.84rem;line-height:1.45;overflow-x:auto}
+.mt{min-width:480px}
+.pill{white-space:nowrap}
+figcaption{padding:6px 12px 10px;font-size:.78rem;color:var(--soft);background:#fff;border-top:1px solid var(--line)}
+.m-panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.m-h{font-weight:700;margin-bottom:6px;color:var(--ink)}
+.m-row{display:flex;gap:10px;flex-wrap:wrap}
+.m-f{flex:1;min-width:130px}
+.m-l{font-size:.7rem;color:var(--soft);font-weight:500;margin-bottom:2px}
+.m-in{border:1px solid var(--line);border-radius:6px;background:#fff;padding:5px 8px;min-height:30px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-in.on{border-color:var(--petrol);box-shadow:0 0 0 3px var(--wash)}
+.m-btn{display:inline-block;background:var(--petrol);color:#fff;border-radius:6px;padding:5px 12px;font-weight:600}
+.m-btn.g{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.dot.r{background:var(--red);box-shadow:0 0 0 3px rgba(192,57,43,.18)}.dot.a{background:var(--amber);box-shadow:0 0 0 3px rgba(217,154,0,.18)}.dot.g{background:var(--green)}.dot.s{background:var(--off)}
+.pill{display:inline-block;border-radius:999px;padding:0 9px;font-size:.74rem;font-weight:700}
+.pill.g{background:var(--okbg);color:var(--green)}.pill.a{background:var(--warn);color:#8a6100;border:1px solid var(--warnline)}.pill.r{background:#fbe4e1;color:var(--red)}.pill.n{background:var(--floor);color:var(--soft)}.pill.p{background:var(--wash);color:var(--deep)}
+.cl{position:absolute}
+.n1,.n2,.n3,.n4,.n5,.n6{display:inline-grid;place-items:center;width:19px;height:19px;border-radius:50%;background:var(--red);color:#fff;font-size:.7rem;font-weight:700;margin:0 4px 0 0;vertical-align:1px}
+.mt{width:100%;border-collapse:collapse}
+.mt th,.mt td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.mt th{color:var(--soft);font-size:.72rem;font-weight:600}
+.tb{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.card .v{font-size:1.3rem;font-weight:700}
+.phone{max-width:300px;margin:0 auto;border:8px solid #2b343d;border-radius:26px;overflow:hidden;background:var(--floor)}
+.phone .scr{padding:10px;font-size:.78rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+@media (max-width:700px){.two{grid-template-columns:1fr}.cover h1{font-size:1.6rem}}
+/* Chốt trang */
+footer{margin-top:48px;font-size:.82rem;color:var(--soft);border-top:1px solid var(--line);padding-top:14px}
+@media print{
+  body{background:#fff;font-size:11.5pt}
+  .toc{box-shadow:none;margin-top:12px}
+  section.part{break-inside:auto;margin-top:26px}
+  section.part>h2{break-after:avoid}
+  figure.shot,.box,.m-panel,ol.steps>li,table.t tr,.flow .st{break-inside:avoid}
+  .cover{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{size:A4;margin:14mm 12mm}
+}
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <div class="wrap">
+    <small>Minh Kỳ Auto · Hệ thống quản lý showroom</small>
+    <h1>Hướng dẫn sử dụng dành cho Nhân viên Sales</h1>
+    <p>Từ lúc nhận khách đến khi giao xe, chăm sóc sau bán và xem hoa hồng của bạn — ngắn gọn, có ví dụ, làm theo là được.</p>
+    <div class="meta"><span>Phiên bản 12/10/2026</span><span>Vai trò: Sales</span><span>Dùng được trên điện thoại và máy tính</span></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+<nav class="toc" aria-label="Mục lục">
+  <h2>Mục lục</h2>
+  <ol>
+    <li><a href="#tong-quan"><b>0</b>Bức tranh tổng thể (đọc trước)</a></li>
+    <li><a href="#b1"><b>1</b>Đăng nhập và màn hình chính</a></li>
+    <li><a href="#b2"><b>2</b>Việc hôm nay</a></li>
+    <li><a href="#b3"><b>3</b>Nhập khách và nhu cầu mới</a></li>
+    <li><a href="#b4"><b>4</b>Chăm sóc khách hằng ngày</a></li>
+    <li><a href="#b5"><b>5</b>Tìm, lọc và lưu bộ lọc</a></li>
+    <li><a href="#b6"><b>6</b>Gợi ý xe phù hợp</a></li>
+    <li><a href="#b7"><b>7</b>Giữ xe và đặt cọc</a></li>
+    <li><a href="#b8"><b>8</b>Báo giá</a></li>
+    <li><a href="#b9"><b>9</b>Đơn bán</a></li>
+    <li><a href="#b10"><b>10</b>Bàn giao xe</a></li>
+    <li><a href="#b11"><b>11</b>Hậu mãi sau bán</a></li>
+    <li><a href="#b12"><b>12</b>Hoa hồng của bạn</a></li>
+    <li><a href="#loi"><b>!</b>Thông báo thường gặp và cách xử lý</a></li>
+    <li><a href="#hoi"><b>?</b>Hỏi nhanh</a></li>
+  </ol>
+</nav>
+
+<!-- ================= TỔNG QUAN ================= -->
+<section class="part" id="tong-quan">
+  <h2><span class="num">0</span>Bức tranh tổng thể</h2>
+  <p>Mọi khách của bạn đi qua <b>một đường duy nhất</b>. Mỗi bước đều có người chịu trách nhiệm và việc tiếp theo có hạn — không còn thông tin trôi trong nhóm Zalo.</p>
+
+  <div class="flow" role="list">
+    <div class="st" role="listitem"><b>Khách &amp; nhu cầu</b><span class="who me">Bạn</span><span>Nhập khách, nhu cầu mua/bán, việc tiếp theo + hạn.</span></div>
+    <div class="st" role="listitem"><b>Chăm sóc</b><span class="who me">Bạn</span><span>Mở “Việc hôm nay”, gọi/nhắn, ghi nhật ký.</span></div>
+    <div class="st" role="listitem"><b>Gợi ý xe</b><span class="who me">Bạn</span><span>App gợi ý xe hợp nhu cầu; giải thích điểm khớp/lệch.</span></div>
+    <div class="st" role="listitem"><b>Giữ xe / đặt cọc</b><span class="who me">Bạn ghi</span><span class="who kt">KT thu tiền</span><span>Mỗi xe chỉ một người giữ/cọc.</span></div>
+    <div class="st" role="listitem"><b>Báo giá</b><span class="who me">Bạn</span><span class="who ql">QL duyệt nếu giá thấp</span></div>
+    <div class="st" role="listitem"><b>Đơn bán</b><span class="who me">Bạn lập</span><span class="who ql">QL xác nhận nếu giá thấp</span><span class="who kt">KT thu tiền</span></div>
+    <div class="st" role="listitem"><b>Bàn giao</b><span class="who me">Bạn</span><span class="who ql">QL duyệt ngoại lệ</span><span>Checklist → giao xe.</span></div>
+    <div class="st" role="listitem"><b>Hậu mãi</b><span class="who auto">Tự nhắc 7·30·90 ngày</span><span class="who me">Bạn xử lý</span></div>
+    <div class="st" role="listitem"><b>Hoa hồng</b><span class="who me">Bạn xem</span><span class="who ql">QL duyệt</span><span class="who kt">KT chi</span></div>
+  </div>
+  <p class="legend"><span class="who me">Bạn</span> việc của Sales &nbsp; <span class="who ql">QL</span> Quản lý showroom &nbsp; <span class="who kt">KT</span> Kế toán &nbsp; <span class="who auto">Tự động</span> do hệ thống tạo</p>
+
+  <h3>Thói quen mỗi ngày (5 phút đầu giờ)</h3>
+  <ol class="steps">
+    <li>Đăng nhập, mở <b>Việc hôm nay</b>.</li>
+    <li>Xử lý các khách <span class="pill r">Quá hạn</span> trước, rồi <span class="pill a">Đến hạn hôm nay</span>.</li>
+    <li>Sau mỗi cuộc gọi/nhắn: <b>ghi nhật ký</b> và <b>đặt việc tiếp theo + hạn mới</b>.</li>
+  </ol>
+
+  <h3>Bạn xem và làm được gì</h3>
+  <div class="scroll"><table class="t">
+    <tr><th>Bạn làm được</th><th>Bạn không thấy / không làm</th></tr>
+    <tr><td>Khách và nhu cầu <b>của bạn</b> hoặc được <b>chia sẻ</b> cho bạn<br>Xe <b>đang bán / đang giữ / đã cọc</b> kèm <b>giá chào</b><br>Giữ xe, đặt cọc, báo giá, đơn bán, bàn giao, hậu mãi cho khách của bạn<br>Hoa hồng của chính bạn</td>
+        <td>Khách và nhu cầu của đồng nghiệp (trừ khi được chia sẻ)<br><b>Giá mua, giá sàn, lợi nhuận</b> của xe<br>Thu chi, công nợ, quyết toán, báo cáo toàn showroom<br>Hoa hồng của người khác</td></tr>
+  </table></div>
+  <div class="box warn"><strong>Ghi nhớ</strong>Dán đường dẫn nhu cầu của người khác vào trình duyệt sẽ ra “không tìm thấy” — đây là chủ ý bảo mật, không phải lỗi.</div>
+</section>
+
+<!-- ================= B1 ================= -->
+<section class="part" id="b1">
+  <h2><span class="num">1</span>Đăng nhập và màn hình chính</h2>
+  <p class="goal">Mục đích: vào được app và biết tìm chức năng ở đâu.</p>
+  <ol class="steps">
+    <li>Mở địa chỉ app do quản lý gửi. Nhập <b>Email</b> và <b>Mật khẩu</b>, bấm <span class="btn">Đăng nhập</span>.</li>
+    <li>Lần đầu: bấm vào <b>liên kết trong email mời</b> để đặt mật khẩu. Quên mật khẩu hoặc chưa có tài khoản: liên hệ quản lý (app không tự đăng ký).</li>
+    <li>Trên <b>điện thoại</b>, bấm nút menu (☰) để mở danh sách chức năng; trên máy tính menu nằm bên trái.</li>
+  </ol>
+  <figure class="shot"><div class="bar"><i></i><i></i><i></i><span>minhky-auto.vercel.app/tong-quan</span></div>
+    <div class="scr" style="display:grid;grid-template-columns:150px 1fr;gap:12px">
+      <div class="m-panel" style="margin:0;font-size:.78rem">
+        <div class="m-h">Minh Kỳ Auto</div>
+        <div style="color:var(--soft);font-size:.68rem;margin-top:6px">Điều hành</div><div style="background:var(--wash);border-radius:5px;padding:2px 6px;font-weight:700">Tổng quan</div>
+        <div style="color:var(--soft);font-size:.68rem;margin-top:6px">Khách &amp; nhu cầu</div><div>Việc hôm nay</div><div>Nhu cầu mua/bán</div><div>Khách hàng</div>
+        <div style="color:var(--soft);font-size:.68rem;margin-top:6px">Xe</div><div>Kho xe</div>
+        <div style="color:var(--soft);font-size:.68rem;margin-top:6px">Giao dịch</div><div>Đơn bán</div><div>Hồ sơ &amp; bàn giao</div><div>Hậu mãi</div><div>Hoa hồng</div>
+      </div>
+      <div>
+        <div style="font-size:1.1rem;font-weight:700">Chào Minh</div><div style="color:var(--soft);margin-bottom:8px">Tổng quan công việc</div>
+        <div class="m-h" style="font-size:.78rem;color:var(--soft)">Chăm sóc khách — của tôi</div>
+        <div class="cards"><div class="card"><span class="dot r"></span>Quá hạn<div class="v">2</div></div><div class="card"><span class="dot a"></span>Đến hạn hôm nay<div class="v">3</div></div><div class="card">Lâu chưa cập nhật<div class="v">1</div></div><div class="card">Khách cần mua<div class="v">8</div></div></div>
+      </div>
+    </div>
+    <figcaption>Hình minh họa (dữ liệu mẫu) — Tổng quan của Sales: menu bên trái, các thẻ đếm việc cần làm. Bấm vào thẻ để mở danh sách tương ứng.</figcaption></figure>
+  <div class="box ex"><strong>Mẹo</strong>Bấm vào thẻ đỏ “Quá hạn” để vào thẳng danh sách khách cần xử lý gấp.</div>
+  <div class="box warn"><strong>Lưu ý</strong>Menu của bạn chỉ hiện chức năng được cấp quyền. Không thấy mục nào đó (ví dụ Thu chi, Báo cáo) là đúng — đó là việc của kế toán/quản lý.</div>
+</section>
+
+<!-- ================= B2 ================= -->
+<section class="part" id="b2">
+  <h2><span class="num">2</span>Việc hôm nay</h2>
+  <p class="goal">Mục đích: biết ngay hôm nay phải gọi/nhắn ai, theo thứ tự ưu tiên.</p>
+  <ol class="steps">
+    <li>Menu <b>Việc hôm nay</b>. Danh sách chia nhóm: <span class="pill r">Quá hạn</span> → <span class="pill a">Đến hạn hôm nay</span> → <span class="pill n">Chưa có lịch chăm sóc</span>.</li>
+    <li>Bấm <span class="btn ghost">Gọi</span> để gọi ngay từ điện thoại, hoặc bấm vào tên khách để mở nhu cầu.</li>
+    <li>Xử lý xong thì <b>ghi nhật ký</b> và <b>đặt hạn mới</b> (xem bước 4). Khách biến mất khỏi nhóm “quá hạn” khi hạn mới nằm ở tương lai.</li>
+  </ol>
+  <figure class="shot"><div class="phone"><div class="scr">
+    <div style="font-weight:700;font-size:1rem">Việc hôm nay</div><div style="color:var(--soft);margin-bottom:8px">Nhu cầu anh/chị phụ trách hoặc được chia sẻ</div>
+    <div class="m-h" style="color:var(--red)"><span class="dot r"></span>Quá hạn (2)</div>
+    <div class="m-panel"><div style="display:flex;justify-content:space-between;gap:8px"><div><b>Nguyễn Văn An</b><br><span style="color:var(--soft)">Cần mua · Toyota Vios<br>Gửi ảnh xe Vios G · hạn 09/10</span></div><span class="m-btn g" style="height:fit-content">Gọi</span></div></div>
+    <div class="m-panel"><div style="display:flex;justify-content:space-between;gap:8px"><div><b>Trần Thị Bích</b><br><span style="color:var(--soft)">Cần bán · Mazda CX-5<br>Hẹn thẩm định · hạn 10/10</span></div><span class="m-btn g" style="height:fit-content">Gọi</span></div></div>
+    <div class="m-h" style="color:#8a6100"><span class="dot a"></span>Đến hạn hôm nay (3)</div>
+  </div></div><figcaption>Hình minh họa (dữ liệu mẫu) — Việc hôm nay trên điện thoại. Chấm đỏ = quá hạn, chấm vàng = đến hạn hôm nay.</figcaption></figure>
+  <div class="box warn"><strong>Lưu ý</strong>Nhu cầu <b>lâu chưa cập nhật</b> (chấm xám) cần gọi lại để xác minh — thông tin cũ có thể không còn đúng.</div>
+</section>
+
+<!-- ================= B3 ================= -->
+<section class="part" id="b3">
+  <h2><span class="num">3</span>Nhập khách và nhu cầu mới</h2>
+  <p class="goal">Mục đích: mỗi khách có một hồ sơ, có người phụ trách (là bạn) và việc tiếp theo có hạn.</p>
+  <ol class="steps">
+    <li>Bấm <span class="btn">+ Thêm nhu cầu</span> (nút cố định ở góc dưới màn hình, hoặc ở trang Nhu cầu / Khách hàng).</li>
+    <li>Chọn loại: <b>Cần mua</b> hoặc <b>Cần bán</b>. Nhập <b>Tên khách *</b> và <b>Số điện thoại</b>. Nếu app báo <b>khách trùng số</b> thì chọn khách đã có, <b>không tạo thêm</b>.</li>
+    <li><b>Cần mua:</b> hãng/model/phiên bản, đời xe, ngân sách từ–đến, ODO tối đa, màu chấp nhận / không muốn. Đánh dấu <b>tiêu chí bắt buộc</b> (không được lệch khi gợi ý xe) và <b>có thể linh hoạt</b>.</li>
+    <li><b>Cần bán:</b> ghi thông tin xe khách <i>kể</i> (năm, ODO, màu, giá mong muốn, tình trạng, hồ sơ, dư nợ nếu có). Đây là thông tin <b>khách cung cấp</b>, chưa phải showroom đã kiểm tra.</li>
+    <li>Có thể dán <b>Tin nhắn gốc</b> từ Zalo vào ô riêng để đối chiếu sau này.</li>
+    <li>Điền <b>Việc tiếp theo</b> và <b>Hạn</b>, rồi bấm <span class="btn">Lưu nhu cầu</span>.</li>
+  </ol>
+  <figure class="shot"><div class="bar"><i></i><i></i><i></i><span>minhky-auto.vercel.app/nhu-cau/moi</span></div><div class="scr">
+    <div class="m-panel"><div class="m-h">Thông tin khách</div><div class="m-row">
+      <div class="m-f"><div class="m-l">Tên khách *</div><div class="m-in on">Nguyễn Văn An</div></div>
+      <div class="m-f"><div class="m-l">Số điện thoại</div><div class="m-in on">0912 345 678</div></div>
+      <div class="m-f"><div class="m-l">Khu vực</div><div class="m-in">Tân Bình</div></div></div></div>
+    <div class="m-panel"><div class="m-h"><span class="pill p">Cần mua</span></div><div class="m-row">
+      <div class="m-f"><div class="m-l">Hãng / Model</div><div class="m-in">Toyota · Vios</div></div>
+      <div class="m-f"><div class="m-l">Đời từ – đến</div><div class="m-in">2021 – 2023</div></div>
+      <div class="m-f"><div class="m-l">Ngân sách từ – đến</div><div class="m-in">450tr – 520tr</div></div>
+      <div class="m-f"><div class="m-l">ODO tối đa (km)</div><div class="m-in">50.000</div></div>
+      <div class="m-f"><div class="m-l">Màu chấp nhận</div><div class="m-in">Trắng, bạc</div></div>
+      <div class="m-f"><div class="m-l">Màu không muốn</div><div class="m-in">Đỏ</div></div></div>
+      <div class="m-l" style="margin-top:8px">Tiêu chí bắt buộc (không được lệch khi gợi ý xe)</div><div class="m-row"><span class="pill p">Hãng / model</span><span class="pill p">Ngân sách</span><span class="pill n">Màu (linh hoạt)</span></div></div>
+    <div class="m-panel"><div class="m-row"><div class="m-f" style="flex:2"><div class="m-l">Việc tiếp theo *</div><div class="m-in on">Gửi ảnh và giá 3 xe Vios đang có</div></div><div class="m-f"><div class="m-l">Hạn *</div><div class="m-in on">13/10/2026</div></div></div></div>
+    <span class="m-btn">Lưu nhu cầu</span>
+  </div><figcaption>Hình minh họa (dữ liệu mẫu) — Form nhu cầu mua. Ô viền xanh là ô đang nhập.</figcaption></figure>
+  <div class="box ex"><strong>Ví dụ</strong>Khách An gọi hỏi Vios đời 2021–2023, ngân sách 450–520 triệu, ODO dưới 50.000 km, thích màu trắng hoặc bạc, không lấy màu đỏ. Bạn nhập đúng như hình, đặt việc tiếp theo “Gửi ảnh và giá 3 xe Vios đang có” hạn 13/10.</div>
+  <div class="box rule"><strong>Quy tắc</strong>Nhu cầu đang xử lý <b>bắt buộc có Việc tiếp theo + Hạn</b> — thiếu thì app không cho lưu. Đây chính là cách app nhắc bạn.</div>
+</section>
+
+<!-- ================= B4 ================= -->
+<section class="part" id="b4">
+  <h2><span class="num">4</span>Chăm sóc khách hằng ngày</h2>
+  <p class="goal">Mục đích: mọi lần liên hệ đều có dấu vết, khách không bị bỏ quên.</p>
+  <ol class="steps">
+    <li>Mở nhu cầu của khách. Bấm <span class="btn">Gọi</span> (gọi ngay) hoặc <span class="btn ghost">Zalo</span>.</li>
+    <li>Cuộn xuống <b>Ghi nhật ký liên hệ</b>: chọn kênh (Gọi điện, Zalo, Gặp trực tiếp…), ghi nội dung ngắn, <b>cập nhật Việc tiếp theo và Hạn</b>.</li>
+    <li>Khi tiến triển, đổi <b>Trạng thái</b>: Mới → Đã xác minh → Đang tìm / đã giới thiệu xe → Hẹn xem / lái thử → Thương lượng → Đã cọc / đã mua.</li>
+    <li>Cần đồng nghiệp hỗ trợ: dùng <b>Chia sẻ để hỗ trợ</b> (họ chỉ được xem/ghi nhật ký theo quyền chia sẻ).</li>
+    <li>Khách không còn nhu cầu: chọn <b>Đã đóng</b> và <b>ghi lý do</b>. Tạm thời chưa mua: chọn <b>Tạm dừng</b> và ghi lý do.</li>
+  </ol>
+  <figure class="shot"><div class="bar"><i></i><i></i><i></i><span>minhky-auto.vercel.app/nhu-cau/…</span></div><div class="scr">
+    <div class="m-panel" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b style="font-size:1rem">Nguyễn Văn An</b> <span class="pill p">Cần mua</span> <span class="pill n">Đã xác minh</span><br><span style="color:var(--soft)">0912 345 678 · Tân Bình</span></div><div><span class="m-btn">Gọi 0912 345 678</span> <span class="m-btn g">Zalo</span> <span class="m-btn g">Sửa</span></div></div>
+    <div class="m-panel"><div class="m-h">Ghi nhật ký liên hệ</div><div class="m-row">
+      <div class="m-f"><div class="m-l">Kênh</div><div class="m-in on">Gọi điện</div></div>
+      <div class="m-f" style="flex:3"><div class="m-l">Nội dung</div><div class="m-in on">Đã gửi ảnh 3 xe; khách thích xe trắng, hẹn xem thứ Bảy</div></div></div>
+      <div class="m-row" style="margin-top:6px"><div class="m-f" style="flex:2"><div class="m-l">Việc tiếp theo</div><div class="m-in on">Dẫn khách xem xe Vios G trắng</div></div><div class="m-f"><div class="m-l">Hạn</div><div class="m-in on">14/10/2026</div></div><div class="m-f"><div class="m-l">Trạng thái</div><div class="m-in on">Hẹn xem / lái thử</div></div></div>
+      <div style="margin-top:8px"><span class="m-btn">Ghi nhật ký</span></div></div>
+  </div><figcaption>Hình minh họa (dữ liệu mẫu) — Trang chi tiết nhu cầu: nút Gọi/Zalo và ghi nhật ký liên hệ.</figcaption></figure>
+  <div class="box warn"><strong>Lưu ý</strong>Đổi người phụ trách và mở lại nhu cầu đã đóng là việc của <b>quản lý</b>. Cần đổi người phụ trách: nhờ quản lý.</div>
+</section>
+
+<!-- ================= B5 ================= -->
+<section class="part" id="b5">
+  <h2><span class="num">5</span>Tìm, lọc và lưu bộ lọc</h2>
+  <p class="goal">Mục đích: tìm đúng khách / đúng xe trong vài giây, không phải cuộn cả danh sách.</p>
+  <ol class="steps">
+    <li>Vào <b>Nhu cầu mua/bán</b>, <b>Khách hàng</b> hoặc <b>Kho xe</b>. Ô tìm kiếm nhận <b>tên, số điện thoại, model, ghi chú</b> (gõ không dấu cũng được).</li>
+    <li>Mở <b>Bộ lọc kết hợp</b>: chọn hãng, model, đời, màu, giá/ngân sách, trạng thái, hạn chăm sóc… rồi bấm <span class="btn">Áp dụng</span>. Các điều kiện được kết hợp với nhau.</li>
+    <li>Dùng thường xuyên? Bấm <b>Lưu bộ lọc</b> để gọi lại bằng một lần bấm. <span class="btn ghost">Xóa lọc</span> để về danh sách đầy đủ.</li>
+  </ol>
+  <div class="box ex"><strong>Ví dụ</strong>Muốn xem mọi khách cần mua Vios có ngân sách quanh 500 triệu và đã quá hạn: lọc <i>Cần mua</i> + <i>Toyota Vios</i> + ngân sách 500tr + hạn chăm sóc <i>Quá hạn</i>. Khách có ngân sách 450–520tr sẽ được tính là <b>khớp</b> (khoảng giá giao nhau), khách chưa ghi ngân sách <b>không</b> bị coi là khớp.</div>
+</section>
+
+<!-- ================= B6 ================= -->
+<section class="part" id="b6">
+  <h2><span class="num">6</span>Gợi ý xe phù hợp</h2>
+  <p class="goal">Mục đích: biết nên giới thiệu xe nào cho khách, và vì sao.</p>
+  <ol class="steps">
+    <li>Mở nhu cầu mua, xem khối <b>Gợi ý xe phù hợp</b>. App xếp xe thành 3 nhóm: <span class="pill g">Phù hợp</span> <span class="pill a">Gần phù hợp</span> <span class="pill n">Cần xác minh</span>.</li>
+    <li>Mỗi xe có phần <b>điểm khớp</b> và <b>điểm lệch</b> (ví dụ “giá 489 triệu nằm trong ngân sách”, “ODO 62.000 km vượt mức khách muốn”).</li>
+    <li>Phân biệt <b>xe sẵn bán</b>, <b>xe ký gửi</b> và <b>nguồn xe khách đang chào bán — chưa thu mua</b>. Nguồn xe chưa thu mua <b>không bao giờ</b> được coi là xe sẵn giao.</li>
+    <li>App chỉ <b>gợi ý</b>, không tự nhắn khách. Bạn chọn xe, liên hệ khách, rồi ghi nhật ký.</li>
+  </ol>
+  <figure class="shot"><div class="bar"><i></i><i></i><i></i><span>minhky-auto.vercel.app/nhu-cau/…</span></div><div class="scr">
+    <div class="m-panel"><div class="m-h">Gợi ý xe phù hợp</div>
+      <table class="mt"><tr><th>Xe</th><th>Giá chào</th><th>Mức</th><th>Điểm khớp / lệch</th></tr>
+      <tr><td><b>Vios G 2022</b> · trắng · 18.250 km<br><span class="pill p">Sẵn bán</span></td><td>489 tr</td><td><span class="pill g">Phù hợp</span></td><td>✔ hãng/model, ngân sách, ODO, màu</td></tr>
+      <tr><td><b>Vios E 2021</b> · bạc · 62.000 km<br><span class="pill p">Sẵn bán</span></td><td>455 tr</td><td><span class="pill a">Gần phù hợp</span></td><td>✔ ngân sách · ✘ ODO vượt 12.000 km</td></tr>
+      <tr><td><b>Vios G 2023</b> · đỏ<br><span class="pill n">Nguồn xe — chưa thu mua</span></td><td>—</td><td><span class="pill n">Cần xác minh</span></td><td>✘ màu khách không muốn · chưa có giá</td></tr></table></div>
+  </div><figcaption>Hình minh họa (dữ liệu mẫu) — Gợi ý xe cho khách An.</figcaption></figure>
+  <div class="box rule"><strong>Quy tắc</strong>Tiêu chí bạn đánh dấu <b>bắt buộc</b> không bao giờ bị bỏ qua. Xe lệch tiêu chí bắt buộc không xuất hiện ở nhóm “Phù hợp”.</div>
+</section>
+
+<!-- ================= B7 ================= -->
+<section class="part" id="b7">
+  <h2><span class="num">7</span>Giữ xe và đặt cọc</h2>
+  <p class="goal">Mục đích: giữ một chiếc xe cho đúng một khách, không ai khác chen vào.</p>
+  <ol class="steps">
+    <li>Vào <b>Kho xe</b>, mở xe cần giữ (xe phải <b>Đang bán</b>). Bấm <span class="btn ghost">+ Giữ xe / đặt cọc cho khách</span>.</li>
+    <li>Chọn <b>Nhu cầu mua của khách *</b> và <b>Loại *</b>:
+      <br>• <b>Giữ xe</b> (chưa cọc): bắt buộc nhập <b>Hạn giữ xe</b> — hết hạn app báo để nhả.
+      <br>• <b>Đặt cọc</b>: nhập <b>Tiền cọc thỏa thuận *</b> (và giá chốt dự kiến nếu có).</li>
+    <li>Bấm <span class="btn">Ghi giữ/cọc</span>. Xe chuyển trạng thái <b>Đang giữ</b> hoặc <b>Đã cọc</b>.</li>
+    <li>Sau này: <b>Gia hạn</b>, <b>Nhả</b> (khách đổi ý), hoặc <b>Chuyển thành đặt cọc</b>.</li>
+  </ol>
+  <figure class="shot"><div class="bar"><i></i><i></i><i></i><span>minhky-auto.vercel.app/kho-xe/…</span></div><div class="scr">
+    <div class="m-panel"><div class="m-h">Giữ xe / đặt cọc — Vios G 2022 <span class="pill g">Đang bán</span></div><div class="m-row">
+      <div class="m-f"><div class="m-l">Nhu cầu mua của khách *</div><div class="m-in on">Nguyễn Văn An — Toyota Vios</div></div>
+      <div class="m-f"><div class="m-l">Loại *</div><div class="m-in on">Đặt cọc</div></div>
+      <div class="m-f"><div class="m-l">Tiền cọc thỏa thuận *</div><div class="m-in on">20.000.000 đ</div></div>
+      <div class="m-f"><div class="m-l">Giá chốt dự kiến</div><div class="m-in">495.000.000 đ</div></div></div>
+      <div style="margin-top:8px"><span class="m-btn">Ghi giữ/cọc</span></div></div>
+  </div><figcaption>Hình minh họa (dữ liệu mẫu) — Đặt cọc cho khách An.</figcaption></figure>
+  <div class="box ex"><strong>Ví dụ</strong>Khách An đồng ý cọc 20 triệu cho Vios G trắng. Bạn ghi đặt cọc 20.000.000 đ. Xe lập tức hiện <i>Đã cọc</i>, nhân viên khác không giữ/cọc thêm được.</div>
+  <div class="box rule"><strong>Quy tắc</strong>Mỗi xe chỉ có <b>một</b> giữ/cọc hiệu lực. Hai người bấm cùng lúc thì chỉ một người thành công; người sau nhận thông báo “xe vừa được người khác giữ”.</div>
+  <div class="box warn"><strong>Lưu ý</strong>Bạn ghi <b>thỏa thuận</b> cọc; <b>tiền thật</b> do <b>kế toán</b> thu và lập phiếu thu. Hủy cọc là việc của quản lý.</div>
+</section>
+
+<!-- ================= B8 ================= -->
+<section class="part" id="b8">
+  <h2><span class="num">8</span>Báo giá</h2>
+  <p class="goal">Mục đích: có bản báo giá rõ ràng cho khách, lưu được lịch sử mỗi lần đổi giá.</p>
+  <ol class="steps">
+    <li>Mở xe, bấm <span class="btn ghost">+ Lập báo giá cho khách</span>.</li>
+    <li>Chọn <b>Nhu cầu mua của khách *</b>, nhập <b>Giá báo cho khách *</b>, <b>Hiệu lực đến *</b> (bắt buộc chọn ngày), <b>Ưu đãi / quà tặng</b>. Bấm <span class="btn">Lập báo giá</span>.</li>
+    <li>Khách đổi giá: bấm <b>Sửa giá / lập phiên bản mới</b> — bản cũ được giữ lại, không bị ghi đè.</li>
+    <li>Khách đồng ý: bấm <b>Khách chấp nhận bản …</b>. Khách từ chối: <b>Hủy báo giá</b>.</li>
+  </ol>
+  <figure class="shot"><div class="bar"><i></i><i></i><i></i><span>minhky-auto.vercel.app/kho-xe/…</span></div><div class="scr">
+    <div class="m-panel"><div class="m-h">Báo giá — Vios G 2022</div>
+      <table class="mt"><tr><th>Phiên bản</th><th>Giá báo</th><th>Hiệu lực đến</th><th>Trạng thái</th></tr>
+      <tr><td>Bản 1</td><td>499.000.000 đ</td><td>15/10/2026</td><td><span class="pill n">Đã thay bằng bản 2</span></td></tr>
+      <tr><td><b>Bản 2</b> · tặng phim cách nhiệt</td><td><b>495.000.000 đ</b></td><td>15/10/2026</td><td><span class="pill g">Đạt mức cho phép</span></td></tr></table>
+      <div style="margin-top:8px"><span class="m-btn">Khách chấp nhận bản 2</span> <span class="m-btn g">Sửa giá / lập phiên bản mới</span></div></div>
+  </div><figcaption>Hình minh họa (dữ liệu mẫu) — Hai phiên bản báo giá cho khách An.</figcaption></figure>
+  <div class="box ex"><strong>Ví dụ</strong>Báo 499 triệu, khách xin bớt. Bạn lập bản 2 giá 495 triệu kèm quà tặng phim cách nhiệt. Cả hai bản vẫn xem lại được.</div>
+  <div class="box warn"><strong>Giá thấp hơn mức cho phép?</strong>Báo giá hiện cờ <span class="pill a">Cần quản lý duyệt</span>. Bạn <b>không</b> thấy giá sàn; chờ quản lý bấm <i>Duyệt giá này</i> hoặc <i>Từ chối</i> rồi mới chốt với khách.</div>
+</section>
+
+<!-- ================= B9 ================= -->
+<section class="part" id="b9">
+  <h2><span class="num">9</span>Đơn bán</h2>
+  <p class="goal">Mục đích: ghi nhận xe đã bán, đúng giá ghi trên hợp đồng.</p>
+  <ol class="steps">
+    <li>Menu <b>Đơn bán</b> → <span class="btn">+ Lập đơn bán</span>.</li>
+    <li>Chọn <b>Nhu cầu mua của khách *</b>, thêm <b>Xe *</b>, nhập <b>Giá bán ghi trên hợp đồng *</b>. Nếu khách đã chấp nhận báo giá, chọn <b>Báo giá khách đã chấp nhận</b> để giá điền sẵn. Một đơn có thể nhiều xe (bấm thêm dòng).</li>
+    <li>Đơn mới là <b>nháp</b>, sửa được. Khi đã ký hợp đồng: nhập <b>Số hợp đồng bán *</b> và <b>Ngày ký hợp đồng *</b>, bấm <span class="btn">Xác nhận đã ký hợp đồng</span>.</li>
+    <li>Sau khi xác nhận, xe chuyển <b>Đã bán</b>. Kế toán sẽ thu tiền theo đơn; bạn theo dõi trạng thái đơn.</li>
+  </ol>
+  <figure class="shot"><div class="bar"><i></i><i></i><i></i><span>minhky-auto.vercel.app/don-ban/…</span></div><div class="scr">
+    <div class="m-panel"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div><b style="font-size:1rem">Đơn bán DB00014</b> <span class="pill a">Nháp</span></div><span style="color:var(--soft)">Khách: Nguyễn Văn An</span></div>
+      <table class="mt" style="margin-top:6px"><tr><th>Xe</th><th>Giá bán ghi trên hợp đồng</th></tr><tr><td>XE00031 Toyota Vios G 2022</td><td><b>495.000.000 đ</b></td></tr></table></div>
+    <div class="m-panel"><div class="m-h">Xác nhận đã ký hợp đồng</div><div class="m-row"><div class="m-f"><div class="m-l">Số hợp đồng bán *</div><div class="m-in on">HĐB-2610-014</div></div><div class="m-f"><div class="m-l">Ngày ký hợp đồng *</div><div class="m-in on">14/10/2026</div></div></div><div style="margin-top:8px"><span class="m-btn">Xác nhận đã ký hợp đồng</span></div></div>
+  </div><figcaption>Hình minh họa (dữ liệu mẫu) — Đơn bán nháp và bước xác nhận.</figcaption></figure>
+  <div class="box rule"><strong>Quy tắc</strong>Một xe chỉ nằm trong <b>một</b> đơn bán hiệu lực. “Giá bán” là giá ghi trên hợp đồng — <b>chưa phải tiền đã thu</b>.</div>
+  <div class="box warn"><strong>Có dòng giá thấp hơn mức cho phép?</strong>Chỉ <b>quản lý</b> xác nhận được, kèm lý do. Hủy đơn đã xác nhận cũng là việc của quản lý.</div>
+</section>
+
+<!-- ================= B10 ================= -->
+<section class="part" id="b10">
+  <h2><span class="num">10</span>Bàn giao xe</h2>
+  <p class="goal">Mục đích: giao xe đủ điều kiện, có biên bản, không sót hồ sơ.</p>
+  <ol class="steps">
+    <li>Mở đơn bán đã xác nhận, mục <b>Bàn giao xe</b>: chọn ngày hẹn rồi bấm <span class="btn">Lập bàn giao</span>.</li>
+    <li>Trong <b>Checklist bàn giao</b>, đánh dấu từng mục (giấy tờ, chìa khóa, phụ kiện…) là <i>Đạt / đã có</i>, <i>Không áp dụng</i> hoặc <i>Thiếu</i> (phải ghi lý do). Có bản gốc thì chọn <b>người giữ</b>.</li>
+    <li>Xem khối <b>Điều kiện giao xe</b>: ✔ là đạt, ✘ là còn thiếu (đã thu đủ tiền, xe chuẩn bị xong, hồ sơ xe đủ, checklist đạt).</li>
+    <li>Đủ điều kiện: nhập <b>Ngày giao</b>, <b>Người nhận xe</b>, <b>Quan hệ</b> (chính khách / người nhận thay), <b>ODO lúc giao</b>, <b>Số chìa khóa</b>, bấm <span class="btn">Xác nhận đã giao xe</span>. Có thể <b>in biên bản</b>.</li>
+  </ol>
+  <figure class="shot"><div class="bar"><i></i><i></i><i></i><span>minhky-auto.vercel.app/ban-giao/…</span></div><div class="scr two">
+    <div class="m-panel" style="margin:0"><div class="m-h">Điều kiện giao xe</div>
+      <div>✔ Đơn bán đã ký hợp đồng</div><div>✔ Đã thanh toán đủ</div><div>✔ Xe đã chuẩn bị xong</div><div style="color:var(--red)">✘ Hồ sơ xe chưa đủ</div><div>◐ Checklist — <span style="color:#8a6100">đã được quản lý phê duyệt ngoại lệ</span></div>
+      <div style="margin-top:8px;font-weight:700;color:var(--red)">Chưa đủ điều kiện giao xe.</div></div>
+    <div class="m-panel" style="margin:0"><div class="m-h">Giao xe</div><div class="m-row"><div class="m-f"><div class="m-l">Người nhận xe *</div><div class="m-in on">Nguyễn Văn An</div></div><div class="m-f"><div class="m-l">Quan hệ *</div><div class="m-in on">Chính khách</div></div></div><div class="m-row" style="margin-top:6px"><div class="m-f"><div class="m-l">ODO lúc giao *</div><div class="m-in on">18.250 km</div></div><div class="m-f"><div class="m-l">Số chìa khóa *</div><div class="m-in on">2</div></div></div><div style="margin-top:8px"><span class="m-btn">Xác nhận đã giao xe</span></div></div>
+  </div><figcaption>Hình minh họa (dữ liệu mẫu) — Điều kiện giao xe và biểu mẫu giao xe.</figcaption></figure>
+  <div class="box warn"><strong>Chưa đủ điều kiện nhưng cần giao?</strong>Nhờ <b>quản lý</b> bấm <i>Phê duyệt ngoại lệ</i> (có lý do). Bạn không tự miễn điều kiện được; đơn chưa ký hợp đồng thì không có ngoại lệ.</div>
+  <div class="box ex"><strong>Sau khi giao xe</strong>Xe chuyển <i>Đã bàn giao</i> và app <b>tự tạo 3 phiếu nhắc chăm sóc</b> sau 7, 30 và 90 ngày giao cho bạn (xem bước 11). Bàn giao đã giao xong không sửa/hủy được.</div>
+</section>
+
+<!-- ================= B11 ================= -->
+<section class="part" id="b11">
+  <h2><span class="num">11</span>Hậu mãi sau bán</h2>
+  <p class="goal">Mục đích: chăm sóc khách sau khi giao xe và xử lý phản ánh có người chịu trách nhiệm, có hạn.</p>
+  <ol class="steps">
+    <li>Menu <b>Hậu mãi</b> có các tab: Đang xử lý, <span class="pill r">Quá hạn</span>, Đến hạn hôm nay, Đã xử lý xong. Bấm <b>Của tôi</b> để chỉ xem phiếu bạn phụ trách.</li>
+    <li><b>Phiếu nhắc chăm sóc tự động:</b> sau khi giao xe, đến mốc 7 / 30 / 90 ngày bạn sẽ thấy phiếu “Chăm sóc sau giao xe …”. Gọi khách hỏi thăm, ghi nhật ký rồi bấm <b>Đã xử lý xong</b> kèm kết quả.</li>
+    <li><b>Khách phản ánh / cần bảo hành:</b> mở đơn bán của khách → mục <b>Hậu mãi</b> → chọn loại (Phản ánh, Yêu cầu bảo hành, Yêu cầu dịch vụ), ghi nội dung, <b>số km hiện tại</b>, gắn <b>cam kết/bảo hành</b> (nếu có), <b>việc tiếp theo + hạn</b> → <span class="btn">Mở phiếu</span>.</li>
+    <li>Trong phiếu: ghi nhật ký liên hệ, cập nhật việc tiếp theo. Xong thì <b>Đã xử lý xong</b> (bắt buộc ghi kết quả). Mở nhầm: <b>Hủy phiếu</b> (ghi lý do).</li>
+  </ol>
+  <figure class="shot"><div class="bar"><i></i><i></i><i></i><span>minhky-auto.vercel.app/hau-mai</span></div><div class="scr">
+    <div class="tb"><span class="m-btn">Đang xử lý</span><span class="m-btn g">Quá hạn</span><span class="m-btn g">Đến hạn hôm nay</span><span class="m-btn g">Đã xử lý xong</span><span class="m-btn g">Của tôi</span></div>
+    <div class="m-panel"><table class="mt"><tr><th>Phiếu</th><th>Nội dung</th><th>Xe</th><th>Việc tiếp theo</th><th>Hạn</th></tr>
+      <tr><td><b>HM00021</b><br><span style="color:var(--soft)">Nhắc chăm sóc</span></td><td>Chăm sóc sau giao xe 7 ngày</td><td>Vios G 2022</td><td>Gọi hỏi thăm khách</td><td><b style="color:var(--red)">21/10 · quá hạn</b></td></tr>
+      <tr><td><b>HM00019</b><br><span style="color:var(--soft)">Phản ánh</span></td><td>Khách báo tiếng ồn gầm</td><td>CX-5 2020</td><td>Hẹn lịch kiểm tra tại xưởng</td><td>14/10</td></tr></table></div>
+  </div><figcaption>Hình minh họa (dữ liệu mẫu) — Danh sách phiếu hậu mãi.</figcaption></figure>
+  <div class="box ex"><strong>Ví dụ</strong>Khách An báo tiếng ồn gầm khi xe chạy 12.500 km, đang trong bảo hành thân vỏ 12 tháng / 100.000 km. Bạn mở phiếu “Phản ánh”, gắn bảo hành đó, nhập 12.500 km, việc tiếp theo “Hẹn khách đưa xe vào xưởng” hạn 14/10. App gợi ý <span class="pill g">trong bảo hành</span>.</div>
+  <div class="box warn"><strong>Lưu ý</strong>Gợi ý “trong / ngoài bảo hành” chỉ là <b>tham khảo</b> theo ngày và số km; <b>quản lý quyết định</b>. Thiếu số km thì app ghi “chưa rõ, cần xác minh”. Chi phí sửa chữa do kế toán/quản lý ghi, bạn không thấy.</div>
+</section>
+
+<!-- ================= B12 ================= -->
+<section class="part" id="b12">
+  <h2><span class="num">12</span>Hoa hồng của bạn</h2>
+  <p class="goal">Mục đích: biết khoản hoa hồng của từng xe bạn bán, đã duyệt và đã chi chưa.</p>
+  <ol class="steps">
+    <li>Menu <b>Hoa hồng</b>: danh sách khoản <b>của bạn</b>, mỗi xe bán ra một khoản. Khoản tự xuất hiện khi đơn bán được xác nhận ký hợp đồng.</li>
+    <li>Số tiền tính <b>theo từng đầu xe</b>: <b>xe mới</b> theo hãng/model, <b>xe cũ</b> theo đúng số VIN, theo quy tắc do quản lý đặt tại ngày ký hợp đồng.</li>
+    <li>Các trạng thái: <span class="pill n">Chưa có quy tắc</span> → <span class="pill a">Đã tính — chờ duyệt</span> → <span class="pill g">Đã duyệt</span>. Bấm vào khoản để xem quy tắc đã áp, <b>đã chi / còn lại</b> và từng lần chi.</li>
+  </ol>
+  <figure class="shot"><div class="bar"><i></i><i></i><i></i><span>minhky-auto.vercel.app/hoa-hong</span></div><div class="scr">
+    <div class="m-panel"><table class="mt"><tr><th>Mã</th><th>Ngày ký</th><th>Xe</th><th>Số tiền</th><th>Đã chi</th><th>Trạng thái</th></tr>
+      <tr><td><b>HH00012</b></td><td>14/10/2026</td><td>Vios G 2022 <span style="color:var(--soft)">· xe mới</span></td><td>5.000.000 đ</td><td>5.000.000 đ</td><td><span class="pill g">Đã duyệt</span></td></tr>
+      <tr><td><b>HH00013</b></td><td>16/10/2026</td><td>CX-5 2020 <span style="color:var(--soft)">· xe cũ</span></td><td>3.000.000 đ</td><td>—</td><td><span class="pill a">Đã tính — chờ duyệt</span></td></tr>
+      <tr><td><b>HH00014</b></td><td>17/10/2026</td><td>Accent 2023 <span style="color:var(--soft)">· xe mới</span></td><td><span style="color:var(--soft)">Chưa có quy tắc</span></td><td>—</td><td><span class="pill n">Chưa có quy tắc</span></td></tr></table></div>
+  </div><figcaption>Hình minh họa (dữ liệu mẫu) — Hoa hồng của Sales; số tiền chỉ để minh họa, mức thật do quản lý đặt.</figcaption></figure>
+  <div class="box warn"><strong>Lưu ý</strong>“Chưa có quy tắc” nghĩa là showroom <b>chưa đặt mức</b> cho xe đó — <b>không phải 0 đồng</b>. Báo quản lý để bổ sung quy tắc; khoản sẽ được tính lại. Bạn chỉ xem được hoa hồng của mình. Duyệt do quản lý, chi do kế toán.</div>
+</section>
+
+<!-- ================= LỖI ================= -->
+<section class="part" id="loi">
+  <h2><span class="num">!</span>Thông báo thường gặp và cách xử lý</h2>
+  <div class="scroll"><table class="t">
+    <tr><th>App báo</th><th>Nghĩa là</th><th>Bạn làm</th></tr>
+    <tr><td>Nhu cầu đang xử lý phải có việc tiếp theo và hạn</td><td>Thiếu “Việc tiếp theo” hoặc “Hạn”</td><td>Điền hai ô đó rồi lưu lại</td></tr>
+    <tr><td>Khách trùng số điện thoại</td><td>Khách đã có hồ sơ</td><td>Chọn khách đã có, không tạo mới</td></tr>
+    <tr><td>Xe vừa được người khác giữ hoặc đặt cọc</td><td>Có người giữ/cọc xe trước bạn vài giây</td><td>Chọn xe khác hoặc hỏi người đang giữ</td></tr>
+    <tr><td>Giữ xe phải có hạn giữ / đặt cọc phải có số tiền cọc</td><td>Thiếu hạn hoặc tiền cọc</td><td>Nhập đủ rồi ghi lại</td></tr>
+    <tr><td>Báo giá “Cần quản lý duyệt”</td><td>Giá thấp hơn mức cho phép</td><td>Chờ quản lý duyệt/từ chối, chưa chốt với khách</td></tr>
+    <tr><td>Xe này đã nằm trong một đơn bán khác</td><td>Xe đã có đơn bán hiệu lực</td><td>Kiểm tra đơn cũ; muốn đổi thì nhờ quản lý hủy đơn cũ</td></tr>
+    <tr><td>Chưa đủ điều kiện giao xe</td><td>Thiếu thanh toán, chuẩn bị xe, hồ sơ hoặc checklist</td><td>Xem khối “Điều kiện giao xe”, bổ sung hoặc nhờ quản lý phê duyệt ngoại lệ</td></tr>
+    <tr><td>… vừa được người khác cập nhật. Tải lại trang</td><td>Có người sửa cùng lúc</td><td>Tải lại trang, kiểm tra rồi làm lại</td></tr>
+    <tr><td>Anh/chị không có quyền…</td><td>Việc này dành cho vai trò khác</td><td>Nhờ quản lý/kế toán</td></tr>
+  </table></div>
+</section>
+
+<!-- ================= HỎI NHANH ================= -->
+<section class="part" id="hoi">
+  <h2><span class="num">?</span>Hỏi nhanh</h2>
+  <p><b>Bấm “Lưu” hai lần có tạo trùng không?</b><br>Không. Mỗi lần nhập có mã riêng, bấm lặp hoặc mạng chập chờn vẫn chỉ ghi một bản.</p>
+  <p><b>Nhập sai thì sửa thế nào?</b><br>Nhu cầu, đơn nháp: bấm <i>Sửa</i>. Giữ xe, báo giá: lập phiên bản mới. Các chứng từ đã ghi (cọc, hợp đồng đã xác nhận, bàn giao đã giao) <b>không xóa</b>: nhờ quản lý hủy/đảo có lý do để còn lịch sử.</p>
+  <p><b>Khách nhắn Zalo thì lưu ở đâu?</b><br>App không đọc nhóm Zalo. Hãy dán nội dung vào ô <i>Tin nhắn gốc</i> hoặc ghi vào nhật ký liên hệ.</p>
+  <p><b>Tôi muốn xem giá vốn / lợi nhuận của xe?</b><br>Sales không có quyền xem. Hỏi quản lý.</p>
+  <p><b>Quên mật khẩu, tài khoản bị khóa?</b><br>Liên hệ quản lý hoặc quản trị để cấp lại.</p>
+  <p><b>Gặp lỗi hoặc chỗ khó dùng?</b><br>Chụp màn hình, ghi rõ bạn đang ở trang nào, gửi quản lý để chuyển cho bộ phận kỹ thuật.</p>
+</section>
+
+<footer>
+  Tài liệu hướng dẫn nội bộ — Minh Kỳ Auto · dành cho nhân viên Sales · cập nhật 12/10/2026.<br>
+  Các hình là <b>hình minh họa</b> dựng lại giao diện với dữ liệu mẫu (tên khách, xe, số tiền chỉ để làm ví dụ), không phải dữ liệu thật. Giao diện thật có thể khác đôi chút về màu và bố cục.
+</footer>
+</main>
+</body>
+</html>
