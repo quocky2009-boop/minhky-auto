@@ -31,7 +31,13 @@ export async function inviteUser(_prev: ActionState, fd: FormData): Promise<Acti
   const admin = createAdminClient();
   const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "";
   const { data, error } = await admin.auth.admin.inviteUserByEmail(email, origin ? { redirectTo: `${origin}/doi-mat-khau` } : undefined);
-  if (error || !data.user) return { ok: false, message: error?.message?.includes("already") ? "Email này đã có tài khoản." : "Không gửi được lời mời. Kiểm tra cấu hình email của Supabase." };
+  if (error || !data.user) {
+    const code = (error as { code?: string } | null)?.code;
+    if (error?.message?.includes("already") || code === "email_exists") return { ok: false, message: "Email này đã có tài khoản." };
+    if (code === "over_email_send_rate_limit" || error?.status === 429)
+      return { ok: false, message: "Supabase đang giới hạn số email gửi mỗi giờ (dịch vụ email mặc định rất thấp). Chờ khoảng 1 giờ rồi thử lại, hoặc cấu hình SMTP riêng trong Supabase (xem docs/DEPLOYMENT.md)." };
+    return { ok: false, message: `Không gửi được lời mời${code ? ` (mã ${code})` : ""}. Kiểm tra cấu hình email của Supabase.` };
+  }
   const p = await admin.from("profiles").upsert({ id: data.user.id, full_name: name, is_active: true });
   if (p.error) return { ok: false, message: friendlyError(p.error) };
   const r = await admin.from("user_roles").upsert(roles.map((role) => ({ user_id: data.user!.id, role })), { ignoreDuplicates: true });

@@ -66,3 +66,7 @@ Biến môi trường (mẫu trong `.env.example`):
 - Đã rà mã và toàn bộ lịch sử commit (01/10/2026): không có khóa bí mật, mật khẩu hay chuỗi kết nối. Chỉ có `.env.example` (giá trị mẫu).
 - Công khai làm lộ cấu trúc dữ liệu và quy tắc nghiệp vụ. Nếu muốn kín, chuyển repo về Private (Vercel vẫn deploy được repo private).
 - **Tuyệt đối không commit** `.env*`, `SUPABASE_SECRET_KEY`, bản dump database hay tệp dữ liệu khách. `.gitignore` đã chặn `.env*` (trừ `.env.example`).
+
+## Email mời nhân viên bị giới hạn (Supabase)
+
+Dịch vụ email mặc định của Supabase chỉ cho gửi rất ít email mỗi giờ (khoảng 2). Mời nhiều nhân viên liên tiếp sẽ báo lỗi dù khóa `SUPABASE_SECRET_KEY` đúng; tài khoản chưa được tạo thì mời lại được sau khi hết giới hạn. Cách xử lý lâu dài: Supabase → Authentication → Emails → SMTP Settings, bật SMTP riêng (nhà cung cấp email của showroom), rồi tăng hạn mức email trong Authentication → Rate Limits. Không ghi thông tin đăng nhập SMTP vào git.
