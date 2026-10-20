@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /includes/
+Disallow: /install.php
+
+Sitemap: https://cuuhotuyenquang.vn/sitemap.xml
