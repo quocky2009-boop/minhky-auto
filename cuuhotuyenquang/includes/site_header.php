@@ -44,7 +44,9 @@ if ($ogImage !== '' && str_starts_with($ogImage, '/')) {
 <header class="site-header">
   <div class="wrap bar">
     <a class="brand" href="<?= e(url('/')) ?>" aria-label="<?= e($brand) ?>">
-      <span class="brand-mark" aria-hidden="true">SOS</span>
+      <?php $logo = trim(setting('logo')); if ($logo !== '' && is_safe_url($logo)): ?>
+        <img class="brand-logo" src="<?= e($logo) ?>" alt="" height="40">
+      <?php else: ?><span class="brand-mark" aria-hidden="true">SOS</span><?php endif; ?>
       <span class="brand-text"><?= e($brand) ?></span>
     </a>
     <nav class="nav" aria-label="Điều hướng chính">

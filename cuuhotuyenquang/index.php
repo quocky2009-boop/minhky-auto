@@ -62,8 +62,9 @@ require __DIR__ . '/includes/site_header.php';
   <div class="wrap">
     <h2><?= e(setting('services_title')) ?></h2>
     <div class="cards">
-      <?php foreach (text_lines(setting('services')) as $i => $line): [$t, $d] = split_pair($line); ?>
-        <article class="card">
+      <?php foreach (text_lines(setting('services')) as $i => $line): [$t, $d, $img] = split_parts($line, 3); ?>
+        <article class="card svc">
+          <?php if ($img !== '' && is_safe_url($img)): ?><img class="svc-img" src="<?= e($img) ?>" alt="<?= e($t) ?>" loading="lazy"><?php endif; ?>
           <span class="num"><?= $i + 1 ?></span>
           <h3><?= e($t) ?></h3>
           <p><?= e($d) ?></p>
@@ -79,6 +80,21 @@ require __DIR__ . '/includes/site_header.php';
     <a class="btn btn-light btn-lg" href="<?= e(phone_href($hotline)) ?>" data-call>📞 <?= e($hotline) ?></a>
   </div>
 </section>
+
+<?php $gallery = array_filter(array_map(static fn($l) => split_parts($l, 2), text_lines(setting('gallery'))), static fn($g) => is_safe_url($g[0])); ?>
+<?php if ($gallery): ?>
+<section class="sec" id="hinh-anh">
+  <div class="wrap">
+    <h2><?= e(setting('gallery_title')) ?></h2>
+    <div class="gallery">
+      <?php foreach ($gallery as [$src, $cap]): ?>
+        <figure><a href="<?= e($src) ?>" target="_blank" rel="noopener"><img src="<?= e($src) ?>" alt="<?= e($cap !== '' ? $cap : setting('brand_name')) ?>" loading="lazy"></a>
+          <?php if ($cap !== ''): ?><figcaption><?= e($cap) ?></figcaption><?php endif; ?></figure>
+      <?php endforeach; ?>
+    </div>
+  </div>
+</section>
+<?php endif; ?>
 
 <section class="sec" id="quy-trinh">
   <div class="wrap">

@@ -13,6 +13,7 @@ function settings_def(): array
     return [
         'Thông tin liên hệ' => [
             'brand_name' => ['text', 'Tên thương hiệu', 'Cứu hộ ô tô Gara Minh Kỳ'],
+            'logo' => ['image', 'Logo (tùy chọn, ảnh vuông/ngang nền trong suốt)', ''],
             'hotline' => ['text', 'Hotline cứu hộ (số hiển thị và gọi)', PLACEHOLDER_HOTLINE],
             'hotline2' => ['text', 'Hotline phụ (không bắt buộc)', ''],
             'zalo' => ['text', 'Số Zalo (để trống = dùng số hotline)', ''],
@@ -29,7 +30,11 @@ function settings_def(): array
         ],
         'Dịch vụ' => [
             'services_title' => ['text', 'Tiêu đề mục dịch vụ', 'Dịch vụ cứu hộ ô tô'],
-            'services' => ['lines', 'Danh sách dịch vụ — mỗi dòng "Tên | Mô tả"', "Sửa chữa lưu động | Chẩn đoán và xử lý sự cố nhỏ ngay tại hiện trường\nKéo xe – cẩu xe | Đưa xe hỏng, xe tai nạn về gara an toàn\nCâu bình – kích điện | Xe hết điện, không nổ được máy\nVá lốp – thay lốp dự phòng | Xử lý nổ lốp, xì lốp trên đường\nTiếp nhiên liệu khẩn cấp | Hỗ trợ khi xe hết xăng, hết dầu\nXe sa lầy – xuống mương | Hỗ trợ kéo xe bị kẹt, trượt khỏi mặt đường"],
+            'services' => ['lines', 'Danh sách dịch vụ — mỗi dòng "Tên | Mô tả | Ảnh (tùy chọn)". Đặt con trỏ vào dòng rồi bấm «Tải ảnh cho dòng này»', "Sửa chữa lưu động | Chẩn đoán và xử lý sự cố nhỏ ngay tại hiện trường\nKéo xe – cẩu xe | Đưa xe hỏng, xe tai nạn về gara an toàn\nCâu bình – kích điện | Xe hết điện, không nổ được máy\nVá lốp – thay lốp dự phòng | Xử lý nổ lốp, xì lốp trên đường\nTiếp nhiên liệu khẩn cấp | Hỗ trợ khi xe hết xăng, hết dầu\nXe sa lầy – xuống mương | Hỗ trợ kéo xe bị kẹt, trượt khỏi mặt đường", 'line'],
+        ],
+        'Hình ảnh thực tế' => [
+            'gallery_title' => ['text', 'Tiêu đề mục ảnh', 'Hình ảnh cứu hộ thực tế'],
+            'gallery' => ['lines', 'Thư viện ảnh — mỗi dòng "Đường dẫn ảnh | Chú thích". Bấm «Tải ảnh lên và thêm» để thêm ảnh (chọn được nhiều ảnh). Để trống = ẩn mục này', '', 'append'],
         ],
         'Quy trình' => [
             'steps' => ['lines', 'Các bước — mỗi dòng "Bước | Mô tả"', "Gọi hotline | Cho biết vị trí và tình trạng xe\nXác nhận & báo giá | Điều phối viên báo phương án và chi phí dự kiến\nXuất phát | Kỹ thuật viên di chuyển đến hiện trường\nXử lý & bàn giao | Sửa tại chỗ hoặc kéo xe về gara"],

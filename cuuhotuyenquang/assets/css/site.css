@@ -137,3 +137,11 @@ h3{font-size:1.15rem}
 
 .bar .btn-sm{white-space:nowrap}
 .brand-text{font-size:.92rem}
+
+.brand-logo{height:40px;width:auto;max-width:120px;object-fit:contain}
+.svc{padding-top:0;overflow:hidden}
+.svc-img{display:block;width:calc(100% + 40px);margin:0 -20px 14px;aspect-ratio:16/10;object-fit:cover}
+.gallery{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.gallery figure{margin:0;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:#fff}
+.gallery img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
+.gallery figcaption{padding:8px 12px;font-size:.9rem;color:var(--muted)}

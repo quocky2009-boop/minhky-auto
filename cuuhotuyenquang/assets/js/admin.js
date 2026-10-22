@@ -29,6 +29,50 @@
     });
   });
 
+  function pickMany(done) {
+    var input = document.createElement('input');
+    input.type = 'file'; input.multiple = true;
+    input.accept = 'image/jpeg,image/png,image/webp';
+    input.onchange = function () {
+      var files = Array.prototype.slice.call(input.files), urls = [];
+      (function next() {
+        if (!files.length) { done(urls); return; }
+        var fd = new FormData(); fd.append('file', files.shift()); fd.append('_csrf', csrf);
+        fetch('upload.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+          .then(function (res) { if (res.ok) urls.push(res.j.url); else alert(res.j.error || 'Tải ảnh thất bại.'); next(); })
+          .catch(function () { alert('Không kết nối được máy chủ.'); next(); });
+      })();
+    };
+    input.click();
+  }
+  // Thư viện ảnh: thêm mỗi ảnh thành một dòng "url | "
+  document.querySelectorAll('[data-gallery]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var t = document.querySelector('[name="' + btn.dataset.gallery + '"]');
+      pickMany(function (urls) {
+        var add = urls.map(function (u) { return u + ' | '; }).join('\n');
+        if (add) t.value = (t.value.trim() ? t.value.replace(/\s+$/, '') + '\n' : '') + add;
+      });
+    });
+  });
+  // Dịch vụ: gắn ảnh vào dòng đang chứa con trỏ ("Tên | Mô tả | ảnh")
+  document.querySelectorAll('[data-lineimg]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var t = document.querySelector('[name="' + btn.dataset.lineimg + '"]');
+      var pos = t.selectionStart, v = t.value;
+      var start = v.lastIndexOf('\n', pos - 1) + 1, end = v.indexOf('\n', pos); if (end < 0) end = v.length;
+      var line = v.slice(start, end);
+      if (!line.trim()) { alert('Hãy đặt con trỏ vào dòng dịch vụ muốn gắn ảnh.'); return; }
+      pickAndUpload(function (url) {
+        var parts = line.split('|').map(function (s) { return s.trim(); });
+        while (parts.length < 2) parts.push('');
+        parts[2] = url;
+        t.value = v.slice(0, start) + parts.slice(0, 3).join(' | ') + v.slice(end);
+      });
+    });
+  });
+
   var ta = document.getElementById('f-content');
   function insertAtCursor(text, wrap) {
     var s = ta.selectionStart, e = ta.selectionEnd, v = ta.value;

@@ -92,6 +92,13 @@ function split_pair(string $line): array
     return [$parts[0], $parts[1] ?? ''];
 }
 
+/** Dòng "A | B | C" -> mảng đúng $n phần (thiếu thì để rỗng). */
+function split_parts(string $line, int $n): array
+{
+    $parts = array_map('trim', explode('|', $line, $n));
+    return array_pad($parts, $n, '');
+}
+
 function fmt_date(?string $ts, bool $withTime = false): string
 {
     if (!$ts) {

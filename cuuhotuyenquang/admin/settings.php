@@ -28,6 +28,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($type === 'image' && $val !== '' && !is_safe_url($val)) {
                 $errors[] = "«{$label}» phải là đường dẫn ảnh hợp lệ.";
             }
+            if ($key === 'gallery' || $key === 'services') {
+                $idx = $key === 'gallery' ? 0 : 2;
+                foreach (text_lines($val) as $ln) {
+                    $img = split_parts($ln, 3)[$idx];
+                    if ($img !== '' && !is_safe_url($img)) {
+                        $errors[] = "Ảnh «{$img}» ở mục {$key} không hợp lệ (phải bắt đầu bằng / hoặc https://).";
+                    }
+                }
+            }
             if ($key === 'hotline' && !preg_match('/^[0-9 .+\-()]{8,20}$/', $val)) {
                 $errors[] = 'Hotline chỉ gồm số, dấu cách và + - ( ). (8–20 ký tự).';
             }
@@ -63,12 +72,14 @@ admin_head('Nội dung landing page', $user);
   <?= csrf_field() ?>
   <?php foreach ($def as $group => $fields): ?>
     <fieldset><legend><?= e($group) ?></legend>
-      <?php foreach ($fields as $key => [$type, $label]): $val = setting($key); ?>
+      <?php foreach ($fields as $key => $fdef): [$type, $label] = $fdef; $mode = $fdef[3] ?? ''; $val = setting($key); ?>
         <label><?= e($label) ?>
           <?php if ($type === 'textarea'): ?>
             <textarea name="<?= e($key) ?>" rows="3"><?= e($val) ?></textarea>
           <?php elseif ($type === 'lines'): ?>
             <textarea name="<?= e($key) ?>" rows="<?= max(4, count(text_lines($val)) + 1) ?>"><?= e($val) ?></textarea>
+            <?php if ($mode === 'append'): ?><span><button type="button" class="btn-sec" data-gallery="<?= e($key) ?>">Tải ảnh lên và thêm</button></span>
+            <?php elseif ($mode === 'line'): ?><span><button type="button" class="btn-sec" data-lineimg="<?= e($key) ?>">Tải ảnh cho dòng này</button></span><?php endif; ?>
           <?php elseif ($type === 'image'): ?>
             <span class="row">
               <input name="<?= e($key) ?>" value="<?= e($val) ?>" placeholder="/uploads/...">
