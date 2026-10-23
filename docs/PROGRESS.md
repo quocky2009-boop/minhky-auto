@@ -15,7 +15,7 @@ Cập nhật: 08/10/2026 · Chặng hiện tại: **chặng 6 xong về mã + te
 
 Theo §12, một tính năng chỉ "hoàn thành" khi chạy thật UI → Auth → database. Phần database/quyền/báo cáo đã được kiểm bằng test database thật (171/171) và áp lên Supabase; **phần giao diện với tài khoản thật chưa được nghiệm thu đầu-cuối** (cần Chủ tịch, xem `docs/ACCEPTANCE.md`).
 
-**Tài liệu người dùng:** `docs/huong-dan-sales/huong-dan-sales.html` (+ `.pdf`) — hướng dẫn cho Sales (12/10/2026): luồng tổng thể + 12 bước chi tiết, hình là mô phỏng giao diện với dữ liệu mẫu (đã kiểm tra hiển thị 375 px và 1280 px, không tràn ngang). Chưa thay bằng ảnh chụp thật; nội dung chưa được Chủ tịch/Sales đọc duyệt.
+**Tài liệu người dùng:** `docs/huong-dan-sales/huong-dan-sales.html` (+ `.pdf`) — hướng dẫn cho Sales (12/10/2026): luồng tổng thể + 12 bước chi tiết, hình là mô phỏng giao diện với dữ liệu mẫu (đã kiểm tra hiển thị 375 px và 1280 px, không tràn ngang). Chưa thay bằng ảnh chụp thật; nội dung chưa được Chủ tịch/Sales đọc duyệt. Đã tích hợp vào menu app (mục "Hướng dẫn sử dụng", `/huong-dan`, D99) — chưa kiểm tra bằng tài khoản Sales thật.
 
 ## Chặng 1 — đã có
 

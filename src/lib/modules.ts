@@ -37,6 +37,7 @@ export const MODULES: ModuleDef[] = [
   { key: "commission", label: "Hoa hồng", group: "Giao dịch", href: "/hoa-hong", roles: ["admin", "manager", "accountant", "sales"] },
   { key: "settlement", label: "Quyết toán", group: "Tài chính", href: "/quyet-toan", roles: ["admin", "manager", "accountant"] },
   { key: "reports", label: "Báo cáo", group: "Tài chính", href: "/bao-cao", roles: ["admin", "manager", "accountant"] },
+  { key: "guide", label: "Hướng dẫn sử dụng", group: "Trợ giúp", href: "/huong-dan", roles: SELLERS },
   { key: "users", label: "Người dùng & vai trò", group: "Cài đặt", href: "/cai-dat/nguoi-dung", roles: ["admin"] },
 ];
 
