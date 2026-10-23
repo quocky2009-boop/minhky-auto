@@ -4,11 +4,10 @@ DirectoryIndex index.php
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
-# Tên miền phụ cuuhotuyenquang.com (và www) -> chuyển hướng 301 về tên miền chính .vn
-RewriteCond %{HTTP_HOST} ^(www\.)?cuuhotuyenquang\.com$ [NC]
-RewriteRule ^(.*)$ https://cuuhotuyenquang.vn/$1 [R=301,L]
-RewriteCond %{HTTP_HOST} ^www\.cuuhotuyenquang\.vn$ [NC]
-RewriteRule ^(.*)$ https://cuuhotuyenquang.vn/$1 [R=301,L]
+# Tên miền chính: cuuhotuyenquang.com (không www). Tên miền .vn và bản www chuyển hướng 301 về .com
+RewriteCond %{HTTP_HOST} ^(www\.)?cuuhotuyenquang\.vn$ [NC,OR]
+RewriteCond %{HTTP_HOST} ^www\.cuuhotuyenquang\.com$ [NC]
+RewriteRule ^(.*)$ https://cuuhotuyenquang.com/$1 [R=301,L]
 
 # Ép HTTPS (bật sau khi đã cài chứng chỉ SSL trên hosting)
 RewriteCond %{HTTPS} off

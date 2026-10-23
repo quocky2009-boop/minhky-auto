@@ -11,7 +11,7 @@ if ($CONFIG) {
 $errors = [];
 $v = [
     'db_driver' => 'mysql', 'db_host' => 'localhost', 'db_name' => '', 'db_user' => '',
-    'site_url' => 'https://cuuhotuyenquang.vn',
+    'site_url' => 'https://cuuhotuyenquang.com',
     'username' => 'admin', 'full_name' => 'Quản trị viên',
 ];
 

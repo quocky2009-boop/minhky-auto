@@ -3,4 +3,4 @@ Disallow: /admin/
 Disallow: /includes/
 Disallow: /install.php
 
-Sitemap: https://cuuhotuyenquang.vn/sitemap.xml
+Sitemap: https://cuuhotuyenquang.com/sitemap.xml

@@ -19,7 +19,7 @@ function url(string $path = ''): string
 
 function site_url(string $path = ''): string
 {
-    return rtrim((string) cfg('site_url', 'https://cuuhotuyenquang.vn'), '/') . '/' . ltrim($path, '/');
+    return rtrim((string) cfg('site_url', 'https://cuuhotuyenquang.com'), '/') . '/' . ltrim($path, '/');
 }
 
 function redirect(string $to): never

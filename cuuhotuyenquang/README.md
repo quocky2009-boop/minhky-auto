@@ -15,9 +15,9 @@ Landing page + Dashboard nội bộ cho `cuuhotuyenquang.vn` / `.com`. PHP 8.1+ 
 ## Cài lên hosting
 1. Tạo database MySQL trong cPanel/DirectAdmin (ghi lại tên DB, user, mật khẩu).
 2. Upload **toàn bộ nội dung thư mục `cuuhotuyenquang/`** vào `public_html` của tên miền chính (`.vn`). Đảm bảo `includes/` và `uploads/` ghi được (chmod 755/775).
-3. Mở `https://cuuhotuyenquang.vn/install.php`, nhập thông tin DB và tài khoản Admin (mật khẩu ≥ 10 ký tự). **Làm ngay sau khi upload, rồi xóa `install.php`.**
+3. Mở `https://cuuhotuyenquang.com/install.php`, nhập thông tin DB và tài khoản Admin (mật khẩu ≥ 10 ký tự). **Làm ngay sau khi upload, rồi xóa `install.php`.**
 4. Đăng nhập `/admin/login.php` → **Nội dung landing page**: nhập hotline, Zalo, địa chỉ thật.
-5. Tên miền `.com`: trỏ cùng thư mục (addon/parked domain). `.htaccess` đã tự chuyển 301 `.com`/`www` về `https://cuuhotuyenquang.vn`. Cần cài SSL cho cả hai tên miền; `.htaccess` ép HTTPS.
+5. Tên miền chính là **`.com`** (giữ thứ hạng 11 năm). Trỏ `.vn` về cùng thư mục: `.htaccess` tự chuyển hướng 301 `.vn`/`www` về `https://cuuhotuyenquang.com`. Cần SSL cho cả hai tên miền; `.htaccess` ép HTTPS. Nếu site .com cũ có URL khác cấu trúc mới, thêm 301 từng URL cũ → mới trong `.htaccess` trước khi chuyển DNS.
 6. Cần Apache có `mod_rewrite` (hầu hết hosting có). Nếu hosting dùng Nginx/LiteSpeed không đọc `.htaccess`, cần cấu hình rewrite tương đương (xem `.htaccess`).
 
 ## Chạy thử cục bộ
